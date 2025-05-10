@@ -1,24 +1,51 @@
-/* HeroDetailComponent's private CSS styles */
-label {
-  color: #435960;
-  font-weight: bold;
+:root {
+  --bs-purple: #985cb1;
 }
-input {
-  font-size: 1em;
-  padding: .5rem;
+
+.text-purple {
+  color: var(--bs-purple) !important;
 }
-button {
-  margin-top: 20px;
-  background-color: #eee;
-  padding: 1rem;
-  border-radius: 4px;
-  font-size: 1rem;
+
+.bg-purple {
+  background-color: var(--bs-purple) !important;
 }
-button:hover {
-  background-color: #cfd8dc;
+
+.btn-purple {
+  background-color: var(--bs-purple);
+  color: white;
+  border-color: var(--bs-purple);
 }
-button:disabled {
-  background-color: #eee;
-  color: #ccc;
-  cursor: auto;
+
+.btn-purple:hover {
+  background-color: #7a4a8d;
+  border-color: #7a4a8d;
+  color: white;
+}
+
+.btn-outline-purple {
+  --bs-btn-color: var(--bs-purple);
+  --bs-btn-border-color: var(--bs-purple);
+  --bs-btn-hover-bg: var(--bs-purple);
+  --bs-btn-hover-border-color: var(--bs-purple);
+  --bs-btn-active-bg: var(--bs-purple);
+  --bs-btn-active-border-color: var(--bs-purple);
+}
+
+.btn-outline-purple:hover {
+  --bs-btn-hover-color: white;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--bs-purple);
+  box-shadow: 0 0 0 0.25rem rgba(152, 92, 177, 0.25);
+}
+
+.hero-detail-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.card {
+  border-radius: 10px;
+  border: none;
 }

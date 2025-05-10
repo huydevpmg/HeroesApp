@@ -2,18 +2,27 @@
 /* Application-wide Styles */
 
 @import 'bootstrap-icons/font/bootstrap-icons.css';
+
+
+* {
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+}
+
+
 h1 {
   color: #369;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Tagesschrift', sans-serif;
   font-size: 250%;
 }
 h2, h3 {
   color: #444;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Tagesschrift', sans-serif;
   font-weight: lighter;
 }
 body {
   margin: 2em;
+  background-color: #e9dfff;
 }
 body, input[type="text"], button {
   color: #333;
@@ -40,4 +49,3 @@ button:disabled {
   color: #aaa;
   cursor: auto;
 }
-

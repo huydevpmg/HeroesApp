@@ -2,39 +2,57 @@ h2 {
   text-align: center;
 }
 
-
-.heroes-menu {
-  padding: 0;
-  margin: auto;
-  max-width: 1000px;
-
-  /* flexbox */
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  align-content: flex-start;
-  align-items: flex-start;
+.tile {
+  font-family: 'Open Sans', serif;
+  font-size: 3rem;
+  font-weight: bold;
+  margin-top: 40px;
+  margin-bottom: 10px;
+  color: #100e1a;
 }
-
-.btn-add {
-  border-radius: 20px;
-  /* background-color: #4CAF50; */
-}
-
-@media (min-width: 600px) {
-  a {
-    width: 18%;
-    box-sizing: content-box;
-  }
-}
-
-a:hover {
-  background-color: #000;
-}
-
-
-.modal-title {
+.card-header {
+  background-color: #4B587C;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem;
   font-size: 1.5rem;
   font-weight: bold;
+}
+/* Hero card improvements */
+.hero-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: none;
+  border-radius: 8px;
+}
+
+.hero-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+.hero-detail-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 0.5rem;
+}
+
+.hero-detail-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.card-header {
+  border-radius: 8px 8px 0 0 !important;
+}
+
+.btn {
+  background-color: #4B587C;
+  color: white;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+}
+
+.btn:hover {
+  background-color: #3a4a6a;
 }
