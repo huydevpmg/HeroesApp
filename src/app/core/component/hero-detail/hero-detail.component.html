@@ -1,26 +1,140 @@
-<div *ngIf="hero">
-  <h2>{{ hero.name | uppercase }} Details</h2>
-  <div><span>id: </span>{{ hero.id }}</div>
-  <div>
-    <label for="hero-name">Hero name: </label>
-    <span>{{ hero.gender }}</span>
+<div *ngIf="hero" class="container py-4">
+  <!-- View Mode -->
+  <div *ngIf="!isEditing" class="view-mode">
+    <div class="text-center mb-4">
+      <h2 class="text-purple fw-bold">{{ hero.name | uppercase }} Details</h2>
+      <div class="text-muted">ID: {{ hero.id }}</div>
+    </div>
 
-    <div>
-      <label>Gender: </label>
-      <span>{{ hero.gender }}</span>
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold text-purple">Name:</div>
+          <div class="col-md-9">{{ hero.name }}</div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold text-purple">Gender:</div>
+          <div class="col-md-9">
+            <span class="badge" [ngClass]="{
+              'bg-info': hero.gender === 'Male',
+              'bg-danger': hero.gender === 'Female',
+              'bg-purple': !['Male','Female'].includes(hero.gender)
+            }">
+              {{ hero.gender }}
+            </span>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold text-purple">Email:</div>
+          <div class="col-md-9">{{ hero.email || 'N/A' }}</div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-3 fw-bold text-purple">Age:</div>
+          <div class="col-md-9">{{ hero.age }}</div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-3 fw-bold text-purple">Address:</div>
+          <div class="col-md-9">{{ hero.address || 'N/A' }}</div>
+        </div>
+      </div>
     </div>
-    <div>
-      <label>Email: </label>
-      <span>{{ hero.email }}</span>
-    </div>
-    <div>
-      <label>Age: </label>
-      <span>{{ hero.age }}</span>
-    </div>
-    <div>
-      <label>Address: </label>
-      <span>{{ hero.address }}</span>
+
+    <div class="text-center">
+      <button class="btn btn-outline-purple me-2" (click)="goBack()">
+        <i class="bi bi-arrow-left me-2"></i>Go Back
+      </button>
+      <button class="btn btn-purple" (click)="enableEditing()">
+        <i class="bi bi-pencil me-2"></i>Edit
+      </button>
     </div>
   </div>
-  <button class="btn btn-outline-secondary" type="button" (click)="goBack()">Go back</button>
+
+  <!-- Edit Mode -->
+  <div *ngIf="isEditing" class="edit-mode">
+    <div class="text-center mb-4">
+      <h2 class="text-purple fw-bold">Edit Hero</h2>
+      <div class="text-muted">ID: {{ hero.id }}</div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <form [formGroup]="heroForm" (ngSubmit)="saveChanges()">
+          <div class="row mb-3">
+            <label class="col-md-3 col-form-label fw-bold text-purple">Name:</label>
+            <div class="col-md-9">
+              <input type="text" class="form-control" formControlName="name">
+              <div *ngIf="heroForm.get('name')?.invalid && heroForm.get('name')?.touched" class="text-danger mt-1">
+                Name is required
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <label class="col-md-3 col-form-label fw-bold text-purple">Gender:</label>
+            <div class="col-md-9">
+              <select class="form-select" formControlName="gender">
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+              <div *ngIf="heroForm.get('gender')?.invalid && heroForm.get('gender')?.touched" class="text-danger mt-1">
+                Gender is required
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <label class="col-md-3 col-form-label fw-bold text-purple">Email:</label>
+            <div class="col-md-9">
+              <input type="email" class="form-control" formControlName="email">
+              <div *ngIf="heroForm.get('email')?.errors?.['required'] && heroForm.get('email')?.touched"
+                class="text-danger mt-1">
+                Email is required
+              </div>
+              <div *ngIf="heroForm.get('email')?.errors?.['email'] && heroForm.get('email')?.touched"
+                class="text-danger mt-1">
+                Please enter a valid email
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <label class="col-md-3 col-form-label fw-bold text-purple">Age:</label>
+            <div class="col-md-9">
+              <input type="number" class="form-control" formControlName="age" min="1">
+              <div *ngIf="heroForm.get('age')?.errors?.['required'] && heroForm.get('age')?.touched"
+                class="text-danger mt-1">
+                Age is required
+              </div>
+              <div *ngIf="heroForm.get('age')?.errors?.['min'] && heroForm.get('age')?.touched"
+                class="text-danger mt-1">
+                Age must be at least 1
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <label class="col-md-3 col-form-label fw-bold text-purple">Address:</label>
+            <div class="col-md-9">
+              <textarea class="form-control" formControlName="address" rows="3"></textarea>
+            </div>
+          </div>
+
+          <div class="text-center mt-4">
+            <button type="button" class="btn btn-outline-secondary me-2" (click)="cancelEditing()">
+              <i class="bi bi-x-lg me-2"></i>Cancel
+            </button>
+            <button type="submit" class="btn btn-purple" [disabled]="heroForm.invalid">
+              <i class="bi bi-check-lg me-2"></i>Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

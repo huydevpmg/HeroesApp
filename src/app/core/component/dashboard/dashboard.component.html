@@ -1,86 +1,41 @@
-<h2 class="mb-4 text-center">Top Heroes</h2>
+<div class="container">
+  <h2 class="tile mb-4 text-center">Top Heroes</h2>
+  <hr class="mb-4">
 
-<ng-template #content let-modal>
-  <div class="modal-header text-white">
-    <h4 class="modal-title" id="modal-basic-title">Add New Hero</h4>
-    <button type="button" class="btn-close btn-close-white" aria-label="Close"
-      (click)="modal.dismiss('Cross click')"></button>
-  </div>
-  <div class="modal-body">
-    <form [formGroup]="heroForm" (ngSubmit)="onSubmit()" id="heroForm">
-      <div class="mb-3">
-        <label for="name" class="form-label">Name</label>
-        <input type="text" id="name" class="form-control" formControlName="name" placeholder="Enter hero name">
-      </div>
-      <div class="mb-3">
-        <label for="gender" class="form-label">Gender</label>
-        <select id="gender" class="form-select" formControlName="gender">
-          <option value="">Select gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" id="email" class="form-control" formControlName="email" placeholder="Enter email address">
-      </div>
-      <div class="mb-3">
-        <label for="age" class="form-label">Age</label>
-        <input type="number" id="age" class="form-control" formControlName="age" placeholder="Enter age" min="1">
-      </div>
-      <div class="mb-3">
-        <label for="address" class="form-label">Address</label>
-        <textarea id="address" class="form-control" formControlName="address" rows="2"
-          placeholder="Enter address"></textarea>
-      </div>
-    </form>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-outline-secondary" (click)="modal.close()">
-      <i class="bi bi-x-lg me-1"></i> Close
-    </button>
-    <button type="submit" form="heroForm" class="btn btn-primary" (click)="onSubmit()">
-      <i class="bi bi-save-fill me-1"></i> Save Hero
-    </button>
-  </div>
-</ng-template>
-
-<div class="d-flex justify-content-end mb-4">
-  <button class="btn btn-success" (click)="open(content)">
-    <i class="bi bi-plus-circle-fill me-2"></i>Add New Hero
-  </button>
-</div>
-
-<hr class="mb-4">
-
-<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-  <div class="col" *ngFor="let hero of heroes">
-    <div class="card h-100 shadow-sm">
-      <div class="card-header bg-light">
-        <h5 class="card-title mb-0 text-primary">
-          {{ hero.name }}
-        </h5>
-      </div>
-      <div class="card-body">
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item">
-            <strong>Gender:</strong> {{ hero.gender }}
-          </li>
-          <li class="list-group-item">
-            <strong>Email:</strong> {{ hero.email }}
-          </li>
-          <li class="list-group-item">
-            <strong>Age:</strong> {{ hero.age }}
-          </li>
-          <li class="list-group-item">
-            <strong>Address:</strong> {{ hero.address }}
-          </li>
-        </ul>
-      </div>
-      <div class="card-footer bg-transparent">
-        <a [routerLink]="'/detail/' + hero.id" class="btn btn-outline-primary btn-sm">
-          <i class="bi bi-eye-fill"></i></a>
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div class="col" *ngFor="let hero of heroes">
+      <div class="card h-100 shadow-sm hero-card">
+        <div class="card-header text-white">
+          <h5 class="card-title mb-0 d-flex justify-content-between align-items-center">
+            {{ hero.name }}
+            <span class="badge" [ngClass]="{
+              'bg-info': hero.gender === 'Male',
+              'bg-danger': hero.gender === 'Female',
+              'bg-warning': hero.gender !== 'Male' && hero.gender !== 'Female'
+            }">
+              {{ hero.gender }}
+            </span>
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="hero-detail-item">
+            <i class="bi bi-envelope me-2"></i>
+            <span>{{ hero.email || 'No email' }}</span>
+          </div>
+          <div class="hero-detail-item">
+            <i class="bi bi-calendar me-2"></i>
+            <span>{{ hero.age }} years</span>
+          </div>
+          <div class="hero-detail-item">
+            <i class="bi bi-geo-alt me-2"></i>
+            <span>{{ hero.address || 'No address' }}</span>
+          </div>
+        </div>
+        <div class="card-footer bg-transparent d-flex justify-content-end">
+          <a [routerLink]="'/detail/' + hero.id" class="btn btn-sm">
+            <i class="bi bi-eye-fill me-1"></i> View
+          </a>
+        </div>
       </div>
     </div>
   </div>

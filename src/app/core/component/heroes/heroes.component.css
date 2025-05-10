@@ -1,54 +1,27 @@
-/* HeroesComponent's private CSS styles */
-.heroes {
-  margin: 0 0 2em 0;
-  list-style-type: none;
-  padding: 0;
-  width: 15em;
-}
-.heroes li {
-  position: relative;
-  cursor: pointer;
+/* Thêm các biến màu nếu chưa có */
+:root {
+  --bs-purple: #985cb1;
 }
 
-.heroes li:hover {
-  left: .1em;
+.text-purple {
+  color: var(--bs-purple) !important;
 }
 
-.heroes a {
-  color: #333;
-  text-decoration: none;
-  background-color: #EEE;
-  margin: .5em;
-  padding: .3em 0;
-  height: 1.6em;
-  border-radius: 4px;
-  display: block;
-  width: 100%;
+.bg-purple {
+  background-color: var(--bs-purple) !important;
 }
 
-.heroes a:hover {
-  color: #2c3a41;
-  background-color: #e6e6e6;
+.hero-item {
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
 }
 
-.heroes a:active {
-  background-color: #525252;
-  color: #fafafa;
+.hero-item:hover {
+  background-color: #f8f9fa;
+  border-left-color: var(--bs-purple);
+  transform: translateX(5px);
 }
 
-.heroes .badge {
-  display: inline-block;
-  font-size: small;
-  color: white;
-  padding: 0.8em 0.7em 0 0.7em;
-  background-color: #405061;
-  line-height: 1em;
-  position: relative;
-  left: -1px;
-  top: -4px;
-  height: 1.8em;
-  min-width: 16px;
-  text-align: right;
-  margin-right: .8em;
-  border-radius: 4px 0 0 4px;
+.hero-name {
+  font-weight: 500;
 }

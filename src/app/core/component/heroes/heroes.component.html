@@ -1,8 +1,14 @@
-<h2>My Heroes</h2>
-<ul class="heroes">
-  <li *ngFor="let hero of heroes">
-    <a routerLink="/detail/{{hero.id}}">
-      <span class="badge">{{hero.id}}</span> {{hero.name}}
+<div class="container py-4">
+  <h2 class="text-center text-purple mb-4">My Heroes</h2>
+
+  <div class="list-group">
+    <a *ngFor="let hero of heroes" routerLink="/detail/{{hero.id}}"
+      class="list-group-item list-group-item-action d-flex justify-content-between align-items-center hero-item">
+      <div>
+        <span class="badge bg-purple me-3">{{hero.id}}</span>
+        <span class="hero-name">{{hero.name}}</span>
+      </div>
+      <i class="bi bi-chevron-right text-muted"></i>
     </a>
-  </li>
-</ul>
+  </div>
+</div>

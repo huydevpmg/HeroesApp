@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -7,4 +8,13 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'HeroesApp';
+  showNavbar: boolean = true;
+
+  constructor(private route: ActivatedRoute) {}
+
+  ngOnInit() {
+    this.route.url.subscribe(url => {
+      this.showNavbar = !url.some(segment => segment.path === 'login');
+    });
+  }
 }

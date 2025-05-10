@@ -8,6 +8,8 @@ import { DashboardComponent } from './component/dashboard/dashboard.component';
 import { HeroDetailComponent } from './component/hero-detail/hero-detail.component';
 import { HeroesComponent } from './component/heroes/heroes.component';
 import { MessagesComponent } from './component/messages/messages.component';
+import { NavbarComponent } from './component/navbar/navbar.component';
+import { ModalComponent } from './component/modal/modal.component';
 
 @NgModule({
   declarations: [
@@ -15,6 +17,8 @@ import { MessagesComponent } from './component/messages/messages.component';
     MessagesComponent,
     DashboardComponent,
     HeroDetailComponent,
+    NavbarComponent,
+    ModalComponent,
   ],
   imports: [
     CommonModule,
@@ -22,7 +26,7 @@ import { MessagesComponent } from './component/messages/messages.component';
     ReactiveFormsModule,
   ],
   exports: [
-    HeroesComponent,
+    NavbarComponent,
     MessagesComponent,
     DashboardComponent,
     HeroDetailComponent,
