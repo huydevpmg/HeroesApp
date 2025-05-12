@@ -1,12 +1,12 @@
 <div class="container">
-  <h2 class="tile mb-4 text-center">Top Heroes</h2>
+  <h2 class="tile">Top Heroes</h2>
   <hr class="mb-4">
 
-  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-    <div class="col" *ngFor="let hero of heroes">
-      <div class="card h-100 shadow-sm hero-card">
-        <div class="card-header text-white">
-          <h5 class="card-title mb-0 d-flex justify-content-between align-items-center">
+  <div class="row g-4">
+    <div class="col-12 col-md-6 col-lg-4" *ngFor="let hero of heroes">
+      <div class="card h-100 hero-card">
+        <div class="card-header">
+          <h5 class="card-title d-flex justify-content-between align-items-center mb-0">
             {{ hero.name }}
             <span class="badge" [ngClass]="{
               'bg-info': hero.gender === 'Male',
@@ -17,21 +17,23 @@
             </span>
           </h5>
         </div>
+
         <div class="card-body">
           <div class="hero-detail-item">
-            <i class="bi bi-envelope me-2"></i>
+            <i class="bi bi-envelope"></i>
             <span>{{ hero.email || 'No email' }}</span>
           </div>
           <div class="hero-detail-item">
-            <i class="bi bi-calendar me-2"></i>
+            <i class="bi bi-calendar"></i>
             <span>{{ hero.age }} years</span>
           </div>
           <div class="hero-detail-item">
-            <i class="bi bi-geo-alt me-2"></i>
+            <i class="bi bi-geo-alt"></i>
             <span>{{ hero.address || 'No address' }}</span>
           </div>
         </div>
-        <div class="card-footer bg-transparent d-flex justify-content-end">
+
+        <div class="card-footer d-flex justify-content-end bg-transparent">
           <a [routerLink]="'/detail/' + hero.id" class="btn btn-sm">
             <i class="bi bi-eye-fill me-1"></i> View
           </a>

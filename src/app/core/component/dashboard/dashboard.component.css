@@ -1,58 +1,98 @@
-h2 {
+/* Top Heroes Title */
+h2.tile {
   text-align: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  color: #2c3e50;
 }
 
-.tile {
-  font-family: 'Open Sans', serif;
-  font-size: 3rem;
-  font-weight: bold;
-  margin-top: 40px;
-  margin-bottom: 10px;
-  color: #100e1a;
-}
-.card-header {
-  background-color: #4B587C;
-  border-bottom: 1px solid #e9ecef;
-  padding: 1rem;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-/* Hero card improvements */
+/* Hero Card */
 .hero-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
 .hero-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+  transform: translateY(-6px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12) !important;
 }
 
+/* Card Header */
+.card-header {
+  background-color: #4B587C !important;
+  border-bottom: none;
+  padding: 1rem 1.25rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #ffffff;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+/* Card Title */
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Detail Rows */
 .hero-detail-item {
   display: flex;
   align-items: center;
-  padding: 0.5rem 0;
+  padding: 0.4rem 0;
   border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  color: #4B587C;
+}
+
+.hero-detail-item i {
+  font-size: 1.2rem;
+  color: #3a4a6a;
+  margin-right: 0.5rem;
 }
 
 .hero-detail-item:last-child {
   border-bottom: none;
-  margin-bottom: 0;
 }
 
-.card-header {
-  border-radius: 8px 8px 0 0 !important;
-}
-
-.btn {
+/* View Button */
+.card-footer a.btn.btn-sm {
   background-color: #4B587C;
   color: white;
   border-radius: 8px;
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.btn:hover {
+.card-footer a.btn.btn-sm:hover {
   background-color: #3a4a6a;
+  transform: translateY(-2px);
+}
+
+/* Badge */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.4em 0.6em;
+  border-radius: 12px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  h2.tile {
+    font-size: 2.2rem;
+  }
+
+  .hero-detail-item {
+    font-size: 0.9rem;
+  }
+
+  .card-footer a.btn.btn-sm {
+    padding: 0.35rem 0.9rem;
+  }
 }

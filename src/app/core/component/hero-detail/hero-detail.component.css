@@ -2,6 +2,7 @@
   --bs-purple: #985cb1;
 }
 
+/* Utility Classes */
 .text-purple {
   color: var(--bs-purple) !important;
 }
@@ -14,12 +15,16 @@
   background-color: var(--bs-purple);
   color: white;
   border-color: var(--bs-purple);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
 .btn-purple:hover {
   background-color: #7a4a8d;
   border-color: #7a4a8d;
   color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .btn-outline-purple {
@@ -29,23 +34,65 @@
   --bs-btn-hover-border-color: var(--bs-purple);
   --bs-btn-active-bg: var(--bs-purple);
   --bs-btn-active-border-color: var(--bs-purple);
+  transition: all 0.2s ease;
 }
 
 .btn-outline-purple:hover {
   --bs-btn-hover-color: white;
+  transform: translateY(-1px);
 }
 
-.form-control:focus, .form-select:focus {
+/* Forms */
+.form-control:focus,
+.form-select:focus {
   border-color: var(--bs-purple);
-  box-shadow: 0 0 0 0.25rem rgba(152, 92, 177, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(152, 92, 177, 0.25);
 }
 
+/* Container */
 .hero-detail-container {
   max-width: 800px;
   margin: 0 auto;
+  padding: 1rem;
 }
 
+/* Cards */
 .card {
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+/* Titles */
+h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+/* View mode & edit mode tweaks */
+.view-mode h2,
+.edit-mode h2 {
+  font-size: 2rem;
+}
+
+.text-muted {
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  h2 {
+    font-size: 1.6rem;
+  }
+
+  .card-body {
+    padding: 1.25rem;
+  }
 }
