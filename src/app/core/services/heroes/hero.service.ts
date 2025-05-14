@@ -1,30 +1,47 @@
+// src/app/core/services/hero.service.ts
 import { Injectable } from '@angular/core';
-
-import { Observable, of } from 'rxjs';
-import { MessageService } from '../messages/message.service';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { HeroModel } from '../../models/hero.model';
-import { HEROES } from '../../models/mock-heroes';
 
+export type CreateHeroModel = Omit<HeroModel, '_id'>;
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class HeroService {
+  private apiUrl = 'http://localhost:5000/api';
 
-  constructor(private messageService: MessageService) { }
+  constructor(private http: HttpClient) {}
 
-  getHeroes(): Observable<HeroModel[]> {
-    const heroes = of(HEROES);
-    this.messageService.add('HeroService: fetched heroes');
-    return heroes;
+  getAllHeroes(): Observable<HeroModel[]> {
+    return this.http.get<HeroModel[]>(`${this.apiUrl}/getAllHeroes`);
   }
 
-  addHero(hero: HeroModel) {
-    HEROES.push(hero);
-    this.messageService.add(`HeroService: added hero w/ id=${hero.id}`);
+  getHeroesByOwner(_id: string): Observable<HeroModel[]> {
+      return this.http.get<HeroModel[]>(`${this.apiUrl}/getHeroesByOwner`, {
+          params: { ownerId: _id }
+      });
   }
 
-  getHero(id: number): Observable<HeroModel> {
-    const hero = HEROES.find(h => h.id === id)!;
-    this.messageService.add(`HeroService: fetched hero id=${id}`);
-    return of(hero);
+
+  getHeroById(_id: string): Observable<HeroModel> {
+    return this.http.get<HeroModel>(`${this.apiUrl}/getHeroById/${_id}`);
   }
+
+  createHero(hero: CreateHeroModel): Observable<HeroModel> {
+    return this.http.post<HeroModel>(`${this.apiUrl}/createHero`, hero);
+  }
+
+  updateHero(_id: string, hero: HeroModel): Observable<HeroModel> {
+    return this.http.put<HeroModel>(`${this.apiUrl}/updateHero/${_id}`, hero);
+  }
+
+  deleteHero(_id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/deleteHero/${_id}`);
+  }
+
+  deleteHeroes(ids: string[]): Observable<any> {
+  return this.http.request('delete', `${this.apiUrl}/bulk-delete`, { body: { ids } });
+}
 }

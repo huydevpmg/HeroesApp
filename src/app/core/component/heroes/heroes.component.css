@@ -1,27 +1,81 @@
-/* Thêm các biến màu nếu chưa có */
-:root {
-  --bs-purple: #985cb1;
+
+
+/* Top Heroes Title */
+h2.tile {
+  text-align: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  color: #2c3e50;
 }
 
-.text-purple {
-  color: var(--bs-purple) !important;
+.hero-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: none;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  cursor: pointer
 }
 
-.bg-purple {
-  background-color: var(--bs-purple) !important;
+.hero-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12) !important;
 }
 
-.hero-item {
-  transition: all 0.2s ease;
-  border-left: 3px solid transparent;
+.card-header {
+  background-color: #2c3e50 !important;
+  border-bottom: none;
+  padding: 1rem 1.25rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #ffffff;
+  border-radius: 12px 12px 0 0 !important;
 }
 
-.hero-item:hover {
-  background-color: #f8f9fa;
-  border-left-color: var(--bs-purple);
-  transform: translateX(5px);
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
-.hero-name {
-  font-weight: 500;
+.hero-detail-item {
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.95rem;
+  color: #4B587C;
 }
+
+.hero-detail-item i {
+  font-size: 1.2rem;
+  color: #3a4a6a;
+  margin-right: 0.5rem;
+}
+
+.hero-detail-item:last-child {
+  border-bottom: none;
+}
+
+.card-footer a.btn.btn-sm {
+  background-color: #4B587C;
+  color: white;
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.card-footer a.btn.btn-sm:hover {
+  background-color: #3a4a6a;
+  transform: translateY(-2px);
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 0.4em 0.6em;
+  border-radius: 12px;
+}
+

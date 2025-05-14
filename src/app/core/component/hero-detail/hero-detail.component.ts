@@ -35,18 +35,19 @@ export class HeroDetailComponent implements OnInit {
   }
 
   getHero(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.heroService.getHero(id).subscribe(hero => {
-      this.hero = hero;
-      // Initialize form with hero data
-      this.heroForm.patchValue({
-        name: hero.name,
-        gender: hero.gender,
-        email: hero.email,
-        age: hero.age,
-        address: hero.address
+    const _id = this.route.snapshot.paramMap.get('id');
+    if (_id) {
+      this.heroService.getHeroById(_id).subscribe(hero => {
+        this.hero = hero;
+        this.heroForm.patchValue({
+          name: hero.name,
+          gender: hero.gender,
+          email: hero.email,
+          age: hero.age,
+          address: hero.address
+        });
       });
-    });
+    }
   }
 
   enableEditing(): void {
@@ -58,7 +59,16 @@ export class HeroDetailComponent implements OnInit {
   }
 
   saveChanges(): void {
-
+    if (this.hero && this.heroForm.valid) {
+      const updatedHero: HeroModel = {
+        ...this.hero,
+        ...this.heroForm.value
+      };
+      this.heroService.updateHero(this.hero._id, updatedHero).subscribe(() => {
+        this.hero = updatedHero;
+        this.isEditing = false;
+      });
+    }
   }
 
   goBack(): void {

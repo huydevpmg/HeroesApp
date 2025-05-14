@@ -16,6 +16,7 @@ h2.tile {
   border-radius: 12px;
   background-color: #fff;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  cursor: pointer
 }
 
 .hero-card:hover {
@@ -25,7 +26,7 @@ h2.tile {
 
 /* Card Header */
 .card-header {
-  background-color: #4B587C !important;
+  background-color: #2c3e50 !important;
   border-bottom: none;
   padding: 1rem 1.25rem;
   font-size: 1.2rem;

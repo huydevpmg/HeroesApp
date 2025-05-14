@@ -1,58 +1,55 @@
-import { Component, inject, OnInit, signal, TemplateRef, WritableSignal } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HeroModel } from '../../models/hero.model';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+// src/app/dashboard/dashboard.component.ts
+import { Component, OnInit } from '@angular/core';
 import { HeroService } from '../../services/heroes/hero.service';
+import { BehaviorSubject } from 'rxjs';
+import { HeroModel } from '../../models/hero.model';
+import { HeroEventsService } from '../../services/heroes/hero-events.service';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
-  heroes: HeroModel[] = [];
-  heroForm!: FormGroup;
-  private modalService = inject(NgbModal);
+  heroesSubject = new BehaviorSubject<HeroModel[]>([]);
+  heroes$ = this.heroesSubject.asObservable();
+  loading$ = new BehaviorSubject<boolean>(true);
 
-  constructor(private heroService: HeroService, private fb: FormBuilder) {}
+  constructor(
+    private heroService: HeroService,
+    private heroEvents: HeroEventsService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
-    this.heroForm = this.fb.group({
-      name: ['', Validators.required],
-      gender: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      age: ['', [Validators.required, Validators.min(1)]],
-      address: ['', Validators.required]
+    this.loadHeroes();
+
+    this.heroEvents.heroAdded$.subscribe(() => {
+      this.loadHeroes();
     });
-
-    this.getHeroes();
-  }
-  add(hero: HeroModel): void {
-    if (this.heroForm.valid) {
-      hero.id = this.heroes.length + 1;
-
-      this.heroService.addHero(hero);
-      this.heroes.push(hero);
-      this.heroForm.reset();
-    }
   }
 
-  onSubmit(): void {
-    if (this.heroForm.valid) {
-      const newHero: HeroModel = this.heroForm.value;
-      this.add(newHero);
-      this.heroForm.reset();
+  private loadHeroes(): void {
+    this.loading$.next(true);
+    const userId = this.authService.getCurrentUserId();
+    console.log(userId);
+
+    if (!userId) {
+      console.error('User ID is null. Please login again.');
+      this.loading$.next(false);
+      return;
     }
 
+    this.heroService.getHeroesByOwner(userId).subscribe({
+      next: (heroes) => {
+        this.heroesSubject.next(heroes);
+        this.loading$.next(false);
+      },
+      error: (err) => {
+        console.error('Error loading heroes:', err);
+        this.loading$.next(false);
+      },
+    });
   }
-
-  getHeroes(): void {
-    this.heroService.getHeroes()
-      .subscribe(heroes => this.heroes = heroes.slice(1, 5));
-  }
-
-  open(content: TemplateRef<any>) {
-    this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title' });
-  }
-
 }

@@ -3,6 +3,11 @@
 
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
+:root {
+  --bs-purple: #985cb1;
+  --theme-color: #7e57c2;
+  --dark-color: #2c3e50;
+}
 
 * {
   font-family: "Montserrat", sans-serif;
@@ -15,7 +20,16 @@ h1 {
   font-family: 'Tagesschrift', sans-serif;
   font-size: 250%;
 }
-h2, h3 {
+
+h2 {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+h3 {
   color: #444;
   font-family: 'Tagesschrift', sans-serif;
   font-weight: lighter;

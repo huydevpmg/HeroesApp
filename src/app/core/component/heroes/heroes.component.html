@@ -1,14 +1,66 @@
-<div class="container py-4">
-  <h2 class="text-center text-purple mb-4">My Heroes</h2>
+<div class="container">
+  <h2 class="tile">My Heroes</h2>
+  <hr class="mb-4" />
 
-  <div class="list-group">
-    <a *ngFor="let hero of heroes" routerLink="/detail/{{hero.id}}"
-      class="list-group-item list-group-item-action d-flex justify-content-between align-items-center hero-item">
-      <div>
-        <span class="badge bg-purple me-3">{{hero.id}}</span>
-        <span class="hero-name">{{hero.name}}</span>
-      </div>
-      <i class="bi bi-chevron-right text-muted"></i>
-    </a>
+  <!-- Bulk Action Bar -->
+  <div *ngIf="selectedIds.length > 0" class="mb-3 d-flex justify-content-between align-items-center">
+    <span>{{ selectedIds.length }} selected</span>
+    <button class="btn btn-danger btn-sm" (click)="deleteSelectedHeroes()">
+      Delete Selected
+    </button>
   </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading$ | async" class="text-center py-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Hero Cards -->
+  <ng-container *ngIf="heroes$ | async as heroes; else noData">
+    <div class="row g-4" *ngIf="heroes.length > 0; else noData">
+      <div class="col-12 col-md-6 col-lg-4" *ngFor="let hero of heroes">
+        <div class="card h-100 hero-card">
+          <!-- Checkbox -->
+          <div class="form-check position-absolute m-1">
+            <input class="form-check-input" type="checkbox" [value]="hero._id"
+              (change)="onCheckboxChange(hero._id, $event)" [checked]="selectedIds.includes(hero._id)" />
+          </div>
+
+          <div class="card-header" [routerLink]="['/detail', hero._id]" style="cursor: pointer">
+            <h5 class="card-title d-flex justify-content-between align-items-center mb-0">
+              <span class="ms-2">{{ hero.name | titlecase }} </span>
+              <span class="badge" [ngClass]="{
+                  'bg-primary': hero.gender === 'Male',
+                  'bg-danger': hero.gender === 'Female',
+                  'bg-secondary': !['Male', 'Female'].includes(hero.gender)
+                }">
+                {{ hero.gender }}
+              </span>
+            </h5>
+          </div>
+
+          <div class="card-body" [routerLink]="['/detail', hero._id]" style="cursor: pointer">
+            <div class="hero-detail-item">
+              <i class="bi bi-envelope me-1"></i>
+              <span>{{ hero.email || "No email" }}</span>
+            </div>
+            <div class="hero-detail-item">
+              <i class="bi bi-calendar me-1"></i>
+              <span>{{ hero.age }} years</span>
+            </div>
+            <div class="hero-detail-item">
+              <i class="bi bi-geo-alt me-1"></i>
+              <span>{{ hero.address || "No address" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #noData>
+    <p class="text-center text-muted mt-4">No heroes available.</p>
+  </ng-template>
 </div>

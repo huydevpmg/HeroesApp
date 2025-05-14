@@ -1,16 +1,16 @@
 <div *ngIf="hero" class="container py-4">
   <!-- View Mode -->
   <div *ngIf="!isEditing" class="view-mode">
-    <div class="text-center mb-4">
+    <div class="text-center mb-2">
       <h2 class="text-purple fw-bold">{{ hero.name | uppercase }} Details</h2>
-      <div class="text-muted">ID: {{ hero.id }}</div>
+      <div class="text-muted">ID: {{ hero._id }}</div>
     </div>
 
     <div class="card shadow-sm mb-4">
       <div class="card-body">
         <div class="row mb-3">
           <div class="col-md-3 fw-bold text-purple">Name:</div>
-          <div class="col-md-9">{{ hero.name }}</div>
+          <div class="col-md-9">{{ hero.name | titlecase }}</div>
         </div>
 
         <div class="row mb-3">
@@ -55,9 +55,9 @@
 
   <!-- Edit Mode -->
   <div *ngIf="isEditing" class="edit-mode">
-    <div class="text-center mb-4">
+    <div class="text-center mb-2">
       <h2 class="text-purple fw-bold">Edit Hero</h2>
-      <div class="text-muted">ID: {{ hero.id }}</div>
+      <div class="text-muted">ID: {{ hero._id }}</div>
     </div>
 
     <div class="card shadow-sm mb-4">
@@ -118,14 +118,14 @@
             </div>
           </div>
 
-          <div class="row mb-3">
+          <div class="row mb-1">
             <label class="col-md-3 col-form-label fw-bold text-purple">Address:</label>
             <div class="col-md-9">
               <textarea class="form-control" formControlName="address" rows="3"></textarea>
             </div>
           </div>
 
-          <div class="text-center mt-4">
+          <div class="text-center">
             <button type="button" class="btn btn-outline-secondary me-2" (click)="cancelEditing()">
               <i class="bi bi-x-lg me-2"></i>Cancel
             </button>

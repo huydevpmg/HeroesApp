@@ -9,7 +9,10 @@ import { HeroDetailComponent } from './component/hero-detail/hero-detail.compone
 import { HeroesComponent } from './component/heroes/heroes.component';
 import { MessagesComponent } from './component/messages/messages.component';
 import { NavbarComponent } from './component/navbar/navbar.component';
-import { ModalComponent } from './component/modal/modal.component';
+import { StoreModule } from '@ngrx/store';
+import { heroReducer } from './store/reducers/hero.reducer';
+import { CoreRoutingModule } from './core-routing.module';
+import { CoreLayoutComponent } from './layout/core-layout.component';
 
 @NgModule({
   declarations: [
@@ -18,12 +21,15 @@ import { ModalComponent } from './component/modal/modal.component';
     DashboardComponent,
     HeroDetailComponent,
     NavbarComponent,
-    ModalComponent,
+    CoreLayoutComponent,
   ],
   imports: [
+    StoreModule.forFeature('heroes', heroReducer),
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
+    CoreRoutingModule,
+    RouterModule
   ],
   exports: [
     NavbarComponent,

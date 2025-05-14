@@ -1,0 +1,37 @@
+<div class="register-wrapper">
+  <div class="register-card">
+    <h2 class="text-center mb-4">Register</h2>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" id="username" formControlName="username" class="form-control"
+          [class.is-invalid]="isInvalid('username')">
+        <div class="invalid-feedback" *ngIf="isInvalid('username')">
+          Username is required.
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" id="password" formControlName="password" class="form-control"
+          [class.is-invalid]="isInvalid('password')">
+        <div class="invalid-feedback" *ngIf="isInvalid('password')">
+          Password is required.
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100" [disabled]="registerForm.invalid">Register</button>
+    </form>
+
+    <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+      {{ errorMessage }}
+    </div>
+
+    <div class="login text-center mt-3">
+      <span>Have account?</span>
+      <a routerLink="/auth/login" class="ms-1">Login Now!!!</a>
+    </div>
+
+  </div>
+</div>

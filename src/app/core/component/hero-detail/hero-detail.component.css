@@ -1,18 +1,12 @@
-:root {
-  --bs-purple: #985cb1;
-}
+
 
 /* Utility Classes */
-.text-purple {
-  color: var(--bs-purple) !important;
-}
-
 .bg-purple {
   background-color: var(--bs-purple) !important;
 }
 
 .btn-purple {
-  background-color: var(--bs-purple);
+  background-color: #2c3e50;
   color: white;
   border-color: var(--bs-purple);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
@@ -20,7 +14,7 @@
 }
 
 .btn-purple:hover {
-  background-color: #7a4a8d;
+  background-color: var(--bs-purple);
   border-color: #7a4a8d;
   color: white;
   transform: translateY(-1px);
@@ -28,9 +22,9 @@
 }
 
 .btn-outline-purple {
-  --bs-btn-color: var(--bs-purple);
-  --bs-btn-border-color: var(--bs-purple);
-  --bs-btn-hover-bg: var(--bs-purple);
+  --bs-btn-color: #2c3e50;
+  --bs-btn-border-color: #2c3e50;
+  --bs-btn-hover-bg: #6C757D;
   --bs-btn-hover-border-color: var(--bs-purple);
   --bs-btn-active-bg: var(--bs-purple);
   --bs-btn-active-border-color: var(--bs-purple);
@@ -69,7 +63,7 @@
 
 /* Titles */
 h2 {
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Open Sans', sans-serif;
   font-size: 2.2rem;
   font-weight: 700;
   color: #2c3e50;

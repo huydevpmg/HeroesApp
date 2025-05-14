@@ -1,44 +1,52 @@
 <div class="container">
   <h2 class="tile">Top Heroes</h2>
-  <hr class="mb-4">
+  <hr class="mb-4" />
 
-  <div class="row g-4">
-    <div class="col-12 col-md-6 col-lg-4" *ngFor="let hero of heroes">
-      <div class="card h-100 hero-card">
-        <div class="card-header">
-          <h5 class="card-title d-flex justify-content-between align-items-center mb-0">
-            {{ hero.name }}
-            <span class="badge" [ngClass]="{
-              'bg-info': hero.gender === 'Male',
-              'bg-danger': hero.gender === 'Female',
-              'bg-warning': hero.gender !== 'Male' && hero.gender !== 'Female'
-            }">
-              {{ hero.gender }}
-            </span>
-          </h5>
-        </div>
+  <!-- Loading Spinner -->
+  <div *ngIf="loading$ | async" class="text-center py-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
 
-        <div class="card-body">
-          <div class="hero-detail-item">
-            <i class="bi bi-envelope"></i>
-            <span>{{ hero.email || 'No email' }}</span>
+  <!-- Hero List or Empty State -->
+  <ng-container *ngIf="heroes$ | async as heroes; else noData">
+    <div class="row g-4" *ngIf="heroes.length > 0; else noData">
+      <div class="col-12 col-md-6 col-lg-4" *ngFor="let hero of heroes">
+        <div class="card h-100 hero-card" [routerLink]="['/detail', hero._id]">
+          <div class="card-header">
+            <h5 class="card-title d-flex justify-content-between align-items-center mb-0">
+              {{ hero.name | titlecase }}
+              <span class="badge" [ngClass]="{
+                'bg-primary': hero.gender === 'Male',
+                'bg-danger': hero.gender === 'Female',
+                'bg-secondary': !['Male', 'Female'].includes(hero.gender)
+              }">
+                {{ hero.gender }}
+              </span>
+            </h5>
           </div>
-          <div class="hero-detail-item">
-            <i class="bi bi-calendar"></i>
-            <span>{{ hero.age }} years</span>
-          </div>
-          <div class="hero-detail-item">
-            <i class="bi bi-geo-alt"></i>
-            <span>{{ hero.address || 'No address' }}</span>
-          </div>
-        </div>
 
-        <div class="card-footer d-flex justify-content-end bg-transparent">
-          <a [routerLink]="'/detail/' + hero.id" class="btn btn-sm">
-            <i class="bi bi-eye-fill me-1"></i> View
-          </a>
+          <div class="card-body">
+            <div class="hero-detail-item">
+              <i class="bi bi-envelope me-1"></i>
+              <span>{{ hero.email || 'No email' }}</span>
+            </div>
+            <div class="hero-detail-item">
+              <i class="bi bi-calendar me-1"></i>
+              <span>{{ hero.age }} years</span>
+            </div>
+            <div class="hero-detail-item">
+              <i class="bi bi-geo-alt me-1"></i>
+              <span>{{ hero.address || 'No address' }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </ng-container>
+
+  <ng-template #noData>
+    <p class="text-center text-muted mt-4">No heroes available.</p>
+  </ng-template>
 </div>

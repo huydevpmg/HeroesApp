@@ -1,57 +1,74 @@
-import { Component, inject, TemplateRef } from '@angular/core';
+import { Component, OnInit, TemplateRef } from '@angular/core';
 import { HeroModel } from '../../models/hero.model';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { HeroService } from '../../services/heroes/hero.service';
+import { ageValidator, nameValidator, emailValidator } from '../../../utils/validators';
+import { HeroEventsService } from '../../services/heroes/hero-events.service';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-navbar',
   templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.css'
+  styleUrls: ['./navbar.component.css']
 })
-export class NavbarComponent {
-  heroes: HeroModel[] = [];
+export class NavbarComponent implements OnInit {
   heroForm!: FormGroup;
-  private modalService = inject(NgbModal);
 
-  constructor(private heroService: HeroService, private fb: FormBuilder) {}
+  constructor(
+    private heroService: HeroService,
+    private fb: FormBuilder,
+    private heroEvents: HeroEventsService,
+    private modalService: NgbModal,
+    private authService: AuthService
+  ) {}
 
-    ngOnInit(): void {
-      this.heroForm = this.fb.group({
-        name: ['', Validators.required],
-        gender: ['', Validators.required],
-        email: ['', [Validators.required, Validators.email]],
-        age: ['', [Validators.required, Validators.min(1)]],
-        address: ['', Validators.required]
+  ngOnInit(): void {
+    this.heroForm = this.fb.group({
+      name: ['', [Validators.required, nameValidator()]],
+      gender: ['', Validators.required],
+      email: ['', [Validators.required, emailValidator()]],
+      age: ['', [Validators.required, ageValidator()]],
+      address: ['', Validators.required]
+    });
+  }
+
+  add(hero: HeroModel): void {
+    if (this.heroForm.valid) {
+      this.heroService.createHero(hero).subscribe({
+        next: (newHero) => {
+          this.heroEvents.notifyHeroAdded();
+          this.heroForm.reset();
+        },
+        error: (err) => {
+          console.error('Error adding hero:', err);
+          alert('There was an error while adding the hero.');
+        }
       });
-
-      this.getHeroes();
     }
-    add(hero: HeroModel): void {
-      if (this.heroForm.valid) {
-        hero.id = this.heroes.length + 1;
+  }
 
-        this.heroService.addHero(hero);
-        this.heroes.push(hero);
-        this.heroForm.reset();
-      }
+  onSubmit(): void {
+    const userId = this.authService.getCurrentUserId();
+
+    if (!userId) {
+      alert('User ID not found. Please login again.');
+      return;
     }
 
-    onSubmit(): void {
-      if (this.heroForm.valid) {
-        const newHero: HeroModel = this.heroForm.value;
-        this.add(newHero);
-        this.heroForm.reset();
-      }
+    if (this.heroForm.valid) {
+      const newHero: HeroModel = {
+        ...this.heroForm.value,
+        owner: userId
+      };
 
+      this.add(newHero);
+    } else {
+      alert('Form is invalid');
     }
+  }
 
-    getHeroes(): void {
-      this.heroService.getHeroes()
-        .subscribe(heroes => this.heroes = heroes.slice(1, 5));
-    }
-
-    open(content: TemplateRef<any>) {
-      this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title' });
-    }
+  open(content: TemplateRef<any>) {
+    this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title' });
+  }
 }
