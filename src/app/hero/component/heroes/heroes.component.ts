@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { HeroService } from '../../services/heroes/hero.service';
+import { HeroService } from '../../heroes/hero.service';
 import { HeroModel } from '../../models/hero.model';
 import { BehaviorSubject } from 'rxjs';
-import { HeroEventsService } from '../../services/heroes/hero-events.service';
+import { HeroEventsService } from '../../heroes/hero-events.service';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../auth/services/auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 
 @Component({

@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { HeroModel } from '../../models/hero.model';
+import { HeroModel } from '../models/hero.model';
 
 export type CreateHeroModel = Omit<HeroModel, '_id'>;
 

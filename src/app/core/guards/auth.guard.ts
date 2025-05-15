@@ -1,4 +1,3 @@
-// src/app/guards/auth.guard.ts
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';

@@ -4,8 +4,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { DashboardComponent } from './component/dashboard/dashboard.component';
 import { HeroesComponent } from './component/heroes/heroes.component';
 import { HeroDetailComponent } from './component/hero-detail/hero-detail.component';
-import { authGuard } from './guards/auth.guard';
-import { CoreLayoutComponent } from './layout/core-layout.component';
+import { authGuard } from '../core/guards/auth.guard';
+import { CoreLayoutComponent } from '../shared/layout/core-layout.component';
 
 const routes: Routes = [
   {
@@ -24,4 +24,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class CoreRoutingModule {}
+export class HeroRoutingModule {}

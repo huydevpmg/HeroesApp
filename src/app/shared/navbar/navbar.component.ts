@@ -1,11 +1,11 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
-import { HeroModel } from '../../models/hero.model';
+import { HeroModel } from '../../hero/models/hero.model';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { HeroService } from '../../services/heroes/hero.service';
-import { ageValidator, nameValidator, emailValidator } from '../../../utils/validators';
-import { HeroEventsService } from '../../services/heroes/hero-events.service';
-import { AuthService } from '../../../auth/services/auth.service';
+import { ageValidator, nameValidator, emailValidator } from '../../utils/validators';
+import { HeroService } from '../../hero/heroes/hero.service';
+import { HeroEventsService } from '../../hero/heroes/hero-events.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -63,6 +63,7 @@ export class NavbarComponent implements OnInit {
       };
 
       this.add(newHero);
+      this.modalService.dismissAll();
     } else {
       alert('Form is invalid');
     }
