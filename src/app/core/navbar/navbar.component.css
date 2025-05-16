@@ -2,15 +2,18 @@
   --text-color: #2c2c2c;
   --form-label-color: #495057;
   --modal-bg: #f8f9fa;
+  --theme-color: #7e57c2;
+  --dark-color: #4b3f72;
 }
 
-/* Navbar */
 .navbar {
   border-radius: 12px;
   background-color: #fff !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
   padding: 0.5rem 1rem;
   transition: all 0.3s ease;
+  position: relative;
+  z-index: 1050;
 }
 
 .navbar:hover {
@@ -27,7 +30,7 @@
 
 .nav-link {
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-color);
   transition: all 0.3s;
 }
@@ -40,29 +43,63 @@
   transform: translateY(-1px);
 }
 
-.container-fluid {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 12px;
-}
-
-/* Add Button */
 .btn-add {
   background-color: var(--dark-color);
   color: #fff;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 0.45rem 1rem;
   border-radius: 25px;
   font-weight: 500;
   transition: background-color 0.3s ease;
+  font-size: 0.85rem;
 }
 
 .btn-add:hover {
   background-color: var(--theme-color);
 }
 
-/* Modal */
+.profile-btn {
+  border: 1px solid #dee2e6;
+  border: none;
+  padding: 0.45rem 1rem;
+  border-radius: 25px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  font-size: 0.85rem;
+}
+
+.dropdown-menu {
+  font-size: 0.8rem;
+  min-width: 140px;
+  padding: 0.2rem 0;
+  border-radius: 10px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+  border: none;
+}
+
+.dropdown-item {
+  padding: 0.4rem 0.9rem;
+  font-weight: 500;
+  color: var(--text-color);
+  background-color: transparent;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: var(--theme-color);
+  color: #fff !important;
+  border-radius: 6px;
+}
+
+.dropdown-item.text-danger {
+  color: #dc3545 !important;
+}
+
+.dropdown-item.text-danger:hover {
+  background-color: #f8d7da;
+  color: #b02a37 !important;
+}
+
 .modal-header {
   background-color: var(--modal-bg);
   border-bottom: none;
@@ -75,10 +112,6 @@
   font-weight: 600;
   font-size: 1.1rem;
   color: var(--text-color);
-}
-
-.bi-person-plus {
-  color: var(--dark-color) !important;
 }
 
 .modal-body {
@@ -132,6 +165,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.modal-footer .btn-outline-secondary:hover {
-  transform: translateY(-1px);
+.container,
+.container-fluid {
+  overflow: visible;
 }

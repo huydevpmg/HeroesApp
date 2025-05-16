@@ -3,15 +3,15 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RegisterRequestModel } from '../../models/auth-request.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { emailValidator, nameValidator } from '../../../shared/utils/validators';
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
-  styleUrl: './register.component.css',
+  styleUrls: ['./register.component.css'],
 })
 export class RegisterComponent {
   registerForm: FormGroup;
-
   errorMessage: string = '';
 
   constructor(
@@ -22,6 +22,8 @@ export class RegisterComponent {
     this.registerForm = this.fb.group({
       username: ['', Validators.required],
       password: ['', Validators.required],
+      email: ['', [Validators.required, emailValidator()]],
+      fullName: ['', [Validators.required, nameValidator()]],
     });
   }
 
@@ -39,8 +41,8 @@ export class RegisterComponent {
         alert('Register successfully!');
         this.router.navigate(['/auth/login']);
       },
-      error: (err) => {
-        this.errorMessage = err.error?.message || 'Login failed';
+      error: () => {
+        this.errorMessage = 'Login failed';
       },
     });
   }

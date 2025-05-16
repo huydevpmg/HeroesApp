@@ -5,7 +5,7 @@ import { DashboardComponent } from './component/dashboard/dashboard.component';
 import { HeroesComponent } from './component/heroes/heroes.component';
 import { HeroDetailComponent } from './component/hero-detail/hero-detail.component';
 import { authGuard } from '../core/guards/auth.guard';
-import { CoreLayoutComponent } from '../shared/layout/core-layout.component';
+import { CoreLayoutComponent } from '../core/layout/core-layout.component';
 
 const routes: Routes = [
   {

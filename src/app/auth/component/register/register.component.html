@@ -5,7 +5,7 @@
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
       <div class="mb-3">
         <label for="username" class="form-label">Username</label>
-        <input type="text" id="username" formControlName="username" class="form-control"
+        <input type="text" id="username" formControlName="username" autocomplete="username" class="form-control"
           [class.is-invalid]="isInvalid('username')">
         <div class="invalid-feedback" *ngIf="isInvalid('username')">
           Username is required.
@@ -14,10 +14,28 @@
 
       <div class="mb-3">
         <label for="password" class="form-label">Password</label>
-        <input type="password" id="password" formControlName="password" class="form-control"
+        <input type="password" id="password" formControlName="password" autocomplete="new-password" class="form-control"
           [class.is-invalid]="isInvalid('password')">
         <div class="invalid-feedback" *ngIf="isInvalid('password')">
           Password is required.
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" id="email" formControlName="email" autocomplete="email" class="form-control"
+          [class.is-invalid]="isInvalid('email')">
+        <div class="invalid-feedback" *ngIf="isInvalid('email')">
+          Please input an valid email
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="fullName" class="form-label">Full Name</label>
+        <input type="text" id="fullName" formControlName="fullName" autocomplete="name" class="form-control"
+          [class.is-invalid]="isInvalid('fullName')">
+        <div class="invalid-feedback" *ngIf="isInvalid('fullName')">
+          Full Name can only contain letters and spaces.
         </div>
       </div>
 

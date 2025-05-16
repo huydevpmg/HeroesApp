@@ -1,0 +1,46 @@
+<nav class="navbar navbar-expand-lg bg-white shadow-sm py-1">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand fs-8" routerLink="/">
+      <i class="bi bi-stars me-1"></i>Heroes
+    </a>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link py-1 px-2 fs-7" routerLink="/dashboard">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link py-1 px-2 fs-7" routerLink="/heroes">Heroes</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="d-flex order-lg-2 align-items-center gap-2">
+      <div class="btn btn-add btn-sm px-3" (click)="openAddHeroModal()">
+        <i class="bi bi-plus-lg"></i> Add Hero
+      </div>
+
+      <div ngbDropdown class="dropdown">
+        <button class="profile-btn dropdown-toggle btn-sm px-3 d-flex align-items-center gap-2" ngbDropdownToggle
+          id="profileDropdown">
+          <i class="bi bi-person-circle"></i>
+        </button>
+        <ul ngbDropdownMenu class="dropdown-menu-end" aria-labelledby="profileDropdown">
+          <li>
+            <button class="dropdown-item" (click)="openProfileModal()">Edit Profile</button>
+          </li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li>
+            <button class="dropdown-item text-danger" (click)="logout()">Logout</button>
+          </li>
+        </ul>
+      </div>
+
+      <button class="navbar-toggler border-0 px-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+  </div>
+</nav>

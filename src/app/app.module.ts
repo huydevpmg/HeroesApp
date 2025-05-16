@@ -26,7 +26,6 @@ import { SharedModule } from './shared/shared.module';
     AppRoutingModule,
     NgbModule,
     RouterModule,
-
     CoreModule,
     HttpClientModule,
     AuthModule,

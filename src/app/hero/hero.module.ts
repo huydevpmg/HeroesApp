@@ -20,8 +20,8 @@ import { SharedModule } from '../shared/shared.module';
     DashboardComponent,
   ],
   imports: [
-    SharedModule,
     CommonModule,
+    SharedModule,
     ReactiveFormsModule,
     StoreModule.forFeature('heroes', heroReducer),
     EffectsModule.forFeature([HeroEffects]),

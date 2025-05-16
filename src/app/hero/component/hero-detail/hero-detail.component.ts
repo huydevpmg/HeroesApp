@@ -1,9 +1,10 @@
-import { HeroService } from '../../heroes/hero.service';
+import { HeroService } from '../../service/hero.service';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { HeroModel } from '../../models/hero.model';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-hero-detail',
@@ -14,12 +15,15 @@ export class HeroDetailComponent implements OnInit {
   hero: HeroModel | undefined;
   isEditing: boolean = false;
   heroForm: FormGroup;
+  isOwner: boolean = false;
+
 
   constructor(
     private route: ActivatedRoute,
     private heroService: HeroService,
+    private authService: AuthService,
     private location: Location,
-    private fb: FormBuilder
+    private fb: FormBuilder,
   ) {
     this.heroForm = this.fb.group({
       name: ['', Validators.required],
@@ -36,17 +40,28 @@ export class HeroDetailComponent implements OnInit {
 
   getHero(): void {
     const _id = this.route.snapshot.paramMap.get('id');
+    const currentUserId = this.authService.getCurrentUserId();
     if (_id) {
-      this.heroService.getHeroById(_id).subscribe(hero => {
-        this.hero = hero;
-        this.heroForm.patchValue({
-          name: hero.name,
-          gender: hero.gender,
-          email: hero.email,
-          age: hero.age,
-          address: hero.address
-        });
-      });
+      this.heroService.getHeroById(_id).subscribe({
+        next: (hero) => {
+          this.hero = hero;
+          this.isOwner = hero.owner === currentUserId;
+          this.heroForm.patchValue({
+            name: hero.name,
+            gender: hero.gender,
+            email: hero.email,
+            age: hero.age,
+            address: hero.address
+          });
+        },
+        error: (err) => {
+          if (err.status === 404) {
+            alert('')
+          }
+        }
+      }
+
+      );
     }
   }
 
@@ -74,4 +89,6 @@ export class HeroDetailComponent implements OnInit {
   goBack(): void {
     this.location.back();
   }
+
+
 }

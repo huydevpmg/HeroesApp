@@ -19,7 +19,7 @@ export const loadHeroesFailure = createAction(
 // CRUD Actions
 export const loadHero = createAction(
   `${ACTION_PREFIX} Load Hero`,
-  props<{ _id: string }>()
+  props<{ _id: string, ownerId: string }>()
 );
 export const loadHeroSuccess = createAction(
   `${ACTION_PREFIX} Load Hero Success`,

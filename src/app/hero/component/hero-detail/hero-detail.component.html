@@ -47,7 +47,7 @@
       <button class="btn btn-outline-purple me-2" (click)="goBack()">
         <i class="bi bi-arrow-left me-2"></i>Go Back
       </button>
-      <button class="btn btn-purple" (click)="enableEditing()">
+      <button class="btn btn-purple" (click)="enableEditing()" *ngIf="isOwner">
         <i class="bi bi-pencil me-2"></i>Edit
       </button>
     </div>

@@ -1,9 +1,9 @@
 // src/app/dashboard/dashboard.component.ts
 import { Component, OnInit } from '@angular/core';
-import { HeroService } from '../../heroes/hero.service';
+import { HeroService } from '../../service/hero.service';
 import { BehaviorSubject } from 'rxjs';
 import { HeroModel } from '../../models/hero.model';
-import { HeroEventsService } from '../../heroes/hero-events.service';
+import { HeroEventsService } from '../../service/hero-events.service';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -43,6 +43,7 @@ export class DashboardComponent implements OnInit {
 
     this.heroService.getAllHeroes().subscribe({
       next: (heroes) => {
+        console.log(heroes);
         this.heroesSubject.next(heroes);
         this.loading$.next(false);
       },

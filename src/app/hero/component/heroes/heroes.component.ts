@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { HeroService } from '../../heroes/hero.service';
+import { HeroService } from '../../service/hero.service';
 import { HeroModel } from '../../models/hero.model';
 import { BehaviorSubject } from 'rxjs';
-import { HeroEventsService } from '../../heroes/hero-events.service';
+import { HeroEventsService } from '../../service/hero-events.service';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -59,16 +59,13 @@ export class HeroesComponent implements OnInit {
   }
 
 
-  onCheckboxChange(heroId: string, event: Event): void {
-    const inputElement = event.target as HTMLInputElement;
-    const isChecked = inputElement.checked;
-
-    if (isChecked) {
-      this.selectedIds.push(heroId);
-    } else {
-      this.selectedIds = this.selectedIds.filter(id => id !== heroId);
-    }
+  onCheckboxChange(heroId: string, checked: boolean): void {
+  if (checked) {
+    this.selectedIds.push(heroId);
+  } else {
+    this.selectedIds = this.selectedIds.filter(id => id !== heroId);
   }
+}
 
   deleteSelectedHeroes() {
     if (this.selectedIds.length === 0) return;

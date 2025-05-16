@@ -10,7 +10,7 @@ export type CreateHeroModel = Omit<HeroModel, '_id'>;
   providedIn: 'root',
 })
 export class HeroService {
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = 'http://localhost:5000/api/heroes';
 
   constructor(private http: HttpClient) {}
 
@@ -26,7 +26,9 @@ export class HeroService {
 
 
   getHeroById(_id: string): Observable<HeroModel> {
-    return this.http.get<HeroModel>(`${this.apiUrl}/getHeroById/${_id}`);
+    return this.http.get<HeroModel>(
+      `${this.apiUrl}/getHeroById/${_id}`
+    );
   }
 
   createHero(hero: CreateHeroModel): Observable<HeroModel> {
