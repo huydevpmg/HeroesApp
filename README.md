@@ -17,7 +17,7 @@ HeroesApp là một ứng dụng Angular quản lý danh sách anh hùng, hỗ t
 1. Clone repo về máy:
 
    ```bash
-   git clone https://github.com/your-username/heroes-app.git
+   git clone https://github.com/huydevpmg/HeroesApp
    ```
 
 2. Cài đặt các dependencies:
@@ -29,10 +29,10 @@ HeroesApp là một ứng dụng Angular quản lý danh sách anh hùng, hỗ t
 3. Chạy ứng dụng:
 
    ```bash
-   ng serve
+   ng serve --o
    ```
 
-4. Mở trình duyệt tại `http://localhost:4200`.
+4. Mở trình duyệt tại `http://localhost:4200` (default)
 
 ## Các Module Chính
 
@@ -40,7 +40,6 @@ HeroesApp là một ứng dụng Angular quản lý danh sách anh hùng, hỗ t
 - **Shared Module**: Chứa các component, pipe và validator dùng chung.
 - **Heroes Module**: Quản lý danh sách anh hùng và các thao tác CRUD.
 - **Auth Module**: Cung cấp chức năng đăng nhập và đăng ký.
-- **Profile Module**: Cập nhật thông tin cá nhân người dùng.
 
 ## Công nghệ sử dụng
 
