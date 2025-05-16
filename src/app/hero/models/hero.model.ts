@@ -6,4 +6,5 @@ export interface HeroModel {
   age: number;
   address: string;
   owner: string;
+  tags: string[];
 }

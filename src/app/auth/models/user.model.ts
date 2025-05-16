@@ -1,9 +1,7 @@
 export interface UserModel {
-  id: string;           // hoặc _id nếu backend bạn trả vậy
+  id: string;
   username: string;
   email: string;
   fullName: string;
-  // gender?: string;
-  // age?: number;
-  // address?: string;
+
 }

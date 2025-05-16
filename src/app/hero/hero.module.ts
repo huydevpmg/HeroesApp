@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 
@@ -25,7 +25,8 @@ import { SharedModule } from '../shared/shared.module';
     ReactiveFormsModule,
     StoreModule.forFeature('heroes', heroReducer),
     EffectsModule.forFeature([HeroEffects]),
-    HeroRoutingModule
+    HeroRoutingModule,
+    FormsModule
   ]
 })
 export class HeroModule {}

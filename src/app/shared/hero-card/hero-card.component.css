@@ -1,8 +1,9 @@
-/* Title */
 h2.tile {
   margin: 30px 0 20px;
   text-align: center;
-  font: 700 2.8rem 'Montserrat', sans-serif;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2.8rem;
+  font-weight: 700;
   color: #2c3e50;
 }
 
@@ -14,14 +15,14 @@ h2.tile {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
-
-  &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12) !important;
-  }
 }
 
-/* Card Header */
+.hero-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+/*Card Header */
 .card-header {
   padding: 1rem 1.25rem;
   background-color: #2c3e50 !important;
@@ -38,7 +39,7 @@ h2.tile {
   font-weight: 600;
 }
 
-/* Detail Row */
+/* Hero Detail Row */
 .hero-detail-item {
   display: flex;
   align-items: center;
@@ -46,35 +47,93 @@ h2.tile {
   font-size: 0.95rem;
   color: #4b587c;
   border-bottom: 1px solid #f0f0f0;
-
-  i {
-    font-size: 1.2rem;
-    color: #3a4a6a;
-    margin-right: 0.5rem;
-  }
-
-  &:last-child {
-    border-bottom: none;
-  }
 }
 
-/* View Button */
-.card-footer a.btn.btn-sm {
-  background-color: #4b587c;
-  color: #fff;
-  border-radius: 8px;
-  padding: 0.4rem 1rem;
-  font-size: 0.85rem;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-
-  &:hover {
-    background-color: #3a4a6a;
-    transform: translateY(-2px);
-  }
+.hero-detail-item i {
+  font-size: 1.2rem;
+  color: #3a4a6a;
+  margin-right: 0.5rem;
 }
 
+.hero-detail-item:last-child {
+  border-bottom: none;
+}
 .badge {
   font-size: 0.75rem;
-  padding: 0.4em 0.6em;
+  padding: 0.35em 0.65em;
   border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tag-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: #e9ecef;
+  color: #333;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  max-height: 28px;
+  line-height: 1;
+  white-space: nowrap;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.tag-badge.selected {
+  background-color: #007bff;
+  color: white;
+}
+
+.tag-badge .btn-close {
+  font-size: 0.5rem;
+  margin-left: 6px;
+  opacity: 0.6;
+  padding: 0;
+  line-height: 1;
+  width: 14px;
+  height: 14px;
+  background: none;
+  color: inherit;
+}
+
+.tag-badge .btn-close:hover {
+  opacity: 1;
+  color: #ff4d4f;
+}
+
+.card-footer a.btn.btn-sm,
+.btn.btn-sm {
+  border-radius: 8px;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.card-footer a.btn.btn-sm {
+  background-color: #4b587c;
+  color: white;
+  padding: 0.4rem 1rem;
+}
+
+.card-footer a.btn.btn-sm:hover {
+  background-color: #3a4a6a;
+  transform: translateY(-2px);
+}
+
+/* Tag Button */
+.btn-close {
+  font-size: 0.55rem;
+  opacity: 0.7;
+  margin-left: 6px;
+}
+
+.btn-close:hover {
+  opacity: 1;
+}
+
+.min-height-40 {
+  min-height: 40px;
 }

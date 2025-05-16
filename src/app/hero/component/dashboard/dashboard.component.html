@@ -2,46 +2,19 @@
   <h2 class="tile">Top Heroes</h2>
   <hr class="mb-4" />
 
-  <!-- Loading Spinner -->
+  <!-- Loading -->
   <div *ngIf="loading$ | async" class="text-center py-4">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
 
-  <!-- Hero List or Empty State -->
+  <!-- Hero List -->
   <ng-container *ngIf="heroes$ | async as heroes; else noData">
     <div class="row g-4" *ngIf="heroes.length > 0; else noData">
       <div class="col-12 col-md-6 col-lg-4" *ngFor="let hero of heroes">
-        <div class="card h-100 hero-card" [routerLink]="['/detail', hero._id]">
-          <div class="card-header">
-            <h5 class="card-title d-flex justify-content-between align-items-center mb-0">
-              {{ hero.name | titlecase }}
-              <span class="badge" [ngClass]="{
-                'bg-primary': hero.gender === 'Male',
-                'bg-danger': hero.gender === 'Female',
-                'bg-secondary': !['Male', 'Female'].includes(hero.gender)
-              }">
-                {{ hero.gender }}
-              </span>
-            </h5>
-          </div>
-
-          <div class="card-body">
-            <div class="hero-detail-item">
-              <i class="bi bi-envelope me-1"></i>
-              <span>{{ hero.email || 'No email' }}</span>
-            </div>
-            <div class="hero-detail-item">
-              <i class="bi bi-calendar me-1"></i>
-              <span>{{ hero.age }} years</span>
-            </div>
-            <div class="hero-detail-item">
-              <i class="bi bi-geo-alt me-1"></i>
-              <span>{{ hero.address || 'No address' }}</span>
-            </div>
-          </div>
-        </div>
+        <app-hero-card [hero]="hero" [showCheckbox]="false" [canEditTags]="false" [isMyHeroesView]="false">
+        </app-hero-card>
       </div>
     </div>
   </ng-container>

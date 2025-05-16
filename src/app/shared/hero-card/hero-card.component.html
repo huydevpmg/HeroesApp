@@ -1,27 +1,29 @@
 <div class="card h-100 hero-card">
   <!-- Checkbox -->
-  <div class="form-check position-absolute m-1">
+  <div class="form-check position-absolute m-1" *ngIf="showCheckbox">
     <input class="form-check-input" type="checkbox" [value]="hero._id" (change)="onCheckboxChange($event)"
       [checked]="isChecked" />
   </div>
 
+  <!-- Header -->
   <div class="card-header" [routerLink]="['/detail', hero._id]" style="cursor: pointer">
     <h5 class="card-title d-flex justify-content-between align-items-center mb-0">
-      <span class="ms-2">{{ hero.name | titlecase }} </span>
+      <span class="ms-2">{{ hero.name | titlecase }}</span>
       <span class="badge" [ngClass]="{
-        'bg-primary': hero.gender === 'Male',
-        'bg-danger': hero.gender === 'Female',
-        'bg-secondary': !['Male', 'Female'].includes(hero.gender)
-      }">
+          'bg-primary': hero.gender === 'Male',
+          'bg-danger': hero.gender === 'Female',
+          'bg-secondary': !['Male', 'Female'].includes(hero.gender)
+        }">
         {{ hero.gender }}
       </span>
     </h5>
   </div>
 
-  <div class="card-body" [routerLink]="['/detail', hero._id]" style="cursor: pointer">
+  <!-- Body -->
+  <div class="card-body">
     <div class="hero-detail-item">
       <i class="bi bi-envelope me-1"></i>
-      <span>{{ hero.email || "No email" }}</span>
+      <span>{{ hero.email || 'No email' }}</span>
     </div>
     <div class="hero-detail-item">
       <i class="bi bi-calendar me-1"></i>
@@ -29,7 +31,29 @@
     </div>
     <div class="hero-detail-item">
       <i class="bi bi-geo-alt me-1"></i>
-      <span>{{ hero.address || "No address" }}</span>
+      <span>{{ hero.address || 'No address' }}</span>
+    </div>
+
+    <div class="mt-3">
+      <label class="form-label small mb-1">Tag:</label>
+      <div class="d-flex flex-wrap mt-2">
+        <ng-container *ngIf="isMyHeroesView; else viewTags">
+          <span *ngFor="let tag of defaultTags" class="badge tag-badge me-2"
+            [class.selected]="selectedTags.includes(tag.value)" (click)="toggleTag(tag.value)"
+            [class.disabled]="!canEditTags">
+            {{ tag.label }}
+          </span>
+        </ng-container>
+
+        <ng-template #viewTags>
+          <span *ngFor="let tag of selectedTags" class="badge tag-badge me-2">
+            {{ getTagLabel(tag) }}
+          </span>
+          <ng-template #noTags>
+            <span class="text-muted" style="font-style: italic;">No tags</span>
+          </ng-template>
+        </ng-template>
+      </div>
     </div>
   </div>
 </div>

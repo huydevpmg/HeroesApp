@@ -14,7 +14,7 @@ import { getUserIdFromToken } from '../../shared/utils/jwt-utils';
 export class AuthService {
   private apiUrl = 'http://localhost:5001/api/auth';
 
-  constructor(private http: HttpClient, private cookieService: CookieService) {}
+  constructor(private http: HttpClient, private cookieService: CookieService) { }
 
   login(credentials: LoginRequestModel): Observable<AuthResponseModel> {
     return this.http.post<AuthResponseModel>(`${this.apiUrl}/login`, credentials, { withCredentials: true });
@@ -33,6 +33,7 @@ export class AuthService {
   logout(): void {
     this.cookieService.delete('accessToken', '/');
     this.cookieService.delete('refreshToken', '/');
+    window.location.href = '/auth/login'
   }
 
 
@@ -45,8 +46,8 @@ export class AuthService {
   }
 
   getCurrentUserId(): string | null {
-  const token = this.getAccessToken();
-  return token ? getUserIdFromToken(token) : null;
-}
+    const token = this.getAccessToken();
+    return token ? getUserIdFromToken(token) : null;
+  }
 
 }

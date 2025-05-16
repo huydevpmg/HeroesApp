@@ -59,11 +59,12 @@ export class HeroesComponent implements OnInit {
   }
 
 
-  onCheckboxChange(heroId: string, checked: boolean): void {
-  if (checked) {
-    this.selectedIds.push(heroId);
-  } else {
-    this.selectedIds = this.selectedIds.filter(id => id !== heroId);
+  onCheckboxChange(event: { id: string, checked: boolean }) {
+  const { id, checked } = event;
+  if (checked && !this.selectedIds.includes(id)) {
+    this.selectedIds.push(id);
+  } else if (!checked) {
+    this.selectedIds = this.selectedIds.filter(existingId => existingId !== id);
   }
 }
 
@@ -72,10 +73,14 @@ export class HeroesComponent implements OnInit {
 
     if (confirm(`Are you sure you want to delete ${this.selectedIds.length} heroes?`)) {
       this.heroService.deleteHeroes(this.selectedIds).subscribe(() => {
-        // Clear selection + reload heroes
         this.selectedIds = [];
         this.getHeroes();
       });
     }
   }
+
+  updateHeroTags(heroId: string, tags: string[]) {
+  this.heroService.updateHeroTags(heroId, tags).subscribe(() => {
+  });
+}
 }

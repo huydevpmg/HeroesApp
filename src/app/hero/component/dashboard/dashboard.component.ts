@@ -1,4 +1,3 @@
-// src/app/dashboard/dashboard.component.ts
 import { Component, OnInit } from '@angular/core';
 import { HeroService } from '../../service/hero.service';
 import { BehaviorSubject } from 'rxjs';

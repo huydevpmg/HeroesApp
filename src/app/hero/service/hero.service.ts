@@ -12,16 +12,16 @@ export type CreateHeroModel = Omit<HeroModel, '_id'>;
 export class HeroService {
   private apiUrl = 'http://localhost:5000/api/heroes';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAllHeroes(): Observable<HeroModel[]> {
     return this.http.get<HeroModel[]>(`${this.apiUrl}/getAllHeroes`);
   }
 
   getHeroesByOwner(_id: string): Observable<HeroModel[]> {
-      return this.http.get<HeroModel[]>(`${this.apiUrl}/getHeroesByOwner`, {
-          params: { ownerId: _id }
-      });
+    return this.http.get<HeroModel[]>(`${this.apiUrl}/getHeroesByOwner`, {
+      params: { ownerId: _id }
+    });
   }
 
 
@@ -44,6 +44,10 @@ export class HeroService {
   }
 
   deleteHeroes(ids: string[]): Observable<any> {
-  return this.http.request('delete', `${this.apiUrl}/bulk-delete`, { body: { ids } });
-}
+    return this.http.request('delete', `${this.apiUrl}/bulk-delete`, { body: { ids } });
+  }
+
+  updateHeroTags(heroId: string, tags: string[]): Observable<HeroModel> {
+    return this.http.put<HeroModel>(`${this.apiUrl}/update-tags/${heroId}`, { tags });
+  }
 }
