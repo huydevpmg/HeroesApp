@@ -1,20 +1,21 @@
 import { NgModule, Optional, SkipSelf } from '@angular/core';
-import { NavbarComponent } from './navbar/navbar.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CoreLayoutComponent } from './layout/core-layout.component';
 import { NgbDropdownModule, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
-  declarations: [NavbarComponent, CoreLayoutComponent],
+  declarations: [CoreLayoutComponent],
   imports: [
     ReactiveFormsModule,
+    SharedModule,
     CommonModule,
     RouterModule,
-     NgbDropdownModule,
+    NgbDropdownModule,
     NgbModalModule,
-  ],
+],
 })
 export class CoreModule {
   constructor(@Optional() @SkipSelf() parentModule: CoreModule) {

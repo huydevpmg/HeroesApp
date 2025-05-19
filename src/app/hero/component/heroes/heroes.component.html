@@ -5,6 +5,30 @@
   <!-- Bulk action -->
   <div *ngIf="selectedIds.length > 0" class="mb-3 d-flex justify-content-between align-items-center">
     <span>{{ selectedIds.length }} selected</span>
+
+     <!-- Tag input -->
+  <div class="tag-input-box d-flex align-items-center flex-wrap">
+    <span
+      class="tag-chip me-1 mb-1"
+      *ngFor="let tag of bulkTags"
+    >
+      {{ tag }}
+      <span class="remove-tag" (click)="removeBulkTag(tag)">×</span>
+    </span>
+
+    <input
+      type="text"
+      [(ngModel)]="tagInput"
+      (keydown.enter)="addBulkTag()"
+      placeholder="Add tag"
+      class="tag-input-field"
+    />
+
+    <button type="button" class="btn btn-outline-primary btn-sm ms-2" (click)="addBulkTag()">
+      <i class="bi bi-plus-lg"></i>
+    </button>
+  </div>
+  
     <button class="btn btn-danger btn-sm" (click)="deleteSelectedHeroes()">
       Delete Selected
     </button>

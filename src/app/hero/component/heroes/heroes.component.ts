@@ -17,7 +17,8 @@ export class HeroesComponent implements OnInit {
   heroes$ = this.heroesSubject.asObservable();
   loading$ = new BehaviorSubject<boolean>(true);
   selectedIds: string[] = [];
-
+  tagInput = '';
+  bulkTags: string[] = [];
   constructor(
     private heroService: HeroService,
     private heroEvents: HeroEventsService,
@@ -60,13 +61,13 @@ export class HeroesComponent implements OnInit {
 
 
   onCheckboxChange(event: { id: string, checked: boolean }) {
-  const { id, checked } = event;
-  if (checked && !this.selectedIds.includes(id)) {
-    this.selectedIds.push(id);
-  } else if (!checked) {
-    this.selectedIds = this.selectedIds.filter(existingId => existingId !== id);
+    const { id, checked } = event;
+    if (checked && !this.selectedIds.includes(id)) {
+      this.selectedIds.push(id);
+    } else if (!checked) {
+      this.selectedIds = this.selectedIds.filter(existingId => existingId !== id);
+    }
   }
-}
 
   deleteSelectedHeroes() {
     if (this.selectedIds.length === 0) return;
@@ -80,7 +81,27 @@ export class HeroesComponent implements OnInit {
   }
 
   updateHeroTags(heroId: string, tags: string[]) {
-  this.heroService.updateHeroTags(heroId, tags).subscribe(() => {
-  });
-}
+    this.heroService.updateHeroTags(heroId, tags).subscribe(() => {
+    });
+  }
+
+  addBulkTag() {
+    const tag = this.tagInput.trim();
+    if (!tag || this.bulkTags.includes(tag)) return;
+
+    this.bulkTags.push(tag);
+    this.tagInput = '';
+
+    for (const id of this.selectedIds) {
+      this.heroService.updateHeroTags(id, [...this.bulkTags]).subscribe();
+    }
+  }
+
+  removeBulkTag(tag: string) {
+    this.bulkTags = this.bulkTags.filter(t => t !== tag);
+
+    for (const id of this.selectedIds) {
+      this.heroService.updateHeroTags(id, [...this.bulkTags]).subscribe();
+    }
+  }
 }

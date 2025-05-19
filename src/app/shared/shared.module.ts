@@ -8,19 +8,30 @@ import { HeroCardComponent } from './hero-card/hero-card.component';
 import { AddHeroModalComponent } from './add-hero-modal/add-hero-modal.component';
 import { EditProfileModalComponent } from './edit-profile-modal/edit-profile-modal.component';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { NavbarComponent } from './navbar/navbar.component';
+import { NgbDropdownModule, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
-
     HeroCardComponent,
-     AddHeroModalComponent,
-     EditProfileModalComponent
+    NavbarComponent,
+    AddHeroModalComponent,
+    EditProfileModalComponent,
   ],
   imports: [
-    CommonModule, RouterModule, ReactiveFormsModule, FormsModule, NgSelectModule
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    NgSelectModule,
+    RouterModule,
+    NgbDropdownModule,
+    NgbModalModule
   ],
   exports: [
-    HeroCardComponent
-  ]
+    NavbarComponent,
+    HeroCardComponent,
+    AddHeroModalComponent,
+    EditProfileModalComponent,
+  ],
 })
-export class SharedModule {}
+export class SharedModule { }
