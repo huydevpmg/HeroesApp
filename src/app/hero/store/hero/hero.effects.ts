@@ -74,14 +74,15 @@ export class HeroEffects {
     )
   );
 
-  // Delete hero
-  deleteHero$ = createEffect(() =>
+  deleteManyHeroes$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(HeroActions.deleteHero),
-      exhaustMap(({ _id }) =>
-        this.heroService.deleteHeroes([_id]).pipe(
-          map(() => HeroActions.deleteHeroSuccess({ _id })),
-          catchError(error => of(HeroActions.deleteHeroFailure({ error: error.message })))
+      ofType(HeroActions.deleteManyHeroes),
+      exhaustMap(({ ids }) =>
+        this.heroService.deleteHeroes(ids).pipe( // gọi đến API xóa nhiều
+          map(() => HeroActions.deleteManyHeroesSuccess({ ids })), // trả lại đúng danh sách đã xoá
+          catchError(error =>
+            of(HeroActions.deleteManyHeroesFailure({ error: error.message }))
+          )
         )
       )
     )
@@ -93,7 +94,7 @@ export class HeroEffects {
       ofType(
         HeroActions.createHeroSuccess,
         HeroActions.updateHeroSuccess,
-        HeroActions.deleteHeroSuccess
+        HeroActions.deleteManyHeroesSuccess
       ),
       tap(action => {
         let message = '';
@@ -101,7 +102,7 @@ export class HeroEffects {
           message = `Hero ${action.hero.name} created successfully`;
         } else if (action.type === HeroActions.updateHeroSuccess.type) {
           message = `Hero ${action.hero.name} updated successfully`;
-        } else if (action.type === HeroActions.deleteHeroSuccess.type) {
+        } else if (action.type === HeroActions.deleteManyHeroesSuccess.type) {
           message = 'Hero deleted successfully';
         }
       })
@@ -127,10 +128,12 @@ export class HeroEffects {
   addTagToHero$ = createEffect(() =>
     this.actions$.pipe(
       ofType(HeroActions.addTagToHero),
-      exhaustMap(({ heroId, tag }) =>
-        this.heroService.addTagToHero(heroId, tag).pipe(
-          map(hero => HeroActions.addTagToHeroSuccess({ hero })),
-          catchError(error => of(HeroActions.addTagToHeroFailure({ error: error.message })))
+      exhaustMap(({ heroIds, tag }) =>
+        this.heroService.addTagToHero(heroIds, tag).pipe(
+          map(hero => HeroActions.addTagToHeroSuccess({ heroIds, tag })),
+          catchError(error =>
+            of(HeroActions.addTagToHeroFailure({ error: error.message }))
+          )
         )
       )
     )
@@ -140,10 +143,12 @@ export class HeroEffects {
   removeTagFromHero$ = createEffect(() =>
     this.actions$.pipe(
       ofType(HeroActions.removeTagFromHero),
-      exhaustMap(({ heroId, tag }) =>
-        this.heroService.removeTagFromHero(heroId, tag).pipe(
-          map(hero => HeroActions.removeTagFromHeroSuccess({ hero })),
-          catchError(error => of(HeroActions.removeTagFromHeroFailure({ error: error.message })))
+      exhaustMap(({ heroIds, tag }) =>
+        this.heroService.removeTagFromHero(heroIds, tag).pipe(
+          map(hero => HeroActions.removeTagFromHeroSuccess({ heroIds, tag })),
+          catchError(error =>
+            of(HeroActions.removeTagFromHeroFailure({ error: error.message }))
+          )
         )
       )
     )

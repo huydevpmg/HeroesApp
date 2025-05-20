@@ -58,29 +58,30 @@ export const updateHeroFailure = createAction(
   props<{ error: string }>()
 );
 
-//delete
-export const deleteHero = createAction(
-  `${ACTION_PREFIX} Delete Hero`,
-  props<{ _id: string }>()
+export const deleteManyHeroes = createAction(
+  `${ACTION_PREFIX}Delete Many Heroes`,
+  props<{ ids: string[] }>()
 );
-export const deleteHeroSuccess = createAction(
-  `${ACTION_PREFIX} Delete Hero Success`,
-  props<{ _id: string }>()
+
+export const deleteManyHeroesSuccess = createAction(
+  `${ACTION_PREFIX}Delete Many Heroes Success`,
+  props<{ ids: string[] }>()
 );
-export const deleteHeroFailure = createAction(
-  `${ACTION_PREFIX} Delete Hero Failure`,
+
+export const deleteManyHeroesFailure = createAction(
+  `${ACTION_PREFIX}Delete Many Heroes Failure`,
   props<{ error: string }>()
 );
 
 // Add tag
 export const addTagToHero = createAction(
   `${ACTION_PREFIX} Add Tag`,
-  props<{ heroId: string, tag: string }>()
+  props<{ heroIds: string[], tag: string }>()
 );
 
 export const addTagToHeroSuccess = createAction(
   `${ACTION_PREFIX} Add Tag Success`,
-  props<{ hero: HeroModel }>()
+  props<{ heroIds: string[]; tag: string }>()
 );
 
 export const addTagToHeroFailure = createAction(
@@ -91,13 +92,14 @@ export const addTagToHeroFailure = createAction(
 // Remove tag
 export const removeTagFromHero = createAction(
   `${ACTION_PREFIX} Remove Tag`,
-  props<{ heroId: string; tag: string }>()
+  props<{ heroIds: string[], tag: string }>()
 );
 
 export const removeTagFromHeroSuccess = createAction(
   `${ACTION_PREFIX} Remove Tag Success`,
-  props<{ hero: HeroModel }>()
+  props<{ heroIds: string[]; tag: string }>()
 );
+
 
 export const removeTagFromHeroFailure = createAction(
   `${ACTION_PREFIX} Remove Tag Failure`,

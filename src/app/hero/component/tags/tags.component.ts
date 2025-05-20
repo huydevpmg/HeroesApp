@@ -10,7 +10,7 @@ import {
 import { FormControl } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Tag } from '../../models/tag.model';
-import { loadTags, createTag } from '../../store/tag/tag.actions';
+import { loadTags, createTag, deleteTag } from '../../store/tag/tag.actions';
 import { selectAllTags } from '../../store/tag/tag.selectors';
 import { addTagToHero, removeTagFromHero } from '../../store/hero/hero.actions';
 import { selectAllHeroes } from '../../store/hero/hero.selectors';
@@ -35,14 +35,11 @@ export class TagsComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.store.dispatch(loadTags());
-
     this.store.select(selectAllTags).subscribe(tags => {
       this.allTags = tags;
-      this.filteredTags = [...tags];
+      this.filterTags();
       this.syncSelectedTags();
     });
-
-    this.tagInputControl.valueChanges.subscribe(() => this.filterTags());
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -54,16 +51,31 @@ export class TagsComponent implements OnInit, OnChanges {
   private syncSelectedTags(): void {
     if (!this.currentHeroTags || this.allTags.length === 0) return;
 
-    this.selectedTags = this.allTags.filter(tag =>
-      this.currentHeroTags.includes(tag.name)
-    );
+    if (this.heroIds.length > 1) {
+      this.store.select(selectAllHeroes).pipe(take(1)).subscribe(heroes => {
+        const selectedHeroes = heroes.filter(h => this.heroIds.includes(h._id));
+        if (selectedHeroes.length > 0) {
+          const commonTags = selectedHeroes.reduce((common, hero) => {
+            return common.filter(tag => hero.tags.includes(tag));
+          }, selectedHeroes[0].tags);
+
+          this.selectedTags = this.allTags.filter(tag =>
+            commonTags.includes(tag.name)
+          );
+        }
+      });
+    } else {
+      this.selectedTags = this.allTags.filter(tag =>
+        this.currentHeroTags.includes(tag.name)
+      );
+    }
     this.cdr.markForCheck();
   }
 
   filterTags(): void {
-    const keyword = this.tagInputControl.value?.toLowerCase().trim() || '';
+    const searchTerm = this.tagInputControl.value?.toLowerCase() || '';
     this.filteredTags = this.allTags.filter(tag =>
-      tag.name.toLowerCase().includes(keyword)
+      tag.name.toLowerCase().includes(searchTerm)
     );
   }
 
@@ -72,41 +84,48 @@ export class TagsComponent implements OnInit, OnChanges {
 
     if (isChecked) {
       this.selectedTags = this.selectedTags.filter(t => t.name !== tag.name);
-
-      if (this.heroIds?.length) {
-        this.heroIds.forEach(heroId => {
-          this.store.dispatch(removeTagFromHero({ heroId, tag: tag.name }));
-        });
-      }
+      this.store.dispatch(removeTagFromHero({ heroIds: this.heroIds, tag: tag.name }));
     } else {
       this.selectedTags.push(tag);
-
-      if (this.heroIds?.length) {
-        this.heroIds.forEach(heroId => {
-          this.store.dispatch(addTagToHero({ heroId, tag: tag.name }));
-        });
-      }
+      this.store.dispatch(addTagToHero({ heroIds: this.heroIds, tag: tag.name }));
     }
+
+    this.cdr.markForCheck();
   }
 
   isSelected(tagId: string): boolean {
     return this.selectedTags.some(t => t._id === tagId);
   }
 
+  isIndeterminate(tag: Tag): boolean {
+    if (this.heroIds.length <= 1) return false;
+
+    let hasTag = false;
+    let missingTag = false;
+
+    this.store.select(selectAllHeroes).pipe(take(1)).subscribe(heroes => {
+      const selectedHeroes = heroes.filter(h => this.heroIds.includes(h._id));
+      selectedHeroes.forEach(hero => {
+        if (hero.tags.includes(tag.name)) {
+          hasTag = true;
+        } else {
+          missingTag = true;
+        }
+      });
+    });
+
+    return hasTag && missingTag;
+  }
+
   onEnter(): void {
-    const name = this.tagInputControl.value?.trim();
-    if (!name) {
-      console.warn('Tag name cannot be empty');
-      return;
+    const newTagName = this.tagInputControl.value?.trim();
+    if (newTagName && !this.allTags.some(t => t.name.toLowerCase() === newTagName.toLowerCase())) {
+      this.store.dispatch(createTag({ name: newTagName }));
+      this.tagInputControl.setValue('');
     }
+  }
 
-    const exists = this.allTags.find(tag => tag.name.toLowerCase() === name.toLowerCase());
-    if (exists) {
-      this.toggleTag(exists);
-    } else {
-      this.store.dispatch(createTag({ name }));
-    }
-
-    this.tagInputControl.setValue('');
+  deleteTag(tagId: string): void {
+    this.store.dispatch(deleteTag({ id: tagId }));
   }
 }

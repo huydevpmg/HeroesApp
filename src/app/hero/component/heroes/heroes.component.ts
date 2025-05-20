@@ -7,7 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app.state';
 import { selectAllHeroes, selectLoading, selectError } from '../../store/hero/hero.selectors';
-import { loadHeroesByOwner, deleteHero } from '../../store/hero/hero.actions';
+import { deleteManyHeroes, loadHeroesByOwner } from '../../store/hero/hero.actions';
 
 @Component({
   selector: 'app-heroes',
@@ -80,9 +80,8 @@ export class HeroesComponent implements OnInit, OnDestroy {
 
   deleteSelectedHeroes() {
     if (this.selectedIds.length === 0) return;
-    this.selectedIds.forEach(id => {
-      this.store.dispatch(deleteHero({ _id: id }));
-    });
+
+    this.store.dispatch(deleteManyHeroes({ ids: this.selectedIds }));
     this.selectedIds = [];
   }
 }

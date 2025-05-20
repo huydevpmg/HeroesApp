@@ -11,7 +11,7 @@ export const heroReducer = createReducer(
     HeroActions.loadHero,
     HeroActions.createHero,
     HeroActions.updateHero,
-    HeroActions.deleteHero,
+    HeroActions.deleteManyHeroes,
     HeroActions.addTagToHero,
     HeroActions.removeTagFromHero,
     HeroActions.loadHeroesByOwner,
@@ -63,10 +63,13 @@ export const heroReducer = createReducer(
   })),
 
   // ✅ Success: Delete
-  on(HeroActions.deleteHeroSuccess, (state, { _id }) => ({
+  on(HeroActions.deleteManyHeroesSuccess, (state, { ids }) => ({
     ...state,
-    heroes: state.heroes.filter(h => h._id !== _id),
-    selectedHero: state.selectedHero?._id === _id ? null : state.selectedHero,
+    heroes: state.heroes.filter(h => !ids.includes(h._id)),
+    selectedHero:
+      state.selectedHero && ids.includes(state.selectedHero._id)
+        ? null
+        : state.selectedHero,
     loading: false,
     lastUpdated: Date.now()
   })),
@@ -74,16 +77,47 @@ export const heroReducer = createReducer(
   // ✅ Success: Add or Remove Tag
   on(
     HeroActions.addTagToHeroSuccess,
-    HeroActions.removeTagFromHeroSuccess,
-    (state, { hero }) => ({
+    (state, { heroIds, tag }) => ({
       ...state,
-      heroes: state.heroes.map(h => h._id === hero._id ? hero : h),
-      selectedHero: state.selectedHero?._id === hero._id ? hero : state.selectedHero,
+      heroes: state.heroes.map(h =>
+        heroIds.includes(h._id) && !h.tags.includes(tag)
+          ? { ...h, tags: [...h.tags, tag] }
+          : h
+      ),
+      selectedHero:
+        state.selectedHero && heroIds.includes(state.selectedHero._id)
+          ? {
+            ...state.selectedHero,
+            tags: state.selectedHero.tags.includes(tag)
+              ? state.selectedHero.tags
+              : [...state.selectedHero.tags, tag]
+          }
+          : state.selectedHero,
       loading: false,
       lastUpdated: Date.now()
     })
   ),
 
+  on(
+    HeroActions.removeTagFromHeroSuccess,
+    (state, { heroIds, tag }) => ({
+      ...state,
+      heroes: state.heroes.map(h =>
+        heroIds.includes(h._id)
+          ? { ...h, tags: h.tags.filter(t => t !== tag) }
+          : h
+      ),
+      selectedHero:
+        state.selectedHero && heroIds.includes(state.selectedHero._id)
+          ? {
+            ...state.selectedHero,
+            tags: state.selectedHero.tags.filter(t => t !== tag)
+          }
+          : state.selectedHero,
+      loading: false,
+      lastUpdated: Date.now()
+    })
+  ),
 
   // ❌ All Failure cases
   on(
@@ -91,7 +125,7 @@ export const heroReducer = createReducer(
     HeroActions.loadHeroFailure,
     HeroActions.createHeroFailure,
     HeroActions.updateHeroFailure,
-    HeroActions.deleteHeroFailure,
+    HeroActions.deleteManyHeroesFailure,
     HeroActions.addTagToHeroFailure,
     HeroActions.removeTagFromHeroFailure,
     HeroActions.loadHeroesByOwnerFailure,

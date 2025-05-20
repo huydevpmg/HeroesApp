@@ -17,10 +17,13 @@
     <div *ngIf="filteredTags.length > 0; else noTags">
       <div *ngFor="let tag of filteredTags" class="tag-row d-flex align-items-center mb-2 p-1 rounded"
         [ngStyle]="{'background': isSelected(tag._id) ? '#e9ecef' : '#f8f9fa'}">
-        <input class="form-check-input me-2" type="checkbox" [checked]="isSelected(tag._id)" (change)="toggleTag(tag)">
+        <input class="form-check-input me-2" type="checkbox" [checked]="isSelected(tag._id)"
+          [indeterminate]="isIndeterminate(tag)" (change)="toggleTag(tag)">
         <span class="tag-name flex-grow-1" [ngStyle]="{'font-weight': isSelected(tag._id) ? 'bold' : 'normal'}">
           {{ tag.name }}
         </span>
+        <span class="ms-2" role="button" tabindex="0" (click)="deleteTag(tag._id); $event.stopPropagation()"
+          title="Delete tag" style="font-size: 1rem; font-weight: bold; cursor: pointer;">x</span>
       </div>
     </div>
 

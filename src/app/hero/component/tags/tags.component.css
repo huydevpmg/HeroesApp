@@ -68,6 +68,21 @@ input, .input-group-text {
   height: 1.25rem;
 }
 
+.form-check-input:indeterminate {
+  background-color: #6f42c1;
+  border-color: #6f42c1;
+}
+
+.form-check-input:indeterminate:checked {
+  background-color: #6f42c1;
+  border-color: #6f42c1;
+}
+
+.form-check-input:indeterminate:focus {
+  border-color: #6f42c1;
+  box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
+}
+
 
 
 

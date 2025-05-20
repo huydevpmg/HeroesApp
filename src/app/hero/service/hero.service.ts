@@ -43,11 +43,11 @@ export class HeroService {
     return this.http.request('delete', `${this.apiUrl}/bulk-delete`, { body: { ids } });
   }
 
-  addTagToHero(heroId: string, tag: string): Observable<HeroModel> {
-    return this.http.patch<HeroModel>(`${this.apiUrl}/${heroId}/tags/add`, { tag });
+  addTagToHero(heroIds: string[], tag: string): Observable<HeroModel> {
+    return this.http.patch<HeroModel>(`${this.apiUrl}/bulk/add-tag`, { heroIds, tag });
   }
 
-  removeTagFromHero(heroId: string, tag: string): Observable<HeroModel> {
-    return this.http.patch<HeroModel>(`${this.apiUrl}/${heroId}/tags/remove`, { tag });
+  removeTagFromHero(heroIds: string[], tag: string): Observable<HeroModel> {
+    return this.http.patch<HeroModel>(`${this.apiUrl}/bulk/remove-tag`, { heroIds, tag });
   }
 }
