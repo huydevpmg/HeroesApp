@@ -14,16 +14,18 @@ export class DashboardComponent implements OnInit {
   heroesSubject = new BehaviorSubject<HeroModel[]>([]);
   heroes$ = this.heroesSubject.asObservable();
   loading$ = new BehaviorSubject<boolean>(true);
+  currentUserId: string = '';
 
   constructor(
     private heroService: HeroService,
     private heroEvents: HeroEventsService,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadHeroes();
-
+    const userId = this.authService.getCurrentUserId();
+    this.currentUserId = userId || '';
     this.heroEvents.heroAdded$.subscribe(() => {
       this.loadHeroes();
     });

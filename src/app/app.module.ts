@@ -12,6 +12,7 @@ import { TokenInterceptor } from './core/interceptors/token.interceptor';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { EffectsModule } from '@ngrx/effects';
 import { CoreModule } from './core/core.module';
+
 @NgModule({
   declarations: [AppComponent],
   imports: [

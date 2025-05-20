@@ -9,16 +9,21 @@
     </div>
   </div>
 
-  <!-- Hero List -->
+
   <ng-container *ngIf="heroes$ | async as heroes; else noData">
     <div class="row g-4" *ngIf="heroes.length > 0; else noData">
       <div class="col-12 col-md-6 col-lg-4" *ngFor="let hero of heroes">
-        <app-hero-card [hero]="hero" [showCheckbox]="false" [canEditTags]="false" [isMyHeroesView]="false">
-        </app-hero-card>
+        <div class="position-relative">
+          <!-- Hero Card -->
+          <app-hero-card [hero]="hero" [showCheckbox]="false" [canEditTags]="false" [isMyHeroesView]="false"
+            [appOwnerBadge]="hero.owner === currentUserId">
+          </app-hero-card>
+        </div>
       </div>
     </div>
   </ng-container>
 
+  <!-- No Data Fallback -->
   <ng-template #noData>
     <p class="text-center text-muted mt-4">No heroes available.</p>
   </ng-template>

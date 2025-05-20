@@ -6,11 +6,13 @@ import { HeroCardComponent } from './hero-card/hero-card.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NavbarComponent } from './navbar/navbar.component';
 import { NgbDropdownModule, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { OwnerBadgeDirective } from './directives/owner-badge.directive';
 
 @NgModule({
   declarations: [
     HeroCardComponent,
-    NavbarComponent
+    NavbarComponent,
+    OwnerBadgeDirective
   ],
   imports: [
     CommonModule,
@@ -23,7 +25,9 @@ import { NgbDropdownModule, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
   ],
   exports: [
     NavbarComponent,
-    HeroCardComponent
+    HeroCardComponent,
+    OwnerBadgeDirective
   ],
+
 })
 export class SharedModule { }
