@@ -6,13 +6,12 @@ import { AppComponent } from './app.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { StoreModule } from '@ngrx/store';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { CoreModule } from './core/core.module';
 import { AuthModule } from './auth/auth.module';
 import { CookieService } from 'ngx-cookie-service';
 import { TokenInterceptor } from './core/interceptors/token.interceptor';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { EffectsModule } from '@ngrx/effects';
-import { SharedModule } from './shared/shared.module';
+import { CoreModule } from './core/core.module';
 @NgModule({
   declarations: [AppComponent],
   imports: [
@@ -29,7 +28,6 @@ import { SharedModule } from './shared/shared.module';
     HttpClientModule,
     AuthModule,
     EffectsModule.forRoot([]),
-    SharedModule,
   ],
   providers: [
     CookieService,

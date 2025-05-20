@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { HeroService } from '../../hero/service/hero.service';
-import { HeroEventsService } from '../../hero/service/hero-events.service';
-import { AuthService } from '../../core/services/auth.service';
-import { ageValidator, emailValidator, nameValidator } from '../utils/validators';
-import { HeroModel } from '../../hero/models/hero.model';
+import { HeroService } from '../../service/hero.service';
+import { HeroEventsService } from '../../service/hero-events.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { ageValidator, emailValidator, nameValidator } from '../../../shared/utils/validators';
+import { HeroModel } from '../../models/hero.model';
 
 @Component({
   selector: 'app-add-hero-modal',
@@ -32,7 +32,7 @@ export class AddHeroModalComponent {
 
   onSubmit(): void {
     const userId = this.authService.getCurrentUserId();
-    if (!userId || this.heroForm.invalid) return;
+    if (!userId || this.heroForm.invalid) { return };
 
     const newHero: HeroModel = {
       ...this.heroForm.value,

@@ -6,8 +6,9 @@ import { HeroService } from '../../hero/service/hero.service';
 import { HeroEventsService } from '../../hero/service/hero-events.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ageValidator, emailValidator, nameValidator } from '../../shared/utils/validators';
-import { AddHeroModalComponent } from '../../shared/add-hero-modal/add-hero-modal.component';
-import { EditProfileModalComponent } from '../../shared/edit-profile-modal/edit-profile-modal.component';
+import { Router } from '@angular/router';
+import { AddHeroModalComponent } from '../../hero/component/add-hero-modal/add-hero-modal.component';
+import { EditProfileModalComponent } from '../../hero/component/edit-profile-modal/edit-profile-modal.component';
 
 @Component({
   selector: 'app-navbar',
@@ -22,7 +23,8 @@ export class NavbarComponent implements OnInit {
     private fb: FormBuilder,
     private heroEvents: HeroEventsService,
     private modalService: NgbModal,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -71,10 +73,9 @@ export class NavbarComponent implements OnInit {
     }
   }
 
-  // open(content: TemplateRef<any>) {
-  //   this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title' });
-  // }
-
+  openTags() {
+    this.router.navigate(['/tags'])
+  }
 
   openAddHeroModal() {
     this.modalService.open(AddHeroModalComponent, { centered: true });

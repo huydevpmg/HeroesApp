@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { AuthService } from '../../core/services/auth.service';
-import { ProfileService } from '../../core/services/profile.service';
-import { emailValidator } from '../utils/validators';
+import { AuthService } from '../../../core/services/auth.service';
+import { ProfileService } from '../../../core/services/profile.service';
+import { emailValidator } from '../../../shared/utils/validators';
 
 @Component({
   selector: 'app-edit-profile-modal',
@@ -18,7 +18,7 @@ export class EditProfileModalComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private profileService: ProfileService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.profileForm = this.fb.group({
