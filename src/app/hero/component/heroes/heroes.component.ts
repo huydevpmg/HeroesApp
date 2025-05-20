@@ -1,107 +1,91 @@
-import { Component, OnInit } from '@angular/core';
-import { HeroService } from '../../service/hero.service';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HeroModel } from '../../models/hero.model';
-import { BehaviorSubject } from 'rxjs';
+import { Observable, Subscription, take } from 'rxjs';
 import { HeroEventsService } from '../../service/hero-events.service';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../store/app.state';
+import { selectAllHeroes, selectLoading, selectError } from '../../store/hero/hero.selectors';
+import { loadHeroesByOwner, deleteHero } from '../../store/hero/hero.actions';
 
 @Component({
   selector: 'app-heroes',
   templateUrl: './heroes.component.html',
   styleUrls: ['./heroes.component.css']
 })
-export class HeroesComponent implements OnInit {
-  heroesSubject = new BehaviorSubject<HeroModel[]>([]);
-  heroes$ = this.heroesSubject.asObservable();
-  loading$ = new BehaviorSubject<boolean>(true);
+export class HeroesComponent implements OnInit, OnDestroy {
+  heroes$: Observable<HeroModel[]>;
+  loading$: Observable<boolean>;
+  error$: Observable<string | null>;
   selectedIds: string[] = [];
-  tagInput = '';
-  bulkTags: string[] = [];
+  currentHeroTags: string[] = [];
+  private subscriptions = new Subscription();
+
   constructor(
-    private heroService: HeroService,
+    private store: Store<AppState>,
     private heroEvents: HeroEventsService,
     private router: Router,
     private authService: AuthService
-  ) { }
+  ) {
+    this.heroes$ = this.store.select(selectAllHeroes);
+    this.loading$ = this.store.select(selectLoading);
+    this.error$ = this.store.select(selectError);
+  }
 
   ngOnInit(): void {
-    this.getHeroes();
-    this.heroEvents.heroAdded$.subscribe(() => {
-      this.getHeroes();
-    });
+    this.loadHeroes();
+    this.subscriptions.add(
+      this.heroEvents.heroAdded$.subscribe(() => {
+        this.loadHeroes();
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   goToDetail(heroId: string) {
     this.router.navigate(['/detail', heroId]);
   }
 
-  private getHeroes(): void {
+  private loadHeroes(): void {
     const userId = this.authService.getCurrentUserId();
-    console.log(userId);
     if (!userId) {
       console.error('User ID is null. Please login again.');
-      this.loading$.next(false);
       return;
     }
-
-    this.heroService.getHeroesByOwner(userId).subscribe({
-      next: (heroes) => {
-        this.heroesSubject.next(heroes);
-        this.loading$.next(false);
-      },
-      error: (err) => {
-        console.error('Error loading heroes:', err);
-        this.loading$.next(false);
-      }
-    });
-    this.loading$.next(true);
+    this.store.dispatch(loadHeroesByOwner({ ownerId: userId }));
   }
 
-
-  onCheckboxChange(event: { id: string, checked: boolean }) {
+  onCheckboxChange(event: { id: string; checked: boolean }) {
     const { id, checked } = event;
+
     if (checked && !this.selectedIds.includes(id)) {
       this.selectedIds.push(id);
     } else if (!checked) {
       this.selectedIds = this.selectedIds.filter(existingId => existingId !== id);
     }
+
+    if (this.selectedIds.length === 1) {
+      this.heroes$.pipe(take(1)).subscribe(heroes => {
+        const selectedHero = heroes.find(h => h._id === this.selectedIds[0]);
+        this.currentHeroTags = selectedHero?.tags || [];
+      });
+    } else {
+      this.currentHeroTags = [];
+    }
   }
 
   deleteSelectedHeroes() {
     if (this.selectedIds.length === 0) return;
-
-    if (confirm(`Are you sure you want to delete ${this.selectedIds.length} heroes?`)) {
-      this.heroService.deleteHeroes(this.selectedIds).subscribe(() => {
-        this.selectedIds = [];
-        this.getHeroes();
-      });
-    }
-  }
-
-  updateHeroTags(heroId: string, tags: string[]) {
-    this.heroService.updateHeroTags(heroId, tags).subscribe(() => {
+    this.selectedIds.forEach(id => {
+      this.store.dispatch(deleteHero({ _id: id }));
     });
-  }
-
-  addBulkTag() {
-    const tag = this.tagInput.trim();
-    if (!tag || this.bulkTags.includes(tag)) return;
-
-    this.bulkTags.push(tag);
-    this.tagInput = '';
-
-    for (const id of this.selectedIds) {
-      this.heroService.updateHeroTags(id, [...this.bulkTags]).subscribe();
-    }
-  }
-
-  removeBulkTag(tag: string) {
-    this.bulkTags = this.bulkTags.filter(t => t !== tag);
-
-    for (const id of this.selectedIds) {
-      this.heroService.updateHeroTags(id, [...this.bulkTags]).subscribe();
-    }
+    this.selectedIds = [];
   }
 }
+
+
+

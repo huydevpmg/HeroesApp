@@ -1,6 +1,6 @@
 // src/app/heroes/store/selectors/hero.selectors.ts
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { HeroState } from '../state/hero.state';
+import { HeroState } from './hero.state';
 
 export const selectHeroState = createFeatureSelector<HeroState>('heroes');
 

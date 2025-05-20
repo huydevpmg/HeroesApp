@@ -12,7 +12,6 @@ import { TokenInterceptor } from './core/interceptors/token.interceptor';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { EffectsModule } from '@ngrx/effects';
 import { CoreModule } from './core/core.module';
-import { SharedModule } from './shared/shared.module';
 @NgModule({
   declarations: [AppComponent],
   imports: [
@@ -26,7 +25,6 @@ import { SharedModule } from './shared/shared.module';
     NgbModule,
     RouterModule,
     CoreModule,
-    SharedModule,
     HttpClientModule,
     AuthModule,
     EffectsModule.forRoot([]),

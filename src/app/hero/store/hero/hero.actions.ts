@@ -7,6 +7,7 @@ const ACTION_PREFIX = '[Heroes]'; //Type để định danh
 
 // Load Actions
 export const loadHeroes = createAction(`${ACTION_PREFIX} Load Heroes`);
+
 export const loadHeroesSuccess = createAction(
   `${ACTION_PREFIX} Load Heroes Success`,
   props<{ heroes: HeroModel[] }>()
@@ -16,7 +17,6 @@ export const loadHeroesFailure = createAction(
   props<{ error: string }>()
 );
 
-// CRUD Actions
 export const loadHero = createAction(
   `${ACTION_PREFIX} Load Hero`,
   props<{ _id: string, ownerId: string }>()
@@ -58,7 +58,7 @@ export const updateHeroFailure = createAction(
   props<{ error: string }>()
 );
 
-//deletehttps://chatgpt.com/
+//delete
 export const deleteHero = createAction(
   `${ACTION_PREFIX} Delete Hero`,
   props<{ _id: string }>()
@@ -69,5 +69,52 @@ export const deleteHeroSuccess = createAction(
 );
 export const deleteHeroFailure = createAction(
   `${ACTION_PREFIX} Delete Hero Failure`,
+  props<{ error: string }>()
+);
+
+// Add tag
+export const addTagToHero = createAction(
+  `${ACTION_PREFIX} Add Tag`,
+  props<{ heroId: string, tag: string }>()
+);
+
+export const addTagToHeroSuccess = createAction(
+  `${ACTION_PREFIX} Add Tag Success`,
+  props<{ hero: HeroModel }>()
+);
+
+export const addTagToHeroFailure = createAction(
+  `${ACTION_PREFIX} Add Tag Failure`,
+  props<{ error: any }>()
+);
+
+// Remove tag
+export const removeTagFromHero = createAction(
+  `${ACTION_PREFIX} Remove Tag`,
+  props<{ heroId: string; tag: string }>()
+);
+
+export const removeTagFromHeroSuccess = createAction(
+  `${ACTION_PREFIX} Remove Tag Success`,
+  props<{ hero: HeroModel }>()
+);
+
+export const removeTagFromHeroFailure = createAction(
+  `${ACTION_PREFIX} Remove Tag Failure`,
+  props<{ error: any }>()
+);
+
+export const loadHeroesByOwner = createAction(
+  `${ACTION_PREFIX} Load Heroes By Owner`,
+  props<{ ownerId: string }>()
+);
+
+export const loadHeroesByOwnerSuccess = createAction(
+  `${ACTION_PREFIX} Load Heroes By Owner Success`,
+  props<{ heroes: HeroModel[] }>()
+);
+
+export const loadHeroesByOwnerFailure = createAction(
+  `${ACTION_PREFIX} Load Heroes By Owner Failure`,
   props<{ error: string }>()
 );

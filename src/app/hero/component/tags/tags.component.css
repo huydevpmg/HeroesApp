@@ -1,0 +1,74 @@
+/* Tag input placeholder */
+input::placeholder {
+  color: #6c757d; /* Bootstrap's text-muted */
+  font-style: italic;
+  font-size:  0.875em;
+  opacity: 1; /* Important: override browser default */
+}
+
+input, .input-group-text {
+  height: 2rem;
+}
+
+.dropdown .btn-outline:focus {
+  color: white !important;
+}
+
+.dropdown .btn-outline-dark:hover i {
+  color: white !important;
+}
+.tag-btn {
+  border-color: #6c757d !important;
+}
+
+.tag-btn:hover {
+  border-color: #6f42c1 !important;
+  background-color: #6f42c1 !important;
+  color: white !important;
+}
+
+
+.tag-row {
+  transition: background 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  min-height: 36px;
+  border: 1px solid transparent;
+}
+.tag-row:hover {
+  background: #f1f3f6 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid #e0e0e0;
+}
+
+.tag-icon {
+  width: 24px;
+  height: 24px;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.tag-name {
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  user-select: none;
+}
+.form-check-input {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.form-check-input:checked {
+  border-color: #6f42c1;
+  background-color: #6f42c1;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+
+
+
+

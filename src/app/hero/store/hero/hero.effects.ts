@@ -2,10 +2,11 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
-import { catchError, exhaustMap, map, tap } from 'rxjs/operators';
-import * as HeroActions from '../actions/hero.actions';
+import { catchError, exhaustMap, map, switchMap, tap } from 'rxjs/operators';
+import * as HeroActions from '../hero/hero.actions';
 import { HeroService } from '../../service/hero.service';
 import { Router } from '@angular/router';
+
 @Injectable()
 export class HeroEffects {
   // Load all heroes
@@ -16,6 +17,19 @@ export class HeroEffects {
         this.heroService.getAllHeroes().pipe(
           map(heroes => HeroActions.loadHeroesSuccess({ heroes })),
           catchError(error => of(HeroActions.loadHeroesFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  // Load heroes by owner
+  loadHeroesByOwner$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(HeroActions.loadHeroesByOwner),
+      exhaustMap(({ ownerId }) =>
+        this.heroService.getHeroesByOwner(ownerId).pipe(
+          map(heroes => HeroActions.loadHeroesByOwnerSuccess({ heroes })),
+          catchError(error => of(HeroActions.loadHeroesByOwnerFailure({ error: error.message })))
         )
       )
     )
@@ -65,7 +79,7 @@ export class HeroEffects {
     this.actions$.pipe(
       ofType(HeroActions.deleteHero),
       exhaustMap(({ _id }) =>
-        this.heroService.deleteHero(_id).pipe(
+        this.heroService.deleteHeroes([_id]).pipe(
           map(() => HeroActions.deleteHeroSuccess({ _id })),
           catchError(error => of(HeroActions.deleteHeroFailure({ error: error.message })))
         )
@@ -109,9 +123,35 @@ export class HeroEffects {
     { dispatch: false }
   );
 
+  // Add tag to hero
+  addTagToHero$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(HeroActions.addTagToHero),
+      exhaustMap(({ heroId, tag }) =>
+        this.heroService.addTagToHero(heroId, tag).pipe(
+          map(hero => HeroActions.addTagToHeroSuccess({ hero })),
+          catchError(error => of(HeroActions.addTagToHeroFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  // Remove tag from hero
+  removeTagFromHero$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(HeroActions.removeTagFromHero),
+      exhaustMap(({ heroId, tag }) =>
+        this.heroService.removeTagFromHero(heroId, tag).pipe(
+          map(hero => HeroActions.removeTagFromHeroSuccess({ hero })),
+          catchError(error => of(HeroActions.removeTagFromHeroFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
   constructor(
     private actions$: Actions,
     private heroService: HeroService,
-    private router: Router,
-  ) {}
+    private router: Router
+  ) { }
 }
