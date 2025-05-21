@@ -15,6 +15,7 @@ import { selectAllTags } from '../../store/tag/tag.selectors';
 import { addTagToHero, removeTagFromHero } from '../../store/hero/hero.actions';
 import { selectAllHeroes } from '../../store/hero/hero.selectors';
 import { map, take } from 'rxjs/operators';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-tags',
@@ -31,7 +32,11 @@ export class TagsComponent implements OnInit, OnChanges {
   selectedTags: Tag[] = [];
   debugMode = false;
 
-  constructor(private store: Store, private cdr: ChangeDetectorRef) { }
+  constructor(
+    private store: Store,
+    private cdr: ChangeDetectorRef,
+    private toastr: ToastrService
+  ) { }
 
   ngOnInit(): void {
     this.store.dispatch(loadTags());
@@ -85,9 +90,11 @@ export class TagsComponent implements OnInit, OnChanges {
     if (isChecked) {
       this.selectedTags = this.selectedTags.filter(t => t.name !== tag.name);
       this.store.dispatch(removeTagFromHero({ heroIds: this.heroIds, tag: tag.name }));
+      this.toastr.success(`Tag "${tag.name}" removed successfully!`);
     } else {
       this.selectedTags.push(tag);
       this.store.dispatch(addTagToHero({ heroIds: this.heroIds, tag: tag.name }));
+      this.toastr.success(`Tag "${tag.name}" added successfully!`);
     }
 
     this.cdr.markForCheck();
@@ -122,10 +129,15 @@ export class TagsComponent implements OnInit, OnChanges {
     if (newTagName && !this.allTags.some(t => t.name.toLowerCase() === newTagName.toLowerCase())) {
       this.store.dispatch(createTag({ name: newTagName }));
       this.tagInputControl.setValue('');
+      this.toastr.success(`Tag "${newTagName}" created successfully!`);
     }
   }
 
   deleteTag(tagId: string): void {
-    this.store.dispatch(deleteTag({ id: tagId }));
+    const tagToDelete = this.allTags.find(t => t._id === tagId);
+    if (tagToDelete) {
+      this.store.dispatch(deleteTag({ id: tagId }));
+      this.toastr.success(`Tag "${tagToDelete.name}" deleted successfully!`);
+    }
   }
 }

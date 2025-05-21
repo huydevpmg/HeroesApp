@@ -6,16 +6,16 @@
 </div>
 
 <div class="modal-body pt-0">
-  <form [formGroup]="profileForm" id="profileForm">
-
+  <form [formGroup]="profileForm" (ngSubmit)="updateProfile()" id="profileForm">
     <!-- Username -->
     <div class="mb-3">
       <label class="form-label small fw-semibold">Username</label>
-      <input type="text" [disabled]="true" class="form-control" formControlName="username">
+      <input type="text" class="form-control" formControlName="username">
       <div *ngIf="profileForm.get('username')?.touched && profileForm.get('username')?.errors"
         class="text-danger small">
         <ng-container [ngSwitch]="firstErrorKey(profileForm.get('username')?.errors)">
           <div *ngSwitchCase="'required'">Username is required.</div>
+          <div *ngSwitchCase="'minlength'">Username must be at least 3 characters.</div>
         </ng-container>
       </div>
     </div>
@@ -32,6 +32,7 @@
         class="text-danger small">
         <ng-container [ngSwitch]="firstErrorKey(profileForm.get('email')?.errors)">
           <div *ngSwitchCase="'required'">Email is required.</div>
+          <div *ngSwitchCase="'email'">Please enter a valid email address.</div>
           <div *ngSwitchCase="'emailExists'">Email already exists.</div>
         </ng-container>
       </div>
@@ -45,15 +46,16 @@
         class="text-danger small">
         <ng-container [ngSwitch]="firstErrorKey(profileForm.get('fullName')?.errors)">
           <div *ngSwitchCase="'required'">Full name is required.</div>
+          <div *ngSwitchCase="'minlength'">Full name must be at least 2 characters.</div>
         </ng-container>
       </div>
     </div>
-
   </form>
 </div>
 
-<div class="modal-footer border-0 pt-0">
-  <button type="button" class="btn btn-sm btn-outline-secondary" (click)="modal.dismiss()">Cancel</button>
-  <button type="submit" form="profileForm" class="btn btn-sm btn-primary"
-    [disabled]="profileForm.invalid || profileForm.pending" (click)="updateProfile()">Save</button>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
+  <button type="submit" class="btn btn-primary" [disabled]="!profileForm.valid || loading">
+    {{ loading ? 'Saving...' : 'Save' }}
+  </button>
 </div>

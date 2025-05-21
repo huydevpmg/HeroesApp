@@ -12,6 +12,8 @@ import { TokenInterceptor } from './core/interceptors/token.interceptor';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { EffectsModule } from '@ngrx/effects';
 import { CoreModule } from './core/core.module';
+import { ToastrModule } from 'ngx-toastr';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [AppComponent],
@@ -22,6 +24,7 @@ import { CoreModule } from './core/core.module';
       logOnly: !isDevMode(),
     }),
     BrowserModule,
+    BrowserAnimationsModule,
     AppRoutingModule,
     NgbModule,
     RouterModule,
@@ -29,6 +32,11 @@ import { CoreModule } from './core/core.module';
     HttpClientModule,
     AuthModule,
     EffectsModule.forRoot([]),
+    ToastrModule.forRoot({
+      timeOut: 3000,
+      positionClass: 'toast-top-right',
+      preventDuplicates: true,
+    }),
   ],
   providers: [
     CookieService,

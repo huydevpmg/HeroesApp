@@ -6,6 +6,7 @@ import { HeroEventsService } from '../../service/hero-events.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ageValidator, emailExistsValidator, nameValidator } from '../../../shared/validators/validators';
 import { HeroModel } from '../../models/hero.model';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-add-hero-modal',
@@ -19,7 +20,8 @@ export class AddHeroModalComponent {
     private fb: FormBuilder,
     private heroService: HeroService,
     private heroEvents: HeroEventsService,
-    private authService: AuthService
+    private authService: AuthService,
+    private toastr: ToastrService
   ) {
     this.heroForm = this.fb.group({
       name: ['', [Validators.required, nameValidator()]],
@@ -46,9 +48,12 @@ export class AddHeroModalComponent {
     this.heroService.createHero(newHero).subscribe({
       next: () => {
         this.heroEvents.notifyHeroAdded();
+        this.toastr.success('Hero added successfully!');
         this.modal.close();
       },
-      error: () => alert('Failed to add hero.')
+      error: () => {
+        this.toastr.error('Failed to add hero');
+      }
     });
   }
 

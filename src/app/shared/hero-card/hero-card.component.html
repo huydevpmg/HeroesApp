@@ -38,7 +38,7 @@
       <label class="form-label small mb-1">Tags:</label>
       <div class="d-flex flex-wrap gap-1">
         <span *ngFor="let tag of hero.tags" class="badge" style="background-color: #6f42c1">
-          {{tag}}
+          🏷️ {{tag}}
         </span>
         <span *ngIf="!hero.tags?.length" class="text-muted small">
           No tags

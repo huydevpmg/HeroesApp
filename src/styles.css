@@ -1,4 +1,5 @@
 @import 'bootstrap-icons/font/bootstrap-icons.css';
+@import 'ngx-toastr/toastr';
 
 :root {
   --bs-purple: #985cb1;
@@ -90,4 +91,48 @@ select {
   font-family: 'Roboto', 'Segoe UI', Arial, sans-serif !important;
   font-size: 16px;
   font-weight: 400;
+}
+
+/* Custom toast styles */
+.toast-success {
+  width: 100%;
+  background-color: #4CAF50 !important;
+  color: white !important;
+}
+
+.toast-error {
+  background-color: #f44336 !important;
+  color: white !important;
+}
+
+.toast-info {
+  background-color: #2196F3 !important;
+  color: white !important;
+}
+
+.toast-warning {
+  background-color: #ff9800 !important;
+  color: white !important;
+}
+
+/* Toast container styles */
+#toast-container > div {
+  opacity: 1 !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
+  border-radius: 4px !important;
+  padding: 15px 15px 15px 50px !important;
+  width: 300px !important;
+  background-position: 15px center !important;
+  background-repeat: no-repeat !important;
+  background-size: 24px !important;
+}
+
+/* Toast close button */
+.toast-close-button {
+  color: white !important;
+  opacity: 0.8 !important;
+}
+
+.toast-close-button:hover {
+  opacity: 1 !important;
 }

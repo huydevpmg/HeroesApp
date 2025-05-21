@@ -5,6 +5,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ProfileService } from '../../../core/services/profile.service';
 import { emailExistsValidator } from '../../../shared/validators/validators';
 import { HeroService } from '../../service/hero.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-edit-profile-modal',
@@ -13,24 +14,26 @@ import { HeroService } from '../../service/hero.service';
 export class EditProfileModalComponent implements OnInit {
   profileForm!: FormGroup;
   loading: boolean = true;
-
+  originalEmail: string = '';
   constructor(
     private heroService: HeroService,
     public modal: NgbActiveModal,
     private fb: FormBuilder,
     private authService: AuthService,
-    private profileService: ProfileService
+    private profileService: ProfileService,
+    private toastr: ToastrService
   ) { }
 
   ngOnInit(): void {
     this.profileForm = this.fb.group({
-      username: [{ value: '', disabled: true }, Validators.required],
+      username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', {
-        validators: [Validators.required],
+        validators: [Validators.required, Validators.email],
         asyncValidators: [emailExistsValidator(this.profileService)],
         updateOn: 'blur'
       }],
-      fullName: ['', Validators.required]
+      fullName: ['', [Validators.required, Validators.minLength(2)]],
+      originalEmail: ['']
     });
 
     const userId = this.authService.getCurrentUserId();
@@ -38,21 +41,21 @@ export class EditProfileModalComponent implements OnInit {
     if (userId) {
       this.profileService.getProfileByUserId(userId).subscribe({
         next: (profile) => {
-          console.log(profile);
           this.profileForm.patchValue({
             username: profile.username || '',
             email: profile.email || '',
-            fullName: profile.fullName || ''
+            fullName: profile.fullName || '',
+            originalEmail: profile.email || ''
           });
           this.loading = false;
         },
         error: () => {
-          alert('Failed to load profile');
+          this.toastr.error('Failed to load profile information');
           this.loading = false;
         }
       });
     } else {
-      alert('User ID not found.');
+      this.toastr.error('User ID not found');
       this.modal.dismiss();
     }
   }
@@ -61,12 +64,17 @@ export class EditProfileModalComponent implements OnInit {
     const userId = this.authService.getCurrentUserId();
 
     if (userId && this.profileForm.valid) {
-      this.profileService.updateProfile(userId, this.profileForm.value).subscribe({
+      const formData = this.profileForm.value;
+      delete formData.originalEmail;
+
+      this.profileService.updateProfile(userId, formData).subscribe({
         next: () => {
-          alert('Profile updated!');
+          this.toastr.success('Profile updated successfully!');
           this.modal.close();
         },
-        error: () => alert('Failed to update profile')
+        error: () => {
+          this.toastr.error('Failed to update profile');
+        }
       });
     }
   }

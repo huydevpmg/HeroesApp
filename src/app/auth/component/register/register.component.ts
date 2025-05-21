@@ -5,6 +5,7 @@ import { RegisterRequestModel } from '../../models/auth-request.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { emailExistsValidator, nameValidator, strongPasswordValidator, usernameValidator } from '../../../shared/validators/validators';
 import { ProfileService } from '../../../core/services/profile.service'; // 💡 phải inject service check email
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-register',
@@ -19,7 +20,8 @@ export class RegisterComponent {
     private fb: FormBuilder,
     private authService: AuthService,
     private profileService: ProfileService,
-    private router: Router
+    private router: Router,
+    private toastr: ToastrService
   ) {
     this.registerForm = this.fb.group({
       username: ['', [Validators.required, usernameValidator()]],
@@ -50,11 +52,12 @@ export class RegisterComponent {
     const credentials: RegisterRequestModel = this.registerForm.value;
     this.authService.register(credentials).subscribe({
       next: () => {
-        alert('Register successfully!');
+        this.toastr.success('Registration successful!');
         this.router.navigate(['/auth/login']);
       },
-      error: () => {
-        this.errorMessage = 'Register failed';
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Registration failed';
+        this.toastr.error(this.errorMessage);
       }
     });
   }

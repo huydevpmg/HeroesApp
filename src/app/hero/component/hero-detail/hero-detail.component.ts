@@ -5,6 +5,7 @@ import { Location } from '@angular/common';
 import { HeroModel } from '../../models/hero.model';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-hero-detail',
@@ -24,6 +25,7 @@ export class HeroDetailComponent implements OnInit {
     private authService: AuthService,
     private location: Location,
     private fb: FormBuilder,
+    private toastr: ToastrService
   ) {
     this.heroForm = this.fb.group({
       name: ['', Validators.required],
@@ -56,12 +58,12 @@ export class HeroDetailComponent implements OnInit {
         },
         error: (err) => {
           if (err.status === 404) {
-            alert('')
+            this.toastr.error('Hero not found');
+          } else {
+            this.toastr.error('Error loading hero information');
           }
         }
-      }
-
-      );
+      });
     }
   }
 
@@ -79,9 +81,15 @@ export class HeroDetailComponent implements OnInit {
         ...this.hero,
         ...this.heroForm.value
       };
-      this.heroService.updateHero(this.hero._id, updatedHero).subscribe(() => {
-        this.hero = updatedHero;
-        this.isEditing = false;
+      this.heroService.updateHero(this.hero._id, updatedHero).subscribe({
+        next: () => {
+          this.hero = updatedHero;
+          this.isEditing = false;
+          this.toastr.success('Hero updated successfully!');
+        },
+        error: () => {
+          this.toastr.error('Failed to update hero');
+        }
       });
     }
   }

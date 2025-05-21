@@ -37,8 +37,14 @@ export function ageValidator(): ValidatorFn {
 export function emailExistsValidator(service: any): AsyncValidatorFn {
   return (control: AbstractControl): Observable<ValidationErrors | null> => {
     const email = control.value;
+    const originalEmail = control.parent?.get('originalEmail')?.value;
 
     if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      return of(null);
+    }
+
+    // If email hasn't changed, don't validate
+    if (email === originalEmail) {
       return of(null);
     }
 
