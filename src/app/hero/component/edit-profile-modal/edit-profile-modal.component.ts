@@ -3,7 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { AuthService } from '../../../core/services/auth.service';
 import { ProfileService } from '../../../core/services/profile.service';
-import { emailValidator } from '../../../shared/utils/validators';
+import { emailExistsValidator, emailValidator } from '../../../shared/validators/validators';
+import { HeroService } from '../../service/hero.service';
 
 @Component({
   selector: 'app-edit-profile-modal',
@@ -14,6 +15,7 @@ export class EditProfileModalComponent implements OnInit {
   loading: boolean = true;
 
   constructor(
+    private heroService: HeroService,
     public modal: NgbActiveModal,
     private fb: FormBuilder,
     private authService: AuthService,
@@ -23,7 +25,11 @@ export class EditProfileModalComponent implements OnInit {
   ngOnInit(): void {
     this.profileForm = this.fb.group({
       username: ['', Validators.required],
-      email: ['', [Validators.required, emailValidator()]],
+      email: ['', {
+        validators: [Validators.required, emailValidator()],
+        asyncValidators: [emailExistsValidator(this.heroService)],
+        updateOn: 'blur'
+      }],
       fullName: ['', Validators.required]
     });
 

@@ -5,7 +5,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { HeroService } from '../../hero/service/hero.service';
 import { HeroEventsService } from '../../hero/service/hero-events.service';
 import { AuthService } from '../../core/services/auth.service';
-import { ageValidator, emailValidator, nameValidator } from '../../shared/utils/validators';
+import { ageValidator, emailValidator, nameValidator } from '../validators/validators';
 import { Router } from '@angular/router';
 import { AddHeroModalComponent } from '../../hero/component/add-hero-modal/add-hero-modal.component';
 import { EditProfileModalComponent } from '../../hero/component/edit-profile-modal/edit-profile-modal.component';

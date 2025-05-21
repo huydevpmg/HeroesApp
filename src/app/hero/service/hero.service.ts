@@ -50,4 +50,10 @@ export class HeroService {
   removeTagFromHero(heroIds: string[], tag: string): Observable<HeroModel> {
     return this.http.patch<HeroModel>(`${this.apiUrl}/bulk/remove-tag`, { heroIds, tag });
   }
+
+  checkEmailExists(email: string): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/check-email`, {
+      params: { email }
+    });
+  }
 }

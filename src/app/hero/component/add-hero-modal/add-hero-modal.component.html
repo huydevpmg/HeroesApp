@@ -39,6 +39,9 @@
       <div *ngIf="heroForm.get('email')?.invalid && heroForm.get('email')?.touched" class="text-danger small">
         Please enter a valid email address.
       </div>
+      <div class="text-danger small" *ngIf="heroForm.get('email')?.hasError('emailExists')">
+        Email already exists
+      </div>
     </div>
 
     <div class="mb-3">

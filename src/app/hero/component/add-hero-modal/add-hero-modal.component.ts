@@ -4,7 +4,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { HeroService } from '../../service/hero.service';
 import { HeroEventsService } from '../../service/hero-events.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { ageValidator, emailValidator, nameValidator } from '../../../shared/utils/validators';
+import { ageValidator, emailExistsValidator, emailValidator, nameValidator } from '../../../shared/validators/validators';
 import { HeroModel } from '../../models/hero.model';
 
 @Component({
@@ -24,7 +24,11 @@ export class AddHeroModalComponent {
     this.heroForm = this.fb.group({
       name: ['', [Validators.required, nameValidator()]],
       gender: ['', Validators.required],
-      email: ['', [Validators.required, emailValidator()]],
+      email: ['', {
+        validators: [Validators.required, emailValidator()],
+        asyncValidators: [emailExistsValidator(this.heroService)],
+        updateOn: 'blur'
+      }],
       age: ['', [Validators.required, ageValidator()]],
       address: ['', Validators.required]
     });
