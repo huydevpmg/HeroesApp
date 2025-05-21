@@ -1,9 +1,9 @@
+import { AuthService } from './../../../core/services/auth.service';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { AuthService } from '../../../core/services/auth.service';
 import { ProfileService } from '../../../core/services/profile.service';
-import { emailExistsValidator, emailValidator } from '../../../shared/validators/validators';
+import { emailExistsValidator } from '../../../shared/validators/validators';
 import { HeroService } from '../../service/hero.service';
 
 @Component({
@@ -24,10 +24,10 @@ export class EditProfileModalComponent implements OnInit {
 
   ngOnInit(): void {
     this.profileForm = this.fb.group({
-      username: ['', Validators.required],
+      username: [{ value: '', disabled: true }, Validators.required],
       email: ['', {
-        validators: [Validators.required, emailValidator()],
-        asyncValidators: [emailExistsValidator(this.heroService)],
+        validators: [Validators.required],
+        asyncValidators: [emailExistsValidator(this.profileService)],
         updateOn: 'blur'
       }],
       fullName: ['', Validators.required]
@@ -69,5 +69,11 @@ export class EditProfileModalComponent implements OnInit {
         error: () => alert('Failed to update profile')
       });
     }
+  }
+
+  firstErrorKey(errors: any): string | null {
+    if (!errors) return null;
+    const keys = Object.keys(errors);
+    return keys.length > 0 ? keys[0] : null;
   }
 }

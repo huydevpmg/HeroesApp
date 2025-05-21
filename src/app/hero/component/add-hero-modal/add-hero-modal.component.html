@@ -1,3 +1,4 @@
+<!-- Modal Header -->
 <div class="modal-header bg-light border-0">
   <h5 class="modal-title text-dark fw-semibold fs-5">
     <i class="bi bi-person-plus me-2 text-primary"></i> Add New Hero
@@ -5,17 +6,25 @@
   <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
 </div>
 
+<!-- Modal Body -->
 <div class="modal-body pt-0">
-  <form [formGroup]="heroForm" id="heroForm">
+  <form [formGroup]="heroForm" id="heroForm" (ngSubmit)="onSubmit()">
+
+    <!-- Name -->
     <div class="mb-3">
       <label class="form-label small fw-semibold">Name</label>
       <input type="text" class="form-control" formControlName="name">
-      <div *ngIf="heroForm.get('name')?.invalid && heroForm.get('name')?.touched" class="text-danger small">
-        Name can only contain letters and spaces.
+      <div *ngIf="heroForm.get('name')?.touched && heroForm.get('name')?.errors" class="text-danger small">
+        <ng-container [ngSwitch]="firstErrorKey(heroForm.get('name')?.errors)">
+          <div *ngSwitchCase="'required'">Name is required.</div>
+          <div *ngSwitchCase="'invalidName'">Name can only contain letters and spaces.</div>
+        </ng-container>
       </div>
     </div>
 
+    <!-- Gender + Age -->
     <div class="row">
+      <!-- Gender -->
       <div class="col-md-6 mb-3">
         <label class="form-label small fw-semibold">Gender</label>
         <select class="form-select" formControlName="gender">
@@ -23,36 +32,62 @@
           <option value="Male">Male</option>
           <option value="Female">Female</option>
         </select>
+        <div *ngIf="heroForm.get('gender')?.touched && heroForm.get('gender')?.errors" class="text-danger small">
+          <ng-container [ngSwitch]="firstErrorKey(heroForm.get('gender')?.errors)">
+            <div *ngSwitchCase="'required'">Gender is required.</div>
+          </ng-container>
+        </div>
       </div>
+
+      <!-- Age -->
       <div class="col-md-6 mb-3">
         <label class="form-label small fw-semibold">Age</label>
         <input type="number" class="form-control" formControlName="age" min="1">
-        <div *ngIf="heroForm.get('age')?.invalid && heroForm.get('age')?.touched" class="text-danger small">
-          Age must be between 1 and 100.
+        <div *ngIf="heroForm.get('age')?.touched && heroForm.get('age')?.errors" class="text-danger small">
+          <ng-container [ngSwitch]="firstErrorKey(heroForm.get('age')?.errors)">
+            <div *ngSwitchCase="'required'">Age is required.</div>
+            <div *ngSwitchCase="'invalidAge'">Age must be between 1 and 100.</div>
+          </ng-container>
         </div>
       </div>
     </div>
 
+    <!-- Email -->
     <div class="mb-3">
       <label class="form-label small fw-semibold">Email</label>
       <input type="email" class="form-control" formControlName="email">
-      <div *ngIf="heroForm.get('email')?.invalid && heroForm.get('email')?.touched" class="text-danger small">
-        Please enter a valid email address.
+      <div *ngIf="heroForm.get('email')?.pending" class="text-info small">
+        Checking email availability...
       </div>
-      <div class="text-danger small" *ngIf="heroForm.get('email')?.hasError('emailExists')">
-        Email already exists
+      <div *ngIf="heroForm.get('email')?.touched && heroForm.get('email')?.errors && !heroForm.get('email')?.pending"
+        class="text-danger small">
+        <ng-container [ngSwitch]="firstErrorKey(heroForm.get('email')?.errors)">
+          <div *ngSwitchCase="'required'">Email is required.</div>
+          <div *ngSwitchCase="'invalidEmail'">Please enter a valid email address.</div>
+          <div *ngSwitchCase="'emailExists'">Email already exists.</div>
+        </ng-container>
       </div>
     </div>
 
+    <!-- Address -->
     <div class="mb-3">
       <label class="form-label small fw-semibold">Address</label>
       <textarea class="form-control" formControlName="address" rows="2"></textarea>
+      <div *ngIf="heroForm.get('address')?.touched && heroForm.get('address')?.errors" class="text-danger small">
+        <ng-container [ngSwitch]="firstErrorKey(heroForm.get('address')?.errors)">
+          <div *ngSwitchCase="'required'">Address is required.</div>
+        </ng-container>
+      </div>
     </div>
+
   </form>
 </div>
 
+<!-- Modal Footer -->
 <div class="modal-footer border-0 pt-0">
   <button type="button" class="btn btn-sm btn-outline-secondary" (click)="modal.dismiss()">Cancel</button>
-  <button type="submit" form="heroForm" class="btn btn-sm btn-primary" [disabled]="heroForm.invalid"
-    (click)="onSubmit()">Save</button>
+  <button type="submit" form="heroForm" class="btn btn-sm btn-primary"
+    [disabled]="heroForm.invalid || heroForm.pending">
+    Save
+  </button>
 </div>

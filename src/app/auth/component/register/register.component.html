@@ -3,43 +3,72 @@
     <h2 class="text-center mb-4">Register</h2>
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+      <!-- Username -->
       <div class="mb-3">
         <label for="username" class="form-label">Username</label>
         <input type="text" id="username" formControlName="username" autocomplete="username" class="form-control"
           [class.is-invalid]="isInvalid('username')">
         <div class="invalid-feedback" *ngIf="isInvalid('username')">
-          Username is required.
+          <ng-container [ngSwitch]="firstErrorKey(registerForm.get('username')?.errors)">
+            <div *ngSwitchCase="'required'">Username is required.</div>
+            <div *ngSwitchCase="'invalidUsername'">
+              Username must be 3–20 characters, letters/numbers/underscores only.
+            </div>
+          </ng-container>
         </div>
       </div>
 
+      <!-- Password -->
       <div class="mb-3">
         <label for="password" class="form-label">Password</label>
         <input type="password" id="password" formControlName="password" autocomplete="new-password" class="form-control"
           [class.is-invalid]="isInvalid('password')">
         <div class="invalid-feedback" *ngIf="isInvalid('password')">
-          Password is required.
+          <ng-container [ngSwitch]="firstErrorKey(registerForm.get('password')?.errors)">
+            <div *ngSwitchCase="'required'">Password is required.</div>
+            <div *ngSwitchCase="'weakPassword'">
+              Password must be at least 8 characters and include uppercase, lowercase, number, and symbol.
+            </div>
+          </ng-container>
         </div>
       </div>
 
+      <!-- Email -->
       <div class="mb-3">
         <label for="email" class="form-label">Email</label>
         <input type="email" id="email" formControlName="email" autocomplete="email" class="form-control"
-          [class.is-invalid]="isInvalid('email')">
-        <div class="invalid-feedback" *ngIf="isInvalid('email')">
-          Please input an valid email
+          [class.is-invalid]="isInvalid('email') || registerForm.get('email')?.hasError('emailExists')">
+
+        <div class="text-info small" *ngIf="registerForm.get('email')?.pending">
+          Checking email availability...
+        </div>
+
+        <div class="invalid-feedback" *ngIf="isInvalid('email') || registerForm.get('email')?.hasError('emailExists')">
+          <ng-container [ngSwitch]="firstErrorKey(registerForm.get('email')?.errors)">
+            <div *ngSwitchCase="'required'">Email is required.</div>
+            <div *ngSwitchCase="'email'">Invalid email format.</div>
+            <div *ngSwitchCase="'emailExists'">Email already exists.</div>
+          </ng-container>
         </div>
       </div>
 
+      <!-- Full Name -->
       <div class="mb-3">
         <label for="fullName" class="form-label">Full Name</label>
         <input type="text" id="fullName" formControlName="fullName" autocomplete="name" class="form-control"
           [class.is-invalid]="isInvalid('fullName')">
         <div class="invalid-feedback" *ngIf="isInvalid('fullName')">
-          Full Name can only contain letters and spaces.
+          <ng-container [ngSwitch]="firstErrorKey(registerForm.get('fullName')?.errors)">
+            <div *ngSwitchCase="'required'">Full Name is required.</div>
+            <div *ngSwitchCase="'invalidName'">Full Name can only contain letters and spaces.</div>
+          </ng-container>
         </div>
       </div>
 
-      <button type="submit" class="btn btn-primary w-100" [disabled]="registerForm.invalid">Register</button>
+      <button type="submit" class="btn btn-primary w-100" [disabled]="registerForm.invalid">
+        Register
+      </button>
     </form>
 
     <div *ngIf="errorMessage" class="alert alert-danger mt-3">
@@ -50,6 +79,5 @@
       <span>Have account?</span>
       <a routerLink="/auth/login" class="ms-1">Login Now!!!</a>
     </div>
-
   </div>
 </div>

@@ -7,28 +7,53 @@
 
 <div class="modal-body pt-0">
   <form [formGroup]="profileForm" id="profileForm">
+
+    <!-- Username -->
     <div class="mb-3">
       <label class="form-label small fw-semibold">Username</label>
-      <input type="text" class="form-control" formControlName="username">
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label small fw-semibold">Email</label>
-      <input type="email" class="form-control" formControlName="email">
-      <div class="text-danger small" *ngIf="profileForm.get('email')?.hasError('emailExists')">
-        Email already exists
+      <input type="text" [disabled]="true" class="form-control" formControlName="username">
+      <div *ngIf="profileForm.get('username')?.touched && profileForm.get('username')?.errors"
+        class="text-danger small">
+        <ng-container [ngSwitch]="firstErrorKey(profileForm.get('username')?.errors)">
+          <div *ngSwitchCase="'required'">Username is required.</div>
+        </ng-container>
       </div>
     </div>
 
+    <!-- Email -->
+    <div class="mb-3">
+      <label class="form-label small fw-semibold">Email</label>
+      <input type="email" class="form-control" formControlName="email">
+      <div *ngIf="profileForm.get('email')?.pending" class="text-info small">
+        Checking email availability...
+      </div>
+      <div
+        *ngIf="profileForm.get('email')?.touched && profileForm.get('email')?.errors && !profileForm.get('email')?.pending"
+        class="text-danger small">
+        <ng-container [ngSwitch]="firstErrorKey(profileForm.get('email')?.errors)">
+          <div *ngSwitchCase="'required'">Email is required.</div>
+          <div *ngSwitchCase="'emailExists'">Email already exists.</div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Full Name -->
     <div class="mb-3">
       <label class="form-label small fw-semibold">Full Name</label>
       <input type="text" class="form-control" formControlName="fullName">
+      <div *ngIf="profileForm.get('fullName')?.touched && profileForm.get('fullName')?.errors"
+        class="text-danger small">
+        <ng-container [ngSwitch]="firstErrorKey(profileForm.get('fullName')?.errors)">
+          <div *ngSwitchCase="'required'">Full name is required.</div>
+        </ng-container>
+      </div>
     </div>
+
   </form>
 </div>
 
 <div class="modal-footer border-0 pt-0">
   <button type="button" class="btn btn-sm btn-outline-secondary" (click)="modal.dismiss()">Cancel</button>
-  <button type="submit" form="profileForm" class="btn btn-sm btn-primary" [disabled]="profileForm.invalid"
-    (click)="updateProfile()">Save</button>
+  <button type="submit" form="profileForm" class="btn btn-sm btn-primary"
+    [disabled]="profileForm.invalid || profileForm.pending" (click)="updateProfile()">Save</button>
 </div>

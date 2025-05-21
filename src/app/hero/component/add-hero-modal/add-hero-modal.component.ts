@@ -4,7 +4,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { HeroService } from '../../service/hero.service';
 import { HeroEventsService } from '../../service/hero-events.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { ageValidator, emailExistsValidator, emailValidator, nameValidator } from '../../../shared/validators/validators';
+import { ageValidator, emailExistsValidator, nameValidator } from '../../../shared/validators/validators';
 import { HeroModel } from '../../models/hero.model';
 
 @Component({
@@ -25,7 +25,7 @@ export class AddHeroModalComponent {
       name: ['', [Validators.required, nameValidator()]],
       gender: ['', Validators.required],
       email: ['', {
-        validators: [Validators.required, emailValidator()],
+        validators: [Validators.required],
         asyncValidators: [emailExistsValidator(this.heroService)],
         updateOn: 'blur'
       }],
@@ -51,4 +51,11 @@ export class AddHeroModalComponent {
       error: () => alert('Failed to add hero.')
     });
   }
+
+  firstErrorKey(errors: any): string | null {
+    if (!errors) return null;
+    const keys = Object.keys(errors);
+    return keys.length > 0 ? keys[0] : null;
+  }
+
 }

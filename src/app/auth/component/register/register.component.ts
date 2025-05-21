@@ -3,7 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RegisterRequestModel } from '../../models/auth-request.model';
 import { AuthService } from '../../../core/services/auth.service';
-import { emailValidator, nameValidator } from '../../../shared/validators/validators';
+import { emailExistsValidator, nameValidator, strongPasswordValidator, usernameValidator } from '../../../shared/validators/validators';
+import { ProfileService } from '../../../core/services/profile.service'; // 💡 phải inject service check email
 
 @Component({
   selector: 'app-register',
@@ -17,19 +18,30 @@ export class RegisterComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private profileService: ProfileService,
     private router: Router
   ) {
     this.registerForm = this.fb.group({
-      username: ['', Validators.required],
-      password: ['', Validators.required],
-      email: ['', [Validators.required, emailValidator()]],
-      fullName: ['', [Validators.required, nameValidator()]],
+      username: ['', [Validators.required, usernameValidator()]],
+      password: ['', [Validators.required, strongPasswordValidator()]],
+      email: ['', {
+        validators: [Validators.required, Validators.email],
+        asyncValidators: [emailExistsValidator(this.profileService)],
+        updateOn: 'blur'
+      }],
+      fullName: ['', [Validators.required, nameValidator()]]
     });
   }
 
   isInvalid(controlName: string): boolean {
     const control = this.registerForm.get(controlName);
     return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  firstErrorKey(errors: any): string | null {
+    if (!errors) return null;
+    const keys = Object.keys(errors);
+    return keys.length > 0 ? keys[0] : null;
   }
 
   onSubmit() {
@@ -42,8 +54,8 @@ export class RegisterComponent {
         this.router.navigate(['/auth/login']);
       },
       error: () => {
-        this.errorMessage = 'Login failed';
-      },
+        this.errorMessage = 'Register failed';
+      }
     });
   }
 }
