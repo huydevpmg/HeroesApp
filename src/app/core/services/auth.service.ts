@@ -12,7 +12,7 @@ import { getUserIdFromToken } from '../../shared/utils/jwt-utils';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:5001/api/auth';
+  private apiUrl = 'http://localhost:4000/api/auth';
 
   constructor(private http: HttpClient, private cookieService: CookieService) { }
 

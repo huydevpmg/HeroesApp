@@ -1,0 +1,22 @@
+{
+    "/api/auth": {
+      "target": "http://auth-service:4000",
+      "secure": false,
+      "changeOrigin": true
+    },
+    "/api/profile": {
+      "target": "http://auth-service:4000",
+      "secure": false,
+      "changeOrigin": true
+    },
+    "/api/heroes": {
+      "target": "http://hero-service:5000",
+      "secure": false,
+      "changeOrigin": true
+    },
+    "/api/tags": {
+      "target": "http://hero-service:5000",
+      "secure": false,
+      "changeOrigin": true
+    }
+  }

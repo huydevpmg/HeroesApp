@@ -8,7 +8,7 @@ import { UserModel } from '../../auth/models/user.model';
   providedIn: 'root'
 })
 export class ProfileService {
-  private apiUrl = 'http://localhost:5001/api/profile';
+  private apiUrl = 'http://localhost:4000/api/profile';
 
   constructor(private http: HttpClient) { }
 
