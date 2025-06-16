@@ -1,4 +1,3 @@
-// src/app/core/services/hero.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -15,40 +14,43 @@ export class HeroService {
   constructor(private http: HttpClient) { }
 
   getAllHeroes(): Observable<HeroModel[]> {
-    return this.http.get<HeroModel[]>(`${this.apiUrl}/getAllHeroes`);
+    return this.http.get<HeroModel[]>(`${this.apiUrl}`);
   }
 
-  getHeroesByOwner(_id: string): Observable<HeroModel[]> {
-    return this.http.get<HeroModel[]>(`${this.apiUrl}/getHeroesByOwner`, {
-      params: { ownerId: _id }
-    });
+  getHeroesByOwner(ownerId: string): Observable<HeroModel[]> {
+    return this.http.get<HeroModel[]>(`${this.apiUrl}/owner/${ownerId}`);
   }
 
-
-  getHeroById(_id: string): Observable<HeroModel> {
-    return this.http.get<HeroModel>(
-      `${this.apiUrl}/getHeroById/${_id}`
-    );
+  getHeroById(id: string): Observable<HeroModel> {
+    return this.http.get<HeroModel>(`${this.apiUrl}/${id}`);
   }
 
   createHero(hero: CreateHeroModel): Observable<HeroModel> {
-    return this.http.post<HeroModel>(`${this.apiUrl}/createHero`, hero);
+    return this.http.post<HeroModel>(`${this.apiUrl}`, hero);
   }
 
-  updateHero(_id: string, hero: HeroModel): Observable<HeroModel> {
-    return this.http.put<HeroModel>(`${this.apiUrl}/updateHero/${_id}`, hero);
+  updateHero(id: string, hero: HeroModel): Observable<HeroModel> {
+    return this.http.put<HeroModel>(`${this.apiUrl}/${id}`, hero);
+  }
+
+  deleteHero(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
   deleteHeroes(ids: string[]): Observable<any> {
-    return this.http.request('delete', `${this.apiUrl}/bulk-delete`, { body: { ids } });
+    return this.http.request('delete', `${this.apiUrl}`, { body: { ids } });
   }
 
-  addTagToHero(heroIds: string[], tag: string): Observable<HeroModel> {
-    return this.http.patch<HeroModel>(`${this.apiUrl}/bulk/add-tag`, { heroIds, tag });
+  updateHeroTags(id: string, tags: string[]): Observable<HeroModel> {
+    return this.http.patch<HeroModel>(`${this.apiUrl}/${id}/tags`, { tags });
   }
 
-  removeTagFromHero(heroIds: string[], tag: string): Observable<HeroModel> {
-    return this.http.patch<HeroModel>(`${this.apiUrl}/bulk/remove-tag`, { heroIds, tag });
+  addTagToHeroes(heroIds: string[], tag: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/tags/add`, { heroIds, tag });
+  }
+
+  removeTagFromHeroes(heroIds: string[], tag: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/tags/remove`, { heroIds, tag });
   }
 
   checkEmailExists(email: string): Observable<boolean> {

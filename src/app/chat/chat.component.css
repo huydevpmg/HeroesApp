@@ -1,0 +1,22 @@
+.chat-container {
+  display: grid;
+  grid-template-columns: 350px 1fr ;
+  margin-top: 5px;
+  height: calc(82vh);
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  overflow: auto;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 992px) {
+  .chat-container {
+    grid-template-columns: 240px 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .chat-container {
+    grid-template-columns: 1fr;
+  }
+}

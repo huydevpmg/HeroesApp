@@ -15,32 +15,42 @@
       </ul>
     </div>
 
-    <div class="d-flex order-lg-2 align-items-center gap-2">
+    <div class="d-flex align-items-center gap-2">
       <div class="btn btn-add btn-sm px-3" (click)="openAddHeroModal()">
         <i class="bi bi-plus-lg"></i> Add Hero
       </div>
 
+
       <div ngbDropdown class="dropdown">
-        <button class="profile-btn dropdown-toggle btn-sm px-3 d-flex align-items-center gap-2" ngbDropdownToggle
-          id="profileDropdown">
+        <button class="profile-btn btn-sm d-flex align-items-center gap-2" ngbDropdownToggle id="profileDropdown">
           <i class="bi bi-person-circle"></i>
         </button>
         <ul ngbDropdownMenu class="dropdown-menu-end" aria-labelledby="profileDropdown">
           <li>
-            <button class="dropdown-item" (click)="openProfileModal()">Edit Profile</button>
+            <button class="dropdown-item" (click)="openProfileModal()">
+              Edit Profile
+            </button>
           </li>
           <li>
-            <hr class="dropdown-divider">
+            <hr class="dropdown-divider" />
           </li>
           <li>
-            <button class="dropdown-item text-danger" (click)="logout()">Logout</button>
+            <button class="dropdown-item text-danger" (click)="logout()">
+              Logout
+            </button>
           </li>
         </ul>
       </div>
 
-      <button class="navbar-toggler border-0 px-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
+      <button class="profile-btn" routerLink="/message" title="Messages">
+        <i class="bi bi-chat-dots"></i>
       </button>
+      <!--
+      <button class="navbar-toggler border-0 px-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon">hS</span>
+      </button> -->
     </div>
+
+
   </div>
 </nav>

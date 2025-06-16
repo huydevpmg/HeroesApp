@@ -129,7 +129,7 @@ export class HeroEffects {
     this.actions$.pipe(
       ofType(HeroActions.addTagToHero),
       exhaustMap(({ heroIds, tag }) =>
-        this.heroService.addTagToHero(heroIds, tag).pipe(
+        this.heroService.addTagToHeroes(heroIds, tag).pipe(
           map(hero => HeroActions.addTagToHeroSuccess({ heroIds, tag })),
           catchError(error =>
             of(HeroActions.addTagToHeroFailure({ error: error.message }))
@@ -144,7 +144,7 @@ export class HeroEffects {
     this.actions$.pipe(
       ofType(HeroActions.removeTagFromHero),
       exhaustMap(({ heroIds, tag }) =>
-        this.heroService.removeTagFromHero(heroIds, tag).pipe(
+        this.heroService.removeTagFromHeroes(heroIds, tag).pipe(
           map(hero => HeroActions.removeTagFromHeroSuccess({ heroIds, tag })),
           catchError(error =>
             of(HeroActions.removeTagFromHeroFailure({ error: error.message }))

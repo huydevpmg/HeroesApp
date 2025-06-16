@@ -1,53 +1,102 @@
 <div *ngIf="hero" class="container py-4">
   <!-- View Mode -->
   <div *ngIf="!isEditing" class="view-mode">
-    <div class="text-center mb-2">
-      <h2 class="text-purple fw-bold">{{ hero.name | uppercase }} Details</h2>
-      <div class="text-muted">ID: {{ hero._id }}</div>
+    <div class="text-center mb-4">
+      <h2 class="fw-bold mb-2">
+        <i class="bi bi-person-circle me-2"></i>{{ hero.name | uppercase }}
+      </h2>
+      <p class="text-muted">Hero Details</p>
+
+      <div class="d-flex justify-content-center gap-3 flex-wrap mt-3">
+        <span class="badge bg-light text-dark border px-3 py-2">
+          <i class="bi bi-hash me-1"></i>
+          <span class="fw-semibold">ID:</span> {{ hero._id }}
+        </span>
+        <span class="badge bg-light text-dark border px-3 py-2">
+          <i class="bi bi-person-badge me-1"></i>
+          <span class="fw-semibold">Username:</span> {{ hero.age }}
+        </span>
+        <span class="badge bg-light text-dark border px-3 py-2">
+          <i class="bi bi-person-fill me-1"></i>
+          <span class="fw-semibold">Owner:</span> {{ hero.age || 'N/A' }}
+        </span>
+      </div>
     </div>
 
-    <div class="card shadow-sm mb-4">
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0 fw-bold">
+          <i class="bi bi-info-circle me-2"></i>Hero Information
+        </h5>
+      </div>
       <div class="card-body">
-        <div class="row mb-3">
-          <div class="col-md-3 fw-bold text-purple">Name:</div>
-          <div class="col-md-9">{{ hero.name | titlecase }}</div>
-        </div>
-
-        <div class="row mb-3">
-          <div class="col-md-3 fw-bold text-purple">Gender:</div>
-          <div class="col-md-9">
-            <span class="badge" [ngClass]="{
-              'bg-info': hero.gender === 'Male',
-              'bg-danger': hero.gender === 'Female',
-              'bg-purple': !['Male','Female'].includes(hero.gender)
-            }">
-              {{ hero.gender }}
-            </span>
-          </div>
-        </div>
-
-        <div class="row mb-3">
-          <div class="col-md-3 fw-bold text-purple">Email:</div>
-          <div class="col-md-9">{{ hero.email || 'N/A' }}</div>
-        </div>
-
-        <div class="row mb-3">
-          <div class="col-md-3 fw-bold text-purple">Age:</div>
-          <div class="col-md-9">{{ hero.age }}</div>
-        </div>
-
         <div class="row">
-          <div class="col-md-3 fw-bold text-purple">Address:</div>
-          <div class="col-md-9">{{ hero.address || 'N/A' }}</div>
+          <div class="col-md-6 mb-3">
+            <div class="mb-3">
+              <div class="fw-bold mb-1">
+                <i class="bi bi-person me-2"></i>Name
+              </div>
+              <div>{{ hero.name | titlecase }}</div>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <div class="mb-3">
+              <div class="fw-bold mb-1">
+                <i class="bi bi-gender-ambiguous me-2"></i>Gender
+              </div>
+              <div>
+                <span class="badge" [ngClass]="{
+                  'bg-info': hero.gender === 'Male',
+                  'bg-danger': hero.gender === 'Female',
+                  'bg-secondary': !['Male','Female'].includes(hero.gender)
+                }">
+                  <i class="bi" [ngClass]="{
+                    'bi-gender-male': hero.gender === 'Male',
+                    'bi-gender-female': hero.gender === 'Female',
+                    'bi-asterisk': !['Male','Female'].includes(hero.gender)
+                  }"></i>
+                  {{ hero.gender }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <div class="mb-3">
+              <div class="fw-bold mb-1">
+                <i class="bi bi-envelope me-2"></i>Email
+              </div>
+              <div>{{ hero.email || 'N/A' }}</div>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <div class="mb-3">
+              <div class="fw-bold mb-1">
+                <i class="bi bi-calendar3 me-2"></i>Age
+              </div>
+              <div>{{ hero.age }}</div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="mb-3">
+              <div class="fw-bold mb-1">
+                <i class="bi bi-geo-alt me-2"></i>Address
+              </div>
+              <div>{{ hero.address || 'N/A' }}</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="text-center">
-      <button class="btn btn-outline-purple me-2" (click)="goBack()">
+    <div class="text-center mt-4">
+      <button class="btn btn-outline-secondary me-3" (click)="goBack()">
         <i class="bi bi-arrow-left me-2"></i>Go Back
       </button>
-      <button class="btn btn-purple" (click)="enableEditing()" *ngIf="isOwner">
+      <button class="btn btn-primary" (click)="enableEditing()" *ngIf="isOwner">
         <i class="bi bi-pencil me-2"></i>Edit
       </button>
     </div>
@@ -55,81 +104,102 @@
 
   <!-- Edit Mode -->
   <div *ngIf="isEditing" class="edit-mode">
-    <div class="text-center mb-2">
-      <h2 class="text-purple fw-bold">Edit Hero</h2>
-      <div class="text-muted">ID: {{ hero._id }}</div>
+    <div class="text-center mb-4">
+      <h2 class="fw-bold mb-2">
+        <i class="bi bi-pencil-square me-2"></i>Edit Hero
+      </h2>
+      <p class="text-muted">ID: {{ hero._id }}</p>
     </div>
 
-    <div class="card shadow-sm mb-4">
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0 fw-bold">
+          <i class="bi bi-pencil me-2"></i>Update Information
+        </h5>
+      </div>
       <div class="card-body">
         <form [formGroup]="heroForm" (ngSubmit)="saveChanges()">
-          <div class="row mb-3">
-            <label class="col-md-3 col-form-label fw-bold text-purple">Name:</label>
-            <div class="col-md-9">
-              <input type="text" class="form-control" formControlName="name">
-              <div *ngIf="heroForm.get('name')?.invalid && heroForm.get('name')?.touched" class="text-danger mt-1">
-                Name is required
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="nameInput" class="form-label fw-bold">
+                  <i class="bi bi-person me-2"></i>Name
+                </label>
+                <input type="text" class="form-control" id="nameInput" formControlName="name">
+                <div *ngIf="heroForm.get('name')?.invalid && heroForm.get('name')?.touched"
+                  class="text-danger mt-1 small">
+                  <i class="bi bi-exclamation-circle me-1"></i>Name is required
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="genderSelect" class="form-label fw-bold">
+                  <i class="bi bi-gender-ambiguous me-2"></i>Gender
+                </label>
+                <select class="form-select" id="genderSelect" formControlName="gender">
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+                <div *ngIf="heroForm.get('gender')?.invalid && heroForm.get('gender')?.touched"
+                  class="text-danger mt-1 small">
+                  <i class="bi bi-exclamation-circle me-1"></i>Gender is required
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="emailInput" class="form-label fw-bold">
+                  <i class="bi bi-envelope me-2"></i>Email
+                </label>
+                <input type="email" class="form-control" id="emailInput" formControlName="email">
+                <div *ngIf="heroForm.get('email')?.errors?.['required'] && heroForm.get('email')?.touched"
+                  class="text-danger mt-1 small">
+                  <i class="bi bi-exclamation-circle me-1"></i>Email is required
+                </div>
+                <div *ngIf="heroForm.get('email')?.errors?.['email'] && heroForm.get('email')?.touched"
+                  class="text-danger mt-1 small">
+                  <i class="bi bi-exclamation-circle me-1"></i>Please enter a valid email
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="ageInput" class="form-label fw-bold">
+                  <i class="bi bi-calendar3 me-2"></i>Age
+                </label>
+                <input type="number" class="form-control" id="ageInput" formControlName="age" min="1">
+                <div *ngIf="heroForm.get('age')?.errors?.['required'] && heroForm.get('age')?.touched"
+                  class="text-danger mt-1 small">
+                  <i class="bi bi-exclamation-circle me-1"></i>Age is required
+                </div>
+                <div *ngIf="heroForm.get('age')?.errors?.['min'] && heroForm.get('age')?.touched"
+                  class="text-danger mt-1 small">
+                  <i class="bi bi-exclamation-circle me-1"></i>Age must be at least 1
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="mb-3">
+                <label for="addressInput" class="form-label fw-bold">
+                  <i class="bi bi-geo-alt me-2"></i>Address
+                </label>
+                <textarea class="form-control" id="addressInput" formControlName="address" rows="3"></textarea>
               </div>
             </div>
           </div>
 
-          <div class="row mb-3">
-            <label class="col-md-3 col-form-label fw-bold text-purple">Gender:</label>
-            <div class="col-md-9">
-              <select class="form-select" formControlName="gender">
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
-              <div *ngIf="heroForm.get('gender')?.invalid && heroForm.get('gender')?.touched" class="text-danger mt-1">
-                Gender is required
-              </div>
-            </div>
-          </div>
-
-          <div class="row mb-3">
-            <label class="col-md-3 col-form-label fw-bold text-purple">Email:</label>
-            <div class="col-md-9">
-              <input type="email" class="form-control" formControlName="email">
-              <div *ngIf="heroForm.get('email')?.errors?.['required'] && heroForm.get('email')?.touched"
-                class="text-danger mt-1">
-                Email is required
-              </div>
-              <div *ngIf="heroForm.get('email')?.errors?.['email'] && heroForm.get('email')?.touched"
-                class="text-danger mt-1">
-                Please enter a valid email
-              </div>
-            </div>
-          </div>
-
-          <div class="row mb-3">
-            <label class="col-md-3 col-form-label fw-bold text-purple">Age:</label>
-            <div class="col-md-9">
-              <input type="number" class="form-control" formControlName="age" min="1">
-              <div *ngIf="heroForm.get('age')?.errors?.['required'] && heroForm.get('age')?.touched"
-                class="text-danger mt-1">
-                Age is required
-              </div>
-              <div *ngIf="heroForm.get('age')?.errors?.['min'] && heroForm.get('age')?.touched"
-                class="text-danger mt-1">
-                Age must be at least 1
-              </div>
-            </div>
-          </div>
-
-          <div class="row mb-1">
-            <label class="col-md-3 col-form-label fw-bold text-purple">Address:</label>
-            <div class="col-md-9">
-              <textarea class="form-control" formControlName="address" rows="3"></textarea>
-            </div>
-          </div>
-
-          <div class="text-center">
-            <button type="button" class="btn btn-outline-secondary me-2" (click)="cancelEditing()">
+          <div class="text-center mt-4">
+            <button type="button" class="btn btn-outline-secondary me-3" (click)="cancelEditing()">
               <i class="bi bi-x-lg me-2"></i>Cancel
             </button>
-            <button type="submit" class="btn btn-purple" [disabled]="heroForm.invalid">
+            <button type="submit" class="btn btn-primary" [disabled]="heroForm.invalid">
               <i class="bi bi-check-lg me-2"></i>Save Changes
             </button>
           </div>

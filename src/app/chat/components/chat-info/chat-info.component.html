@@ -1,0 +1,68 @@
+<div class="chat-info-container">
+  <div class="chat-info" [class.hidden]="!isVisible">
+    <div class="chat-info-header">
+      <h6 class="mb-0">Chat Info</h6>
+      <button class="btn btn-link" (click)="onClose()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="chat-info-content">
+      <!-- User Profile -->
+      <div class="user-profile">
+        <div class="user-avatar">
+          <img [src]="chatInfo.avatar" [alt]="chatInfo.name">
+          <span class="status-indicator" [class.online]="chatInfo.status === 'Online'"></span>
+        </div>
+        <h5 class="user-name">{{ chatInfo.name }}</h5>
+        <p class="user-status">{{ chatInfo.lastSeen }}</p>
+        <div class="user-actions">
+          <button class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-chat-dots me-1"></i> Message
+          </button>
+          <button class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-person-plus me-1"></i> Follow
+          </button>
+        </div>
+      </div>
+
+      <!-- About Section -->
+      <div class="info-section">
+        <h6 class="section-title">About</h6>
+        <p class="about-text">{{ chatInfo.about }}</p>
+      </div>
+
+      <!-- Shared Media -->
+      <div class="info-section">
+        <h6 class="section-title">Shared Media</h6>
+        <div class="shared-media">
+          <div class="media-item" *ngFor="let media of chatInfo.sharedMedia">
+            <img [src]="media.url" [alt]="'Shared ' + media.type">
+          </div>
+          <div class="media-item more-media" *ngIf="chatInfo.sharedMedia.length > 6">
+            <span>+{{ chatInfo.sharedMedia.length - 6 }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shared Files -->
+      <div class="info-section">
+        <h6 class="section-title">Shared Files</h6>
+        <div class="shared-files">
+          <div class="file-item" *ngFor="let file of chatInfo.sharedFiles">
+            <div class="file-icon">
+              <i class="bi" [ngClass]="file.icon"></i>
+            </div>
+            <div class="file-info">
+              <p class="file-name">{{ file.name }}</p>
+              <small class="file-size">{{ file.size }}</small>
+            </div>
+            <button class="btn btn-link btn-sm">
+              <i class="bi bi-download"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

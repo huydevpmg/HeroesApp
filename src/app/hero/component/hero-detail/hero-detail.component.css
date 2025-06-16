@@ -1,91 +1,44 @@
-
-
-.bg-purple {
-  background-color: var(--bs-purple) !important;
-}
-
-.btn-purple {
-  background-color: #2c3e50;
-  color: white;
-  border-color: var(--bs-purple);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-}
-
-.btn-purple:hover {
-  background-color: var(--bs-purple);
-  border-color: #7a4a8d;
-  color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.btn-outline-purple {
-  --bs-btn-color: #2c3e50;
-  --bs-btn-border-color: #2c3e50;
-  --bs-btn-hover-bg: #6C757D;
-  --bs-btn-hover-border-color: var(--bs-purple);
-  --bs-btn-active-bg: var(--bs-purple);
-  --bs-btn-active-border-color: var(--bs-purple);
-  transition: all 0.2s ease;
-}
-
-.btn-outline-purple:hover {
-  --bs-btn-hover-color: white;
-  transform: translateY(-1px);
-}
-
-/* Forms */
-.form-control:focus,
-.form-select:focus {
-  border-color: var(--bs-purple);
-  box-shadow: 0 0 0 0.2rem rgba(152, 92, 177, 0.25);
-}
-
-/* Container */
-.hero-detail-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 1rem;
-}
-
-/* Cards */
 .card {
-  border-radius: 12px;
-  border: none;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.card-body {
-  padding: 2rem;
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
 }
 
-/* Titles */
-h2 {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
+.view-mode, .edit-mode {
+  min-height: 500px;
 }
 
-/* View mode & edit mode tweaks */
-.view-mode h2,
-.edit-mode h2 {
-  font-size: 2rem;
+.badge {
+  font-weight: 500;
 }
 
-.text-muted {
-  font-size: 0.9rem;
+.btn-primary {
+  background-color: #2c3e50;
+  border-color: #2c3e50;
 }
 
-/* Responsive */
+.btn-primary:hover {
+  background-color: #1a252f;
+  border-color: #1a252f;
+}
+
+.btn-outline-secondary {
+  color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
 @media (max-width: 576px) {
   h2 {
     font-size: 1.6rem;
-  }
-
-  .card-body {
-    padding: 1.25rem;
   }
 }

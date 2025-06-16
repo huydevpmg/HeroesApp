@@ -32,7 +32,8 @@ export class EditProfileModalComponent implements OnInit {
         asyncValidators: [emailExistsValidator(this.profileService)],
         updateOn: 'blur'
       }],
-      fullName: ['', [Validators.required, Validators.minLength(2)]],
+      firstName: ['', [Validators.required, Validators.minLength(2)]],
+      lastName: ['', [Validators.required, Validators.minLength(2)]],
       originalEmail: ['']
     });
 
@@ -44,7 +45,8 @@ export class EditProfileModalComponent implements OnInit {
           this.profileForm.patchValue({
             username: profile.username || '',
             email: profile.email || '',
-            fullName: profile.fullName || '',
+            firstName: profile.firstName || '',
+            lastName: profile.lastName || '',
             originalEmail: profile.email || ''
           });
           this.loading = false;

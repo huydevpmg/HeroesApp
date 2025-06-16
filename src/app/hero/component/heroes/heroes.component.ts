@@ -5,9 +5,9 @@ import { HeroEventsService } from '../../service/hero-events.service';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app.state';
 import { selectAllHeroes, selectLoading, selectError } from '../../store/hero/hero.selectors';
 import { deleteManyHeroes, loadHeroesByOwner } from '../../store/hero/hero.actions';
+import { AppState } from '../../../store/app.state';
 
 @Component({
   selector: 'app-heroes',
