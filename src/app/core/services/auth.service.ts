@@ -42,7 +42,12 @@ export class AuthService {
   }
 
   setAccessToken(token: string): void {
-    this.cookieService.set('accessToken', token, { path: '/' });
+    this.cookieService.set('accessToken', token, {
+      path: '/',
+      secure: false, // Set to true in production with HTTPS
+      sameSite: 'Strict',
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+    });
   }
 
   getCurrentUserId(): string | null {

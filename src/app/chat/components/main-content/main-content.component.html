@@ -27,7 +27,7 @@
       </div>
     </div>
 
-    <div class="chat-messages">
+    <div class="chat-messages" #messagesContainer>
       <div *ngIf="loading$ | async" class="text-center p-3">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
@@ -39,33 +39,28 @@
       </div>
 
       <ng-container *ngIf="selectedConversation$ | async as conversation">
-        <div *ngFor="let message of messages$ | async" class="message"
-          [class.received]="message.senderId !== conversation.createdBy"
-          [class.sent]="message.senderId === conversation.createdBy">
-          <div class="message-avatar" *ngIf="message.senderId !== conversation.createdBy">
-            <img [src]="conversation.avatar || 'https://i.pravatar.cc/150?img=1'" [alt]="conversation.name">
-          </div>
-          <div class="message-content">
-            <div class="message-bubble" [class.text]="!message.attachments?.length">
-              <p *ngIf="message.content">{{ message.content }}</p>
-              <ng-container *ngIf="message.attachments?.length as attachmentsLength">
-                <img *ngIf="attachmentsLength > 0" [src]="message.attachments![0]" [alt]="'Shared image'">
-              </ng-container>
-            </div>
-            <div class="message-info">
-              <span class="message-time">{{ message.createdAt | date:'shortTime' }}</span>
-              <span class="message-status" *ngIf="message.senderId === conversation.createdBy">
-                {{ message.status }}
-              </span>
-            </div>
-            <div class="message-reactions" *ngIf="message.reactions?.length">
-              <div class="reaction" *ngFor="let reaction of message.reactions">
-                <span class="reaction-emoji">{{ reaction.emoji }}</span>
-                <span class="reaction-count">{{ reaction.userId }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ng-container *ngFor="let message of messages$ | async">
+          <!-- Text Message -->
+          <app-text-message *ngIf="!message.attachments?.length && !message.parentMessage" [message]="message"
+            [conversationId]="conversation._id!">
+          </app-text-message>
+
+          <!-- Media Message -->
+          <app-media-message
+            *ngIf="!!message.attachments && message.attachments.length && isMediaAttachment(message.attachments[0])"
+            [message]="message" [conversationId]="conversation._id!">
+          </app-media-message>
+
+          <!-- Attachment Message -->
+          <app-attachment-message
+            *ngIf="!!message.attachments && message.attachments.length && !isMediaAttachment(message.attachments[0])"
+            [message]="message" [conversationId]="conversation._id!">
+          </app-attachment-message>
+
+          <!-- Reply Message -->
+          <app-reply-message *ngIf="message.parentMessage" [message]="message" [conversationId]="conversation._id!">
+          </app-reply-message>
+        </ng-container>
       </ng-container>
     </div>
 

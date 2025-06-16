@@ -1,9 +1,8 @@
-// src/app/heroes/store/actions/hero.actions.ts
 import { createAction, props } from '@ngrx/store';
 import { HeroModel } from '../../models/hero.model';
 
 // Action types
-const ACTION_PREFIX = '[Heroes]'; //Type để định danh
+const ACTION_PREFIX = '[Heroes]';
 
 // Load Actions
 export const loadHeroes = createAction(`${ACTION_PREFIX} Load Heroes`);

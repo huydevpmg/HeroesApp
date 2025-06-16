@@ -1,0 +1,29 @@
+.reply {
+  padding: 10px;
+}
+
+.parent-message {
+  padding: 8px;
+  border-left: 3px solid #ccc;
+  margin-bottom: 8px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.sent .parent-message {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-left-color: #fff;
+}
+
+.parent-message-content {
+  font-size: 13px;
+  color: #666;
+}
+
+.sent .parent-message-content {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.reply-content {
+  margin-top: 5px;
+}

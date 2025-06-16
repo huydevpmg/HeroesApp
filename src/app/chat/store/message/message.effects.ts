@@ -85,7 +85,18 @@ export class MessageEffects {
     this.actions$.pipe(
       ofType(MessageActions.loadMessages),
       tap(({ conversationId }) => {
-        this.socketService.joinConversation(conversationId);
+        console.log('Joining conversation from effects:', conversationId);
+        // Check socket connection before joining room
+        if (!this.socketService.getSocket().connected) {
+          console.log('Socket not connected, connecting first...');
+          this.socketService.connect();
+          // Wait a moment for connection to be established
+          setTimeout(() => {
+            this.socketService.joinConversation(conversationId);
+          }, 1000);
+        } else {
+          this.socketService.joinConversation(conversationId);
+        }
       })
     ),
     { dispatch: false }

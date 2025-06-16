@@ -1,0 +1,31 @@
+<div class="message" [class.sent]="isCurrentUser" [class.received]="!isCurrentUser">
+  <div class="message-avatar" *ngIf="!isCurrentUser">
+    <img src="https://i.pravatar.cc/150?img=1" alt="Avatar">
+  </div>
+  <div class="message-content">
+    <div class="message-bubble media">
+      <p *ngIf="message.content">{{ message.content }}</p>
+      <div class="media-container" *ngIf="message.attachments?.length">
+        <ng-container *ngFor="let attachment of message.attachments">
+          <img *ngIf="isImage(attachment)" [src]="attachment" alt="Image" class="media-image">
+          <video *ngIf="isVideo(attachment)" controls class="media-video">
+            <source [src]="attachment" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </ng-container>
+      </div>
+    </div>
+    <div class="message-info">
+      <span class="message-time">{{ message.createdAt | date:'shortTime' }}</span>
+      <span class="message-status" *ngIf="isCurrentUser">
+        {{ message.status }}
+      </span>
+    </div>
+    <div class="message-reactions" *ngIf="message.reactions?.length">
+      <div class="reaction" *ngFor="let reaction of message.reactions">
+        <span class="reaction-emoji">{{ reaction.emoji }}</span>
+        <span class="reaction-count">{{ reaction.userId }}</span>
+      </div>
+    </div>
+  </div>
+</div>

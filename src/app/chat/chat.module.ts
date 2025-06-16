@@ -15,6 +15,11 @@ import { conversationReducer } from './store/conversation/conversation.reducer';
 import { messageReducer } from './store/message/message.reducer';
 import { ConversationEffects } from './store/conversation/conversation.effects';
 import { MessageEffects } from './store/message/message.effects';
+import { TextMessageComponent } from './components/messages/text-message/text-message.component';
+import { MediaMessageComponent } from './components/messages/media-message/media-message.component';
+import { AttachmentMessageComponent } from './components/messages/attachment-message/attachment-message.component';
+import { ReplyMessageComponent } from './components/messages/reply-message/reply-message.component';
+import { BaseMessageComponent } from './components/messages/base-message/base-message.component';
 
 @NgModule({
   declarations: [
@@ -22,7 +27,12 @@ import { MessageEffects } from './store/message/message.effects';
     LeftbarComponent,
     MainContentComponent,
     TimeAgoDirective,
-    ChatInfoComponent
+    ChatInfoComponent,
+    TextMessageComponent,
+    MediaMessageComponent,
+    AttachmentMessageComponent,
+    ReplyMessageComponent,
+    BaseMessageComponent
   ],
   imports: [
     CommonModule,

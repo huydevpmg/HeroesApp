@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { RegisterRequestModel } from '../../models/auth-request.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { emailExistsValidator, nameValidator, strongPasswordValidator, usernameValidator } from '../../../shared/validators/validators';
-import { ProfileService } from '../../../core/services/profile.service'; // 💡 phải inject service check email
+import { ProfileService } from '../../../core/services/profile.service'; // Must inject service to check email
 import { ToastrService } from 'ngx-toastr';
 
 @Component({

@@ -1,0 +1,22 @@
+<div class="message" [class.sent]="isCurrentUser" [class.received]="!isCurrentUser">
+  <div class="message-avatar" *ngIf="!isCurrentUser">
+    <img src="https://i.pravatar.cc/150?img=1" alt="Avatar">
+  </div>
+  <div class="message-content">
+    <div class="message-bubble">
+      <ng-content></ng-content>
+    </div>
+    <div class="message-info">
+      <span class="message-time">{{ message.createdAt | date:'shortTime' }}</span>
+      <span class="message-status" *ngIf="isCurrentUser">
+        {{ message.status }}
+      </span>
+    </div>
+    <div class="message-reactions" *ngIf="message.reactions?.length">
+      <div class="reaction" *ngFor="let reaction of message.reactions">
+        <span class="reaction-emoji">{{ reaction.emoji }}</span>
+        <span class="reaction-count">{{ reaction.userId }}</span>
+      </div>
+    </div>
+  </div>
+</div>

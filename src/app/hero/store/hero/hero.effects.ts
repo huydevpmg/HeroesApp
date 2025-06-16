@@ -78,8 +78,8 @@ export class HeroEffects {
     this.actions$.pipe(
       ofType(HeroActions.deleteManyHeroes),
       exhaustMap(({ ids }) =>
-        this.heroService.deleteHeroes(ids).pipe( // gọi đến API xóa nhiều
-          map(() => HeroActions.deleteManyHeroesSuccess({ ids })), // trả lại đúng danh sách đã xoá
+        this.heroService.deleteHeroes(ids).pipe( // Call API to delete multiple
+          map(() => HeroActions.deleteManyHeroesSuccess({ ids })), // Return the deleted list
           catchError(error =>
             of(HeroActions.deleteManyHeroesFailure({ error: error.message }))
           )

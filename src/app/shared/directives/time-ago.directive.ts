@@ -1,5 +1,5 @@
 import { Directive, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { formatDistanceToNow } from 'date-fns'; // Thư viện date-fns
+import { formatDistanceToNow } from 'date-fns'; // date-fns library
 
 @Directive({
   selector: '[appTimeAgo]'

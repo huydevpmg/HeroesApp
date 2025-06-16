@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Message } from '../../models/message.model';
 import { Conversation } from '../../models/conversation.model';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,12 @@ export class SocketService {
   private reactionSubject = new Subject<{ messageId: string; userId: string; emoji: string }>();
   private reactionRemovedSubject = new Subject<{ messageId: string; userId: string }>();
   private conversationUpdatedSubject = new Subject<{ conversationId: string; type: 'pin' | 'archive' | 'label'; data: any }>();
+  private connectionStatusSubject = new BehaviorSubject<boolean>(false);
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 5;
+  private reconnectInterval = 3000; // 3 seconds
+
+  private authService = inject(AuthService);
 
   private readonly EVENTS = {
     CONNECTION: 'connection',
@@ -44,36 +51,72 @@ export class SocketService {
   }
 
   private initializeSocket(): void {
-    this.socket = io(environment.socketUrl, {
-      withCredentials: true,
-      transports: ['websocket']
-    });
+    try {
+      const token = this.authService.getAccessToken();
+      if (!token) {
+        return;
+      }
 
-    this.setupSocketListeners();
+      this.socket = io(environment.socketUrl, {
+        withCredentials: true,
+        transports: ['websocket'],
+        reconnection: true,
+        reconnectionAttempts: this.maxReconnectAttempts,
+        reconnectionDelay: this.reconnectInterval,
+        timeout: 10000,
+        auth: {
+          token: token
+        },
+        extraHeaders: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      this.socket.on('connect', () => {
+        this.connectionStatusSubject.next(true);
+        this.reconnectAttempts = 0;
+      });
+
+      this.socket.on('disconnect', (reason) => {
+        this.connectionStatusSubject.next(false);
+
+        if (reason === 'io server disconnect') {
+          this.attemptReconnect();
+        }
+      });
+
+      this.socket.on('connect_error', (error) => {
+        this.connectionStatusSubject.next(false);
+        this.attemptReconnect();
+      });
+
+      this.socket.on('reconnect', (attemptNumber) => {
+        this.connectionStatusSubject.next(true);
+      });
+
+      this.setupSocketListeners();
+    } catch (error) {
+      this.attemptReconnect();
+    }
   }
 
   private setupSocketListeners(): void {
-    // Message events
     this.socket.on(this.EVENTS.RECEIVE_MESSAGE, (message: Message) => {
       this.messageSubject.next(message);
     });
 
-    // Typing events
     this.socket.on(this.EVENTS.USER_TYPING, (data: { userId: string; isTyping: boolean }) => {
       this.typingSubject.next(data);
     });
 
-    // Online status events
     this.socket.on(this.EVENTS.USER_STATUS_CHANGE, (data: { userId: string; status: 'online' | 'offline' }) => {
       this.onlineStatusSubject.next(data);
     });
 
-    // Group events
     this.socket.on(this.EVENTS.NEW_GROUP, (group: Conversation) => {
       this.groupCreatedSubject.next(group);
     });
 
-    // Reaction events
     this.socket.on(this.EVENTS.MESSAGE_REACTION, (data: { messageId: string; userId: string; emoji: string }) => {
       this.reactionSubject.next(data);
     });
@@ -82,7 +125,6 @@ export class SocketService {
       this.reactionRemovedSubject.next(data);
     });
 
-    // Conversation update events
     this.socket.on(this.EVENTS.PIN_CONVERSATION, (data: { conversationId: string; result: any }) => {
       this.conversationUpdatedSubject.next({ conversationId: data.conversationId, type: 'pin', data: data.result });
     });
@@ -98,114 +140,145 @@ export class SocketService {
     this.socket.on(this.EVENTS.REMOVE_LABEL, (data: { conversationId: string; result: any }) => {
       this.conversationUpdatedSubject.next({ conversationId: data.conversationId, type: 'label', data: data.result });
     });
-
-    // Connection events
-    this.socket.on(this.EVENTS.CONNECTION, () => {
-      console.log('Socket connected');
-    });
-
-    this.socket.on(this.EVENTS.DISCONNECT, () => {
-      console.log('Socket disconnected');
-    });
-
-    this.socket.on('error', (error: any) => {
-      console.error('Socket error:', error);
-    });
   }
 
-  // Join/Leave conversation rooms
   joinConversation(conversationId: string): void {
-    this.socket.emit(this.EVENTS.JOIN_ROOM, conversationId);
+    if (!this.socket) {
+      return;
+    }
+
+    if (this.socket.connected) {
+      this.socket.emit(this.EVENTS.JOIN_ROOM, conversationId);
+    } else {
+      this.connect();
+      const retryJoin = (attempt = 1) => {
+        if (attempt > 5) {
+          return;
+        }
+        setTimeout(() => {
+          if (this.socket.connected) {
+            this.socket.emit(this.EVENTS.JOIN_ROOM, conversationId);
+          } else {
+            retryJoin(attempt + 1);
+          }
+        }, Math.min(1000 * Math.pow(2, attempt), 10000));
+      };
+      retryJoin();
+    }
   }
 
   connectConversation(partnerId: string): Promise<{ success: boolean; conversationId: string }> {
     return new Promise((resolve) => {
-      this.socket.emit(this.EVENTS.CONNECT_CONVERSATION, { partnerId }, (response: any) => {
-        resolve(response);
-      });
+      if (!this.socket.connected) {
+        this.connect();
+        setTimeout(() => {
+          this.socket.emit(this.EVENTS.CONNECT_CONVERSATION, { partnerId }, (response: any) => {
+            resolve(response);
+          });
+        }, 1000);
+      } else {
+        this.socket.emit(this.EVENTS.CONNECT_CONVERSATION, { partnerId }, (response: any) => {
+          resolve(response);
+        });
+      }
     });
   }
 
-  // Message events
   sendMessage(message: Message): Promise<{ success: boolean; message: Message }> {
-    return new Promise((resolve) => {
-      this.socket.emit(this.EVENTS.SEND_MESSAGE, {
-        conversationId: message.conversationId,
-        content: message.content
-      }, (response: any) => {
-        resolve(response);
-      });
+    return new Promise((resolve, reject) => {
+      if (!this.socket.connected) {
+        this.connect();
+        setTimeout(() => {
+          this.sendMessageToServer(message, resolve, reject);
+        }, 1000);
+      } else {
+        this.sendMessageToServer(message, resolve, reject);
+      }
     });
+  }
+
+  private sendMessageToServer(message: Message, resolve: Function, reject: Function): void {
+    this.socket.timeout(5000).emit(this.EVENTS.SEND_MESSAGE, {
+      conversationId: message.conversationId,
+      content: message.content,
+      senderId: message.senderId,
+      parentMessage: message.parentMessage,
+      heroContext: message.heroContext,
+      attachments: message.attachments
+    }, (err: any, response: any) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(response);
+      }
+    });
+  }
+
+  startTyping(conversationId: string): void {
+    if (this.socket.connected) {
+      this.socket.emit(this.EVENTS.TYPING, { conversationId, isTyping: true });
+    } else {
+      this.connect();
+    }
+  }
+
+  stopTyping(conversationId: string): void {
+    if (this.socket.connected) {
+      this.socket.emit(this.EVENTS.TYPING, { conversationId, isTyping: false });
+    }
   }
 
   markMessageAsRead(conversationId: string, messageId: string): Promise<{ success: boolean; result: any }> {
     return new Promise((resolve) => {
-      this.socket.emit(this.EVENTS.MARK_AS_READ, { conversationId, messageId }, (response: any) => {
-        resolve(response);
-      });
+      if (!this.socket.connected) {
+        this.connect();
+        setTimeout(() => {
+          this.socket.emit(this.EVENTS.MARK_AS_READ, { conversationId, messageId }, (response: any) => {
+            resolve(response);
+          });
+        }, 1000);
+      } else {
+        this.socket.emit(this.EVENTS.MARK_AS_READ, { conversationId, messageId }, (response: any) => {
+          resolve(response);
+        });
+      }
     });
   }
 
-  // Typing events
-  startTyping(conversationId: string): void {
-    this.socket.emit(this.EVENTS.TYPING, { conversationId, isTyping: true });
-  }
-
-  stopTyping(conversationId: string): void {
-    this.socket.emit(this.EVENTS.TYPING, { conversationId, isTyping: false });
-  }
-
-  // Reaction events
   addReaction(messageId: string, emoji: string): Promise<{ success: boolean; message: Message }> {
     return new Promise((resolve) => {
-      this.socket.emit(this.EVENTS.MESSAGE_REACTION, { messageId, emoji }, (response: any) => {
-        resolve(response);
-      });
+      if (!this.socket.connected) {
+        this.connect();
+        setTimeout(() => {
+          this.socket.emit(this.EVENTS.MESSAGE_REACTION, { messageId, emoji }, (response: any) => {
+            resolve(response);
+          });
+        }, 1000);
+      } else {
+        this.socket.emit(this.EVENTS.MESSAGE_REACTION, { messageId, emoji }, (response: any) => {
+          resolve(response);
+        });
+      }
     });
   }
 
   removeReaction(messageId: string): Promise<{ success: boolean; message: Message }> {
     return new Promise((resolve) => {
-      this.socket.emit(this.EVENTS.REMOVE_REACTION, { messageId }, (response: any) => {
-        resolve(response);
-      });
+      if (!this.socket.connected) {
+        this.connect();
+        setTimeout(() => {
+          this.socket.emit(this.EVENTS.REMOVE_REACTION, { messageId }, (response: any) => {
+            resolve(response);
+          });
+        }, 1000);
+      } else {
+        this.socket.emit(this.EVENTS.REMOVE_REACTION, { messageId }, (response: any) => {
+          resolve(response);
+        });
+      }
     });
   }
 
-  // Conversation management
-  togglePin(conversationId: string): Promise<{ success: boolean; result: any }> {
-    return new Promise((resolve) => {
-      this.socket.emit(this.EVENTS.PIN_CONVERSATION, { conversationId }, (response: any) => {
-        resolve(response);
-      });
-    });
-  }
-
-  toggleArchive(conversationId: string): Promise<{ success: boolean; result: any }> {
-    return new Promise((resolve) => {
-      this.socket.emit(this.EVENTS.ARCHIVE_CONVERSATION, { conversationId }, (response: any) => {
-        resolve(response);
-      });
-    });
-  }
-
-  addLabel(conversationId: string, label: string): Promise<{ success: boolean; result: any }> {
-    return new Promise((resolve) => {
-      this.socket.emit(this.EVENTS.ADD_LABEL, { conversationId, label }, (response: any) => {
-        resolve(response);
-      });
-    });
-  }
-
-  removeLabel(conversationId: string, label: string): Promise<{ success: boolean; result: any }> {
-    return new Promise((resolve) => {
-      this.socket.emit(this.EVENTS.REMOVE_LABEL, { conversationId, label }, (response: any) => {
-        resolve(response);
-      });
-    });
-  }
-
-  // Observables
   onMessage(): Observable<Message> {
     return this.messageSubject.asObservable();
   }
@@ -234,16 +307,58 @@ export class SocketService {
     return this.conversationUpdatedSubject.asObservable();
   }
 
-  // Connection management
+  private attemptReconnect(): void {
+    if (this.reconnectAttempts < this.maxReconnectAttempts) {
+      this.reconnectAttempts++;
+      const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
+
+      setTimeout(() => {
+        try {
+          this.initializeSocket();
+        } catch (error) {
+          this.attemptReconnect();
+        }
+      }, delay);
+    } else {
+      setTimeout(() => {
+        this.reconnectAttempts = 0;
+        this.attemptReconnect();
+      }, 60000);
+    }
+  }
+
   connect(): void {
-    if (!this.socket.connected) {
-      this.socket.connect();
+    if (!this.socket) {
+      this.initializeSocket();
+    } else if (!this.socket.connected) {
+      try {
+        const token = this.authService.getAccessToken();
+        if (!token) {
+          return;
+        }
+        this.socket.auth = { token: token };
+        this.socket.io.opts.extraHeaders = {
+          'Authorization': `Bearer ${token}`
+        };
+        this.socket.connect();
+      } catch (error) {
+        // Handle connection error
+      }
     }
   }
 
   disconnect(): void {
     if (this.socket.connected) {
       this.socket.disconnect();
+      this.connectionStatusSubject.next(false);
     }
+  }
+
+  isConnected(): Observable<boolean> {
+    return this.connectionStatusSubject.asObservable();
+  }
+
+  getSocket(): Socket {
+    return this.socket;
   }
 }
