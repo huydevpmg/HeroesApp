@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Conversation } from '../../models/conversation.model';
+import { tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +25,11 @@ export class ConversationService {
 
   // Get all conversations (current user)
   getConversations(): Observable<Conversation[]> {
-    return this.http.get<Conversation[]>(`${this.apiUrl}`);
+    return this.http.get<Conversation[]>(`${this.apiUrl}`).pipe(
+      tap(conversations => {
+        console.log('Received conversations from API:', conversations);
+      })
+    );
   }
 
   // Get conversation by id

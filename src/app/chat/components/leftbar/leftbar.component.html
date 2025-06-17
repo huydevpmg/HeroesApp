@@ -1,48 +1,37 @@
-<div class="chat-sidebar">
-  <div class="search-box mb-3">
-    <div class="input-group d-flex gap-2">
-      <!-- <span class="input-group-text bg-light border-end-0">
-        <i class="bi bi-search"></i>
-      </span> -->
-      <input type="text" class="form-control bg-light border border-2 rounded-5" placeholder="Search">
-
-      <button class="btn btn-xl btn-dark rounded-circle">
-        <i class="bi bi-pencil-square"></i>
-      </button>
+<div class="conversation-list">
+  <div *ngIf="loading$ | async" class="text-center p-3">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
     </div>
   </div>
 
-  <div class="conversation-list">
-    <div *ngIf="loading$ | async" class="text-center p-3">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-    </div>
+  <div *ngIf="error$ | async as error" class="alert alert-danger m-3">
+    {{ error }}
+  </div>
 
-    <div *ngIf="error$ | async as error" class="alert alert-danger m-3">
-      {{ error }}
-    </div>
+  <div *ngFor="let item of conversationsWithOtherUserId$ | async" class="conversation-item"
+    (click)="selectConversation(item.conversation)">
+    <div class="avatar position-relative">
+      <img
+        [src]=" 'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'"
+        [alt]="item.conversation.name" class="rounded-circle">
+      <ng-container *ngIf="onlineUsers$ | async as onlineUsers">
+        <span class="status-badge" [class.online]="item.otherUserId !== null && onlineUsers.includes(item.otherUserId)"
+          [class.offline]="item.otherUserId === null || !onlineUsers.includes(item.otherUserId)">
+        </span>
 
-    <div *ngFor="let conversation of conversations$ | async" class="conversation-item"
-      (click)="selectConversation(conversation)">
-      <div class="avatar position-relative">
-        <img
-          [src]=" 'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'"
-          [alt]="conversation.name" class="rounded-circle">
-        <span class="status-badge"
-          [ngClass]="{'bg-primary': conversation.unreadCount, 'bg-secondary': !conversation.unreadCount}"></span>
+      </ng-container>
+    </div>
+    <div class="conversation-info">
+      <div class="name-time">
+        <p class="conversation-name mb-0">{{ item.conversation.name }}</p>
+        <small class="time-ago" [appTimeAgo]="item.conversation.updatedAt ?? ''"></small>
       </div>
-      <div class="conversation-info">
-        <div class="name-time">
-          <p class="conversation-name mb-0">{{ conversation.name }}</p>
-          <small class="time-ago" [appTimeAgo]="conversation.updatedAt ?? ''"></small>
-        </div>
-        <div class="last-message">
-          <p class="mb-0 text-truncate">{{ conversation.lastMessage?.content || 'No messages yet' }}</p>
-          <span *ngIf="conversation.unreadCount" class="badge bg-primary rounded-pill">
-            {{ conversation.unreadCount }}
-          </span>
-        </div>
+      <div class="last-message">
+        <p class="mb-0 text-truncate">{{ item.conversation.lastMessage?.content || 'No messages yet' }}</p>
+        <span *ngIf="item.conversation.unreadCount" class="badge bg-primary rounded-pill">
+          {{ item.conversation.unreadCount }}
+        </span>
       </div>
     </div>
   </div>

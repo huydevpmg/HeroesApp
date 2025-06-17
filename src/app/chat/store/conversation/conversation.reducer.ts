@@ -130,6 +130,23 @@ export const conversationReducer = createReducer(
     error
   })),
 
+  // Update lastMessage of a Conversation
+  on(ConversationActions.updateConversationLastMessage, (state, { conversationId, message }) => {
+    const current = state.entities[conversationId];
+    if (!current) return state;
+    if (current.lastMessage && current.lastMessage._id === message._id) return state;
+    return {
+      ...state,
+      entities: {
+        ...state.entities,
+        [conversationId]: {
+          ...current,
+          lastMessage: message
+        }
+      }
+    };
+  }),
+
   // Select Conversation
   on(ConversationActions.selectConversation, (state, { id }) => ({
     ...state,

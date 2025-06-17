@@ -4,9 +4,13 @@
       <div class="d-flex align-items-center">
         <div class="avatar">
           <img [src]="'https://i.pravatar.cc/150?img=1'" [alt]="(selectedConversation$ | async)?.name">
-          <span class="status-badge"
-            [class.online]="(selectedConversation$ | async)?._id && (onlineUsers$ | async)?.includes((selectedConversation$ | async)?._id!)">
-          </span>
+          <ng-container *ngIf="(otherUserId$ | async) as otherUserId">
+            <ng-container *ngIf="(onlineUsers$ | async) as onlineUsers">
+              <span class="status-badge" [class.online]="otherUserId && onlineUsers.includes(otherUserId)"
+                [class.offline]="!otherUserId || !onlineUsers.includes(otherUserId)">
+              </span>
+            </ng-container>
+          </ng-container>
         </div>
         <div class="ms-3">
           <h6 class="mb-0">{{ (selectedConversation$ | async)?.name || 'Select a conversation' }}</h6>
@@ -14,10 +18,13 @@
             {{ (typingUsers$ | async)?.length }} {{ (typingUsers$ | async)?.length === 1 ? 'person' : 'people' }}
             typing...
           </small>
-          <small class="text-muted" *ngIf="!(typingUsers$ | async)?.length">
-            {{ (selectedConversation$ | async)?._id && (onlineUsers$ | async)?.includes((selectedConversation$ |
-            async)?._id!) ? 'Online' : 'Offline' }}
-          </small>
+          <ng-container *ngIf="(otherUserId$ | async) as otherUserId">
+            <ng-container *ngIf="(onlineUsers$ | async) as onlineUsers">
+              <small class="text-muted" *ngIf="!(typingUsers$ | async)?.length">
+                {{ otherUserId && onlineUsers.includes(otherUserId) ? 'Online' : 'Offline' }}
+              </small>
+            </ng-container>
+          </ng-container>
         </div>
       </div>
       <div class="chat-actions">
@@ -38,7 +45,7 @@
         {{ error }}
       </div>
 
-      <ng-container *ngIf="selectedConversation$ | async as conversation">
+      <ng-container *ngIf="selectedConversation$ | async as conversation; else noConversation">
         <ng-container *ngFor="let message of messages$ | async">
           <!-- Text Message -->
           <app-text-message *ngIf="!message.attachments?.length && !message.parentMessage" [message]="message"
@@ -62,6 +69,15 @@
           </app-reply-message>
         </ng-container>
       </ng-container>
+
+      <ng-template #noConversation>
+        <div class="d-flex flex-column align-items-center justify-content-center h-100 w-100" style="min-height:400px;">
+          <img src="https://cdn-icons-png.flaticon.com/512/3095/3095583.png" alt="Select conversation"
+            style="width:120px;height:120px;opacity:0.5;">
+          <div class="mt-3 fs-4 text-muted">Select a
+            conversation to chat</div>
+        </div>
+      </ng-template>
     </div>
 
     <div class="chat-input">

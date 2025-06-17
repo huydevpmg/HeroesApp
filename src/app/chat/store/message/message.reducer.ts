@@ -28,21 +28,18 @@ export const messageReducer = createReducer(
   // Send message
   on(MessageActions.sendMessage, state => ({
     ...state,
-    loading: true,
     error: null
   })),
   on(MessageActions.sendMessageSuccess, (state, { message }) => {
     const id = String(message._id);
     return {
       ...state,
-      loading: false,
       entities: { ...state.entities, [id]: message },
       ids: state.ids.includes(id) ? state.ids : [...state.ids, id]
     };
   }),
   on(MessageActions.sendMessageFailure, (state, { error }) => ({
     ...state,
-    loading: false,
     error
   })),
 
@@ -148,6 +145,10 @@ export const messageReducer = createReducer(
 
   // Online users
   on(MessageActions.setOnlineUsers, (state, { onlineUsers }) => ({
+    ...state,
+    onlineUsers
+  })),
+  on(MessageActions.updateOnlineUsers, (state, { onlineUsers }) => ({
     ...state,
     onlineUsers
   }))

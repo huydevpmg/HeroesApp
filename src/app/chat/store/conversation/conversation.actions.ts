@@ -80,6 +80,12 @@ export const updateConversationFailure = createAction(
   props<{ error: string }>()
 );
 
+// Update Last Message
+export const updateConversationLastMessage = createAction(
+  '[Conversation] Update Last Message',
+  props<{ conversationId: string; message: any }>()
+);
+
 // Select Conversation
 export const selectConversation = createAction(
   '[Conversation] Select Conversation',

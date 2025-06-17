@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { of } from 'rxjs';
+import { of, from } from 'rxjs';
 import { map, mergeMap, catchError, tap } from 'rxjs/operators';
 import * as MessageActions from './message.actions';
+import * as ConversationActions from '../conversation/conversation.actions';
 import { MessageService } from '../../services/message/message.service';
 import { SocketService } from '../../services/socket/socket.service';
 
@@ -25,10 +26,15 @@ export class MessageEffects {
       ofType(MessageActions.sendMessage),
       mergeMap(({ conversationId, content }) =>
         this.messageService.sendMessage(conversationId, content).pipe(
-          map(message => MessageActions.sendMessageSuccess({ message })),
-          catchError(error => of(MessageActions.sendMessageFailure({ error: error.message })))
+          map(message => [
+            MessageActions.sendMessageSuccess({ message }),
+            // Only update lastMessage if message._id is defined (avoid loop)
+            ...(message && message._id ? [ConversationActions.updateConversationLastMessage({ conversationId, message })] : [])
+          ]),
+          catchError(error => of([MessageActions.sendMessageFailure({ error: error.message })]))
         )
-      )
+      ),
+      mergeMap(actions => from(actions))
     )
   );
 
@@ -105,7 +111,12 @@ export class MessageEffects {
   // Handle incoming messages
   handleNewMessage$ = createEffect(() =>
     this.socketService.onMessage().pipe(
-      map(message => MessageActions.receiveMessage({ message }))
+      map(message => [
+        MessageActions.receiveMessage({ message }),
+        // Only update lastMessage if message._id is defined (avoid loop)
+        ...(message && message._id ? [ConversationActions.updateConversationLastMessage({ conversationId: message.conversationId, message })] : [])
+      ]),
+      mergeMap(actions => from(actions))
     )
   );
 
@@ -123,11 +134,13 @@ export class MessageEffects {
   // Handle online status
   handleOnlineStatus$ = createEffect(() =>
     this.socketService.onOnlineStatus().pipe(
-      map(({ userId, status }) =>
-        status === 'online'
+      tap(data => console.log('Received online status in effects:', data)),
+      map(({ userId, status }) => {
+        console.log('Processing online status:', { userId, status });
+        return status === 'online'
           ? MessageActions.userWentOnline({ userId })
-          : MessageActions.userWentOffline({ userId })
-      )
+          : MessageActions.userWentOffline({ userId });
+      })
     )
   );
 

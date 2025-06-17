@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
-import { map, mergeMap, catchError } from 'rxjs/operators';
+import { map, mergeMap, catchError, tap } from 'rxjs/operators';
 import * as ConversationActions from './conversation.actions';
 import { ConversationService } from '../../services/conversation/conversation.service';
 
@@ -10,8 +10,15 @@ export class ConversationEffects {
   loadConversations$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ConversationActions.loadConversations),
+      tap(() => console.log('Loading conversations...')),
       mergeMap(() =>
         this.conversationService.getConversations().pipe(
+          tap(conversations => {
+            console.log('Conversations loaded in effects:', conversations);
+            conversations.forEach(conv => {
+              console.log('Conversation:', conv._id, 'Participants:', conv.participants);
+            });
+          }),
           map(conversations => ConversationActions.loadConversationsSuccess({ conversations })),
           catchError(error => of(ConversationActions.loadConversationsFailure({ error: error.message })))
         )

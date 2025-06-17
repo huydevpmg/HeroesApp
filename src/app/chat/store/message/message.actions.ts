@@ -128,7 +128,13 @@ export const setTypingUsers = createAction(
   props<{ typingUsers: string[] }>()
 );
 
+export const updateOnlineUsers = createAction(
+  '[Message] Update Online Users',
+  props<{ onlineUsers: string[] }>()
+);
+
+
 export const setOnlineUsers = createAction(
   '[Message] Set Online Users',
-  props<{ onlineUsers: string[] }>()
+  props<{ onlineUsers: any[] }>()
 );

@@ -14,6 +14,11 @@ export class SocketService {
   private messageSubject = new Subject<Message>();
   private typingSubject = new Subject<{ userId: string; isTyping: boolean }>();
   private onlineStatusSubject = new Subject<{ userId: string; status: 'online' | 'offline' }>();
+
+  // New: store current online user ids and expose as observable
+  private onlineUserIds = new Set<string>();
+  private onlineUserIdsSubject = new BehaviorSubject<Set<string>>(new Set());
+
   private groupCreatedSubject = new Subject<Conversation>();
   private reactionSubject = new Subject<{ messageId: string; userId: string; emoji: string }>();
   private reactionRemovedSubject = new Subject<{ messageId: string; userId: string }>();
@@ -109,8 +114,24 @@ export class SocketService {
       this.typingSubject.next(data);
     });
 
-    this.socket.on(this.EVENTS.USER_STATUS_CHANGE, (data: { userId: string; status: 'online' | 'offline' }) => {
-      this.onlineStatusSubject.next(data);
+    // Update to handle both online user list and single user status
+    this.socket.on(this.EVENTS.USER_STATUS_CHANGE, (data: any) => {
+      console.log('Received user status change:', data);
+      if (data.onlineUsers) {
+        console.log('Updating online users list:', data.onlineUsers);
+        this.onlineUserIds = new Set(data.onlineUsers);
+        this.onlineUserIdsSubject.next(new Set(this.onlineUserIds));
+      } else if (data.userId && data.status) {
+        console.log('Updating single user status:', data);
+        if (data.status === 'online') {
+          this.onlineUserIds.add(data.userId);
+        } else if (data.status === 'offline') {
+          this.onlineUserIds.delete(data.userId);
+        }
+        this.onlineUserIdsSubject.next(new Set(this.onlineUserIds));
+        // Also emit for legacy usage
+        this.onlineStatusSubject.next(data);
+      }
     });
 
     this.socket.on(this.EVENTS.NEW_GROUP, (group: Conversation) => {
@@ -289,6 +310,11 @@ export class SocketService {
 
   onOnlineStatus(): Observable<{ userId: string; status: 'online' | 'offline' }> {
     return this.onlineStatusSubject.asObservable();
+  }
+
+  // New: observable for online user ids
+  onOnlineUserIds(): Observable<Set<string>> {
+    return this.onlineUserIdsSubject.asObservable();
   }
 
   onGroupCreated(): Observable<Conversation> {
