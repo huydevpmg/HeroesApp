@@ -38,7 +38,6 @@ export class LoginComponent {
     const credentials: LoginRequestModel = this.loginForm.value;
     this.authService.login(credentials).subscribe({
       next: (res) => {
-        console.log('Login response:', res);
         this.authService.setAccessToken(res.accessToken);
         this.toastr.success('Login successful!');
         this.router.navigate(['/dashboard']);

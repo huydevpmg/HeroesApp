@@ -24,20 +24,12 @@ export class AppComponent {
       .subscribe((event: any) => {
         this.showNavbar = !event.url.includes('/login');
 
-        // Connect socket when entering chat page
         if (event.url.includes('/chat')) {
-          console.log('Navigated to chat, ensuring socket connection');
           this.socketService.connect();
         }
       });
 
-    // Ensure socket is connected when app starts
     this.socketService.connect();
-
-    // Monitor socket connection status
-    this.socketService.isConnected().subscribe(connected => {
-      console.log('Socket connection status in AppComponent:', connected ? 'connected' : 'disconnected');
-    });
   }
 
   ngOnDestroy() {

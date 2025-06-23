@@ -34,17 +34,14 @@ export class DashboardComponent implements OnInit {
   private loadHeroes(): void {
     this.loading$.next(true);
     const userId = this.authService.getCurrentUserId();
-    console.log(userId);
 
     if (!userId) {
-      console.error('User ID is null. Please login again.');
       this.loading$.next(false);
       return;
     }
 
     this.heroService.getAllHeroes().subscribe({
       next: (heroes) => {
-        console.log(heroes);
         this.heroesSubject.next(heroes);
         this.loading$.next(false);
       },

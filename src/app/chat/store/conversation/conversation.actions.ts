@@ -91,3 +91,60 @@ export const selectConversation = createAction(
   '[Conversation] Select Conversation',
   props<{ id: string | null }>()
 );
+
+
+// Typing & status
+export const userStartedTyping = createAction(
+  '[Conversation] User Started Typing',
+  props<{ userId: string }>()
+);
+export const userStoppedTyping = createAction(
+  '[Conversation] User Stopped Typing',
+  props<{ userId: string }>()
+);
+export const userWentOnline = createAction(
+  '[Conversation] User Online',
+  props<{ userId: string }>()
+);
+export const userWentOffline = createAction(
+  '[Conversation] User Offline',
+  props<{ userId: string }>()
+);
+
+// Conversation update
+export const conversationUpdated = createAction(
+  '[Conversation] Conversation Updated',
+  props<{ conversationId: string; updateType: string; data: any }>()
+);
+
+export const setTypingUsers = createAction(
+  '[Conversation] Set Typing Users',
+  props<{ typingUsers: string[] }>()
+);
+
+export const updateOnlineUsers = createAction(
+  '[Conversation] Update Online Users',
+  props<{ onlineUsers: string[] }>()
+);
+
+export const setOnlineUsers = createAction(
+  '[Conversation] Set Online Users',
+  props<{ onlineUsers: any[] }>()
+);
+
+
+
+//Get All Users
+export const getAllUsers = createAction(
+  '[Conversation] Get All Users'
+);
+
+export const getAllUsersSuccess = createAction(
+  '[Conversation] Get All Users Success',
+  props<{ users: any[] }>()
+);
+
+export const getAllUsersFailure = createAction(
+  '[Conversation] Get All Users Failure',
+  props<{ error: string }>()
+);

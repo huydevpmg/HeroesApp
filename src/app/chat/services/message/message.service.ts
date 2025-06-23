@@ -38,7 +38,6 @@ export class MessageService {
       this.socketService.sendMessage(message as Message)
         .then(response => {
           if (response && response.success) {
-            console.log('Message sent successfully via socket:', response.message);
             observer.next(response.message);
             observer.complete();
           } else {
@@ -46,7 +45,6 @@ export class MessageService {
             // Fallback method to send message via HTTP API
             this.sendMessageViaHttp(message as Message).subscribe({
               next: (httpResponse) => {
-                console.log('Message sent successfully via HTTP:', httpResponse);
                 observer.next(httpResponse);
                 observer.complete();
               },
@@ -63,7 +61,6 @@ export class MessageService {
           // Fallback method to send message via HTTP API
           this.sendMessageViaHttp(message as Message).subscribe({
             next: (httpResponse) => {
-              console.log('Message sent successfully via HTTP:', httpResponse);
               observer.next(httpResponse);
               observer.complete();
             },
@@ -88,10 +85,8 @@ export class MessageService {
       'Authorization': `Bearer ${token}`
     });
 
-    console.log('Sending message via HTTP API:', message);
     return this.http.post<Message>(`${this.apiUrl}`, message, { headers })
       .pipe(
-        tap(response => console.log('HTTP API response:', response)),
         catchError(error => {
           console.error('HTTP API error:', error);
           return throwError(() => error);
@@ -107,11 +102,7 @@ export class MessageService {
       headers: {
         'Authorization': `Bearer ${token}`
       }
-    }).pipe(
-      tap(messages => {
-        console.log('Received messages:', messages);
-      })
-    );
+    })
   }
 
   updateMessageStatus(messageId: string, status: string): Observable<Message> {

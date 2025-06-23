@@ -1,50 +1,74 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { ConversationState } from './conversation.state';
+import { conversationAdapter, ConversationState } from './conversation.state';
 
-export const selectConversationState = createFeatureSelector<ConversationState>('conversation');
+export const selectConversationState =
+  createFeatureSelector<ConversationState>('conversation');
 
-export const selectAllConversations = createSelector(
-  selectConversationState,
-  (state: ConversationState) => state.ids.map(id => state.entities[id])
-);
+const {
+  selectIds: selectConversationIds,
+  selectEntities: selectConversationEntities,
+  selectAll: selectAllConversations,
+  selectTotal: selectConversationTotal,
+} = conversationAdapter.getSelectors(selectConversationState);
 
-export const selectConversationEntities = createSelector(
-  selectConversationState,
-  (state: ConversationState) => state.entities
-);
+export {
+  selectConversationIds,
+  selectConversationEntities,
+  selectAllConversations,
+  selectConversationTotal,
+};
 
+// Selected
 export const selectSelectedConversationId = createSelector(
   selectConversationState,
-  (state: ConversationState) => state.selectedConversationId
+  s => s.selectedConversationId
 );
 
 export const selectSelectedConversation = createSelector(
   selectConversationEntities,
   selectSelectedConversationId,
-  (entities, selectedId) => selectedId ? entities[selectedId] : null
+  (entities, id) => (id ? entities[id] : null)
 );
 
+// Loading / Error
 export const selectConversationLoading = createSelector(
   selectConversationState,
-  (state: ConversationState) => state.loading
+  s => s.loading
 );
 
 export const selectConversationError = createSelector(
   selectConversationState,
-  (state: ConversationState) => state.error
+  s => s.error
 );
 
-export const selectConversationById = (id: string) => createSelector(
-  selectConversationEntities,
-  (entities) => entities[id]
+// Users list
+export const selectConversationUsers = createSelector(
+  selectConversationState,
+  s => s.users
 );
 
-export const selectGroupConversations = createSelector(
-  selectAllConversations,
-  (conversations) => conversations.filter(conversation => conversation.isGroup)
+export const selectConversationUsersLoading = createSelector(
+  selectConversationState,
+  s => s.usersLoading
 );
 
-export const selectOneOnOneConversations = createSelector(
-  selectAllConversations,
-  (conversations) => conversations.filter(conversation => !conversation.isGroup)
+export const selectConversationUsersError = createSelector(
+  selectConversationState,
+  s => s.usersError
+);
+
+// Typing / Online
+export const selectTypingUsers = createSelector(
+  selectConversationState,
+  s => s.typingUsers
+);
+
+export const selectOnlineUsers = createSelector(
+  selectConversationState,
+  s => s.onlineUsers
+);
+
+export const getAllUsers = createSelector(
+  selectConversationState,
+  s => s.users
 );

@@ -1,37 +1,180 @@
 <div class="conversation-list">
-  <div *ngIf="loading$ | async" class="text-center p-3">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-  </div>
 
-  <div *ngIf="error$ | async as error" class="alert alert-danger m-3">
-    {{ error }}
-  </div>
 
-  <div *ngFor="let item of conversationsWithOtherUserId$ | async" class="conversation-item"
-    (click)="selectConversation(item.conversation)">
-    <div class="avatar position-relative">
-      <img
-        [src]=" 'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'"
-        [alt]="item.conversation.name" class="rounded-circle">
-      <ng-container *ngIf="onlineUsers$ | async as onlineUsers">
-        <span class="status-badge" [class.online]="item.otherUserId !== null && onlineUsers.includes(item.otherUserId)"
-          [class.offline]="item.otherUserId === null || !onlineUsers.includes(item.otherUserId)">
-        </span>
-
-      </ng-container>
-    </div>
-    <div class="conversation-info">
-      <div class="name-time">
-        <p class="conversation-name mb-0">{{ item.conversation.name }}</p>
-        <small class="time-ago" [appTimeAgo]="item.conversation.updatedAt ?? ''"></small>
+  <div class="chat-sidebar">
+    <div class="search-box mb-3">
+      <div class="input-group d-flex gap-2">
+        <input type="text" class="form-control bg-light border border-2 rounded-5" placeholder="Search">
+        <button class="btn btn-xl btn-dark rounded-circle" (click)="openCreateGroupModal()">
+          <i class="bi bi-pencil-square"></i>
+        </button>
       </div>
-      <div class="last-message">
-        <p class="mb-0 text-truncate">{{ item.conversation.lastMessage?.content || 'No messages yet' }}</p>
-        <span *ngIf="item.conversation.unreadCount" class="badge bg-primary rounded-pill">
-          {{ item.conversation.unreadCount }}
-        </span>
+    </div>
+
+    <div *ngIf="loading$ | async" class="text-center p-3">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <div *ngIf="error$ | async as error" class="alert alert-danger m-3">
+      {{ error }}
+    </div>
+
+    <div *ngFor="let item of conversationsWithOtherUserId$ | async; trackBy: trackByConversationId"
+      class="conversation-item" (click)="selectConversation(item.conversation)">
+      <div class="avatar position-relative">
+        <div *ngIf="item.conversation.isGroup" class="group-avatar">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <img *ngIf="!item.conversation.isGroup"
+          [src]=" 'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'"
+          [alt]="item.conversation.name" class="rounded-circle">
+        <ng-container *ngIf="onlineUsers$ | async as onlineUsers">
+          <span class="status-badge" *ngIf="!item.conversation.isGroup"
+            [class.online]="item.otherUserId !== null && onlineUsers.includes(item.otherUserId)"
+            [class.offline]="item.otherUserId === null || !onlineUsers.includes(item.otherUserId)">
+          </span>
+        </ng-container>
+      </div>
+      <div class="conversation-info">
+        <div class="name-time">
+          <p class="conversation-name mb-0">
+            {{ item.conversation.name }}
+            <i *ngIf="item.conversation.isGroup" class="bi bi-people text-muted ms-1" style="font-size: 12px;"></i>
+          </p>
+          <small class="time-ago" [appTimeAgo]="item.conversation.updatedAt ?? ''"></small>
+        </div>
+        <div class="last-message">
+          <p class="mb-0 text-truncate">{{ item.conversation.lastMessage?.content || 'No messages yet' }}</p>
+          <span *ngIf="item.conversation.unreadCount" class="badge bg-primary rounded-pill">
+            {{ item.conversation.unreadCount }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple Clean Modal -->
+  <div class="modal-overlay" [class.show]="showCreateGroupModal" (click)="closeCreateGroupModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header-clean">
+        <div class="modal-icon">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <h4 class="modal-title-clean">Create New Group</h4>
+        <button type="button" class="btn-close-clean" (click)="closeCreateGroupModal()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body-clean">
+        <!-- Group Name Section -->
+        <div class="input-section">
+          <label class="section-label">
+            <i class="bi bi-chat-square-text me-2"></i>
+            Group Name
+          </label>
+          <input type="text" class="form-control-clean" placeholder="Enter group name..." [(ngModel)]="groupName"
+            #groupNameInput>
+        </div>
+
+        <div class="divider-clean"></div>
+
+        <!-- Add People Section -->
+        <div class="people-section">
+          <label class="section-label">
+            <i class="bi bi-person-plus me-2"></i>
+            Add People
+            <span class="selected-count" *ngIf="selectedUserIds().length > 0">
+              ({{ selectedUserIds().length }} selected)
+            </span>
+          </label>
+
+          <!-- Search Users -->
+          <div class="search-wrapper">
+            <div class="search-input-wrapper">
+              <i class="bi bi-search search-icon"></i>
+              <input type="text" class="search-input-clean" placeholder="Search users..." [(ngModel)]="searchUser">
+              <button *ngIf="searchUser" class="clear-search-clean" (click)="searchUser = ''">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Selected Users Pills -->
+          <div class="selected-users-clean" *ngIf="selectedUserIds().length > 0">
+            <div class="selected-users-header">
+              <span class="selected-label">Selected:</span>
+              <button class="clear-all-btn" (click)="clearAllSelections()">
+                <i class="bi bi-x"></i> Clear all
+              </button>
+            </div>
+            <div class="user-pills">
+              <div *ngFor="let user of users" class="user-pill-clean" [class.selected]="user.selected">
+                <span *ngIf="user.selected" class="pill-clean">
+                  <div class="pill-avatar">
+                    <img
+                      [src]="'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'"
+                      [alt]="user.name">
+                  </div>
+                  <span class="pill-name">{{ user.fullName }}</span>
+                  <div class="pill-remove-clean" (click)="user.selected = false">
+                    <i class="bi bi-x"></i>
+                  </div>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- User List -->
+          <div class="users-container-clean">
+            <div class="users-list">
+              <div *ngFor="let user of filteredUsers();" class="user-item-clean" [class.selected]="user.selected"
+                (click)="toggleUserSelection(user)">
+                <div class="user-checkbox">
+                  <input type="checkbox" [id]="'user-' + user._id" [(ngModel)]="user.selected"
+                    class="custom-checkbox-clean">
+                  <label [for]="'user-' + user._id" class="checkbox-label-clean"></label>
+                </div>
+                <div class="user-avatar">
+                  <img
+                    [src]=" 'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'"
+                    [alt]="user.fullName">
+                  <div class="user-status" [class.online]="isUserOnline(user._id)"></div>
+                </div>
+                <div class="user-info">
+                  <div class="user-name">{{ user.fullName }}</div>
+                  <!-- <div class="user-email">{{ user.email || '@' + user.username }}</div> -->
+                </div>
+                <div class="selection-indicator" *ngIf="user.selected">
+                  <i class="bi bi-check-circle-fill"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" *ngIf="filteredUsers().length === 0">
+              <i class="bi bi-person-x"></i>
+              <p>No users found</p>
+              <small>Try adjusting your search</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer-clean">
+        <button class="btn btn-cancel-clean" (click)="closeCreateGroupModal()">
+          Cancel
+        </button>
+        <button class="btn btn-create-clean" [disabled]="!groupName.trim() || selectedUserIds().length === 0"
+          (click)="createGroup()">
+          <i class="bi bi-plus-circle me-2"></i>
+          Create Group
+          <span class="btn-count" *ngIf="selectedUserIds().length > 0">
+            ({{ selectedUserIds().length }})
+          </span>
+        </button>
       </div>
     </div>
   </div>

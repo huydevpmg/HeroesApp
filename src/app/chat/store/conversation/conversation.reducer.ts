@@ -1,155 +1,208 @@
 import { createReducer, on } from '@ngrx/store';
-import { ConversationState, initialConversationState } from './conversation.state';
 import * as ConversationActions from './conversation.actions';
+import {
+  conversationAdapter,
+  initialConversationState,
+} from './conversation.state';
 
 export const conversationReducer = createReducer(
   initialConversationState,
 
-  // Load Conversations
+  // Load all
   on(ConversationActions.loadConversations, (state) => ({
     ...state,
     loading: true,
-    error: null
+    error: null,
   })),
-
-  on(ConversationActions.loadConversationsSuccess, (state, { conversations }) => {
-    const entities = conversations.reduce((acc, conversation) => ({
-      ...acc,
-      [conversation._id!]: conversation
-    }), {});
-
-    return {
+  on(ConversationActions.loadConversationsSuccess, (state, { conversations }) =>
+    conversationAdapter.setAll(conversations, {
       ...state,
-      entities,
-      ids: conversations.map(c => c._id!),
       loading: false,
-      error: null
-    };
-  }),
-
+      error: null,
+    })
+  ),
   on(ConversationActions.loadConversationsFailure, (state, { error }) => ({
     ...state,
     loading: false,
-    error
+    error,
   })),
 
-  // Load Single Conversation
+  // Load single
   on(ConversationActions.loadConversation, (state) => ({
     ...state,
     loading: true,
-    error: null
+    error: null,
   })),
-
-  on(ConversationActions.loadConversationSuccess, (state, { conversation }) => ({
-    ...state,
-    entities: {
-      ...state.entities,
-      [conversation._id!]: conversation
-    },
-    ids: state.ids.includes(conversation._id!) ? state.ids : [...state.ids, conversation._id!],
-    loading: false,
-    error: null
-  })),
-
+  on(ConversationActions.loadConversationSuccess, (state, { conversation }) => {
+    const newState = conversationAdapter.upsertOne(conversation, {
+      ...state,
+      loading: false,
+      error: null,
+    });
+    // Sắp xếp lại conversations theo thời gian cập nhật
+    const all = conversationAdapter.getSelectors().selectAll(newState);
+    const sorted = [...all].sort((a, b) => new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime());
+    return conversationAdapter.setAll(sorted, newState);
+  }),
   on(ConversationActions.loadConversationFailure, (state, { error }) => ({
     ...state,
     loading: false,
-    error
+    error,
   })),
 
-  // Find or Create 1on1 Conversation
+  // Find or create 1-on-1
   on(ConversationActions.findOrCreate1on1Conversation, (state) => ({
     ...state,
     loading: true,
-    error: null
+    error: null,
   })),
+  on(
+    ConversationActions.findOrCreate1on1ConversationSuccess,
+    (state, { conversation }) =>
+      conversationAdapter.upsertOne(conversation, {
+        ...state,
+        selectedConversationId: conversation._id!,
+        loading: false,
+        error: null,
+      })
+  ),
+  on(
+    ConversationActions.findOrCreate1on1ConversationFailure,
+    (state, { error }) => ({
+      ...state,
+      loading: false,
+      error,
+    })
+  ),
 
-  on(ConversationActions.findOrCreate1on1ConversationSuccess, (state, { conversation }) => ({
-    ...state,
-    entities: {
-      ...state.entities,
-      [conversation._id!]: conversation
-    },
-    ids: state.ids.includes(conversation._id!) ? state.ids : [...state.ids, conversation._id!],
-    selectedConversationId: conversation._id!,
-    loading: false,
-    error: null
-  })),
-
-  on(ConversationActions.findOrCreate1on1ConversationFailure, (state, { error }) => ({
-    ...state,
-    loading: false,
-    error
-  })),
-
-  // Create Conversation
+  // Create group
   on(ConversationActions.createConversation, (state) => ({
     ...state,
     loading: true,
-    error: null
+    error: null,
   })),
-
-  on(ConversationActions.createConversationSuccess, (state, { conversation }) => ({
-    ...state,
-    entities: {
-      ...state.entities,
-      [conversation._id!]: conversation
-    },
-    ids: [...state.ids, conversation._id!],
-    selectedConversationId: conversation._id!,
-    loading: false,
-    error: null
-  })),
-
+  on(ConversationActions.createConversationSuccess, (state, { conversation }) => {
+    const isCurrentSelected = state.selectedConversationId === conversation._id;
+    const newState = conversationAdapter.upsertOne(conversation, {
+      ...state,
+      selectedConversationId: isCurrentSelected ? conversation._id! : state.selectedConversationId,
+      loading: false,
+      error: null,
+    });
+    // Sort conversations by updatedAt desc
+    const all = conversationAdapter.getSelectors().selectAll(newState);
+    const sorted = [...all].sort((a, b) => new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime());
+    return conversationAdapter.setAll(sorted, newState);
+  }),
   on(ConversationActions.createConversationFailure, (state, { error }) => ({
     ...state,
     loading: false,
-    error
+    error,
   })),
 
-  // Update Conversation
+  // Update
   on(ConversationActions.updateConversation, (state) => ({
     ...state,
     loading: true,
-    error: null
+    error: null,
   })),
-
-  on(ConversationActions.updateConversationSuccess, (state, { conversation }) => ({
-    ...state,
-    entities: {
-      ...state.entities,
-      [conversation._id!]: conversation
-    },
-    loading: false,
-    error: null
-  })),
-
+  on(ConversationActions.updateConversationSuccess, (state, { conversation }) =>
+    conversationAdapter.updateOne(
+      { id: conversation._id!, changes: conversation },
+      { ...state, loading: false, error: null }
+    )
+  ),
   on(ConversationActions.updateConversationFailure, (state, { error }) => ({
     ...state,
     loading: false,
-    error
+    error,
   })),
 
-  // Update lastMessage of a Conversation
-  on(ConversationActions.updateConversationLastMessage, (state, { conversationId, message }) => {
-    const current = state.entities[conversationId];
-    if (!current) return state;
-    if (current.lastMessage && current.lastMessage._id === message._id) return state;
-    return {
-      ...state,
-      entities: {
-        ...state.entities,
-        [conversationId]: {
-          ...current,
-          lastMessage: message
-        }
-      }
-    };
-  }),
+  // Update last message
+  on(
+    ConversationActions.updateConversationLastMessage,
+    (state, { conversationId, message }) =>
+      conversationAdapter.updateOne(
+        { id: conversationId, changes: { lastMessage: message } },
+        state
+      )
+  ),
 
-  // Select Conversation
+  // Select
   on(ConversationActions.selectConversation, (state, { id }) => ({
     ...state,
-    selectedConversationId: id
+    selectedConversationId: id,
+  })),
+
+  // Typing
+  on(ConversationActions.userStartedTyping, (state, { userId }) => ({
+    ...state,
+    typingUsers: [
+      ...state.typingUsers,
+      {
+        userId,
+        timestamp: Date.now(),
+        conversationId: state.selectedConversationId!,
+      },
+    ],
+  })),
+  on(ConversationActions.userStoppedTyping, (state, { userId }) => ({
+    ...state,
+    typingUsers: state.typingUsers.filter((t) => t.userId !== userId),
+  })),
+  on(ConversationActions.setTypingUsers, (state, { typingUsers }) => ({
+    ...state,
+    typingUsers: typingUsers.map((id) => ({
+      userId: id,
+      timestamp: Date.now(),
+    })),
+  })),
+
+  // Online
+  on(ConversationActions.userWentOnline, (state, { userId }) => ({
+    ...state,
+    onlineUsers: Array.from(new Set([...state.onlineUsers, userId])),
+  })),
+  on(ConversationActions.userWentOffline, (state, { userId }) => ({
+    ...state,
+    onlineUsers: state.onlineUsers.filter((id) => id !== userId),
+  })),
+  on(ConversationActions.updateOnlineUsers, (state, { onlineUsers }) => ({
+    ...state,
+    onlineUsers,
+  })),
+  on(ConversationActions.setOnlineUsers, (state, { onlineUsers }) => ({
+    ...state,
+    onlineUsers,
+  })),
+
+  // Conversation updates via socket
+  on(
+    ConversationActions.conversationUpdated,
+    (state, { conversationId, data }) =>
+      conversationAdapter.updateOne(
+        { id: conversationId, changes: data },
+        state
+      )
+  ),
+
+  // Load all users
+  on(ConversationActions.getAllUsers, (state) => ({
+    ...state,
+    loading: true,
+    error: null,
+  })),
+
+  on(ConversationActions.getAllUsersSuccess, (state, { users }) => ({
+    ...state,
+    users,
+    loading: false,
+    error: null,
+  })),
+
+  on(ConversationActions.getAllUsersFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error,
   }))
 );

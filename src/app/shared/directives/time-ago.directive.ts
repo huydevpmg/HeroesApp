@@ -19,7 +19,9 @@ export class TimeAgoDirective implements OnChanges {
 
   private getTimeAgo(date: string | Date): string {
     const inputDate = new Date(date);
-
+    if (isNaN(inputDate.getTime())) {
+      return '';
+    }
     const distance = formatDistanceToNow(inputDate, { addSuffix: false });
     return this.formatShortDistance(distance);
   }

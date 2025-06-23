@@ -7,8 +7,8 @@ import { Message } from '../../models/message.model';
 import * as ConversationSelectors from '../../store/conversation/conversation.selectors';
 import * as MessageActions from '../../store/message/message.actions';
 import * as MessageSelectors from '../../store/message/message.selectors';
-import { SocketService } from '../../services/socket/socket.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { SocketService } from '../../services/socket/socket.service';
 
 @Component({
   selector: 'app-main-content',
@@ -26,20 +26,23 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   otherUserId$: Observable<string | null>;
   selectedConversationId: string = '';
   private messagesSub!: Subscription;
+  private socketMessageSub!: Subscription;
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef<HTMLDivElement>;
 
   constructor(
     private store: Store,
-    private socketService: SocketService,
-    private authService: AuthService
+    private authService: AuthService,
+    private socketService: SocketService
   ) {
-    this.selectedConversation$ = this.store.select(ConversationSelectors.selectSelectedConversation);
+    this.selectedConversation$ = this.store.select(ConversationSelectors.selectSelectedConversation).pipe(
+      map(conv => conv ?? null)
+    );
     this.messages$ = this.store.select(MessageSelectors.selectAllMessages);
     this.loading$ = this.store.select(MessageSelectors.selectMessagesLoading);
     this.error$ = this.store.select(MessageSelectors.selectMessagesError);
-    this.typingUsers$ = this.store.select(MessageSelectors.selectTypingUsers);
-    this.onlineUsers$ = this.socketService.onOnlineUserIds().pipe(map(set => Array.from(set)));
+    this.typingUsers$ = this.store.select(ConversationSelectors.selectTypingUsers);
+    this.onlineUsers$ = this.store.select(ConversationSelectors.selectOnlineUsers);
 
     this.otherUserId$ = this.selectedConversation$.pipe(
       map(conversation => {
@@ -60,10 +63,14 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(conversationId => {
         if (conversationId && conversationId !== this.selectedConversationId) {
           this.selectedConversationId = conversationId;
-          this.socketService.joinConversation(conversationId);
           this.store.dispatch(MessageActions.loadMessages({ conversationId }));
         }
       });
+
+    // Subscribe to socketService.onMessage and dispatch to store
+    this.socketMessageSub = this.socketService.onMessage().subscribe(message => {
+      this.store.dispatch(MessageActions.receiveMessage({ message }));
+    });
   }
 
   ngAfterViewInit() {
@@ -77,7 +84,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   sendMessage(content: string) {
-    if (!this.selectedConversationId) return;
+    if (!this.selectedConversationId) { return };
     this.store.dispatch(MessageActions.sendMessage({
       conversationId: this.selectedConversationId,
       content
@@ -96,5 +103,6 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.messagesSub?.unsubscribe();
+    this.socketMessageSub?.unsubscribe();
   }
 }
