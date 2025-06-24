@@ -25,11 +25,7 @@ export class ConversationService {
 
   // Get all conversations (current user)
   getConversations(): Observable<Conversation[]> {
-    return this.http.get<Conversation[]>(`${this.apiUrl}`).pipe(
-      tap(conversations => {
-        console.log('Received conversations from API:', conversations);
-      })
-    );
+    return this.http.get<Conversation[]>(`${this.apiUrl}`)
   }
 
   // Get conversation by id
@@ -40,6 +36,10 @@ export class ConversationService {
   // Update conversation (PATCH)
   updateConversation(id: string, data: Partial<Conversation>): Observable<Conversation> {
     return this.http.patch<Conversation>(`${this.apiUrl}/${id}`, data);
+  }
+
+  getAllUsers(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.authService}/api/profile`);
   }
 
   // Delete conversation (if you want to use this, uncomment backend route)

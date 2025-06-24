@@ -5,6 +5,8 @@ import { environment } from '../../../../environments/environment';
 import { Message } from '../../models/message.model';
 import { Conversation } from '../../models/conversation.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { Store } from '@ngrx/store';
+import * as ConversationActions from '../../store/conversation/conversation.actions';
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +31,7 @@ export class SocketService {
   private reconnectInterval = 3000; // 3 seconds
 
   private authService = inject(AuthService);
+  private store = inject(Store);
 
   private readonly EVENTS = {
     CONNECTION: 'connection',
@@ -114,28 +117,24 @@ export class SocketService {
       this.typingSubject.next(data);
     });
 
-    // Update to handle both online user list and single user status
     this.socket.on(this.EVENTS.USER_STATUS_CHANGE, (data: any) => {
-      console.log('Received user status change:', data);
       if (data.onlineUsers) {
-        console.log('Updating online users list:', data.onlineUsers);
         this.onlineUserIds = new Set(data.onlineUsers);
         this.onlineUserIdsSubject.next(new Set(this.onlineUserIds));
       } else if (data.userId && data.status) {
-        console.log('Updating single user status:', data);
         if (data.status === 'online') {
           this.onlineUserIds.add(data.userId);
         } else if (data.status === 'offline') {
           this.onlineUserIds.delete(data.userId);
         }
         this.onlineUserIdsSubject.next(new Set(this.onlineUserIds));
-        // Also emit for legacy usage
         this.onlineStatusSubject.next(data);
       }
     });
 
     this.socket.on(this.EVENTS.NEW_GROUP, (group: Conversation) => {
       this.groupCreatedSubject.next(group);
+      this.store.dispatch(ConversationActions.loadConversationSuccess({ conversation: group }));
     });
 
     this.socket.on(this.EVENTS.MESSAGE_REACTION, (data: { messageId: string; userId: string; emoji: string }) => {
@@ -298,6 +297,20 @@ export class SocketService {
         });
       }
     });
+  }
+
+  // Emit group creation event
+  emitGroupCreated(conversation: Conversation): void {
+    if (this.socket && this.socket.connected) {
+      this.socket.emit(this.EVENTS.GROUP_CREATED, {
+        _id: conversation._id,
+        name: conversation.name,
+        participants: conversation.participants,
+        isGroup: conversation.isGroup,
+        createdBy: conversation.createdBy,
+        createdAt: conversation.createdAt
+      });
+    }
   }
 
   onMessage(): Observable<Message> {

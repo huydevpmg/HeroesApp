@@ -1,23 +1,21 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { MessageState } from './message.state';
+import { MessageState, messageAdapter } from './message.state';
 
 export const selectMessageState = createFeatureSelector<MessageState>('messages');
 
-export const selectMessageEntities = createSelector(
-  selectMessageState,
-  state => state.entities
-);
+const {
+  selectIds: selectMessageIds,
+  selectEntities: selectMessageEntities,
+  selectAll: selectAllMessages,
+  selectTotal: selectMessageTotal
+} = messageAdapter.getSelectors(selectMessageState);
 
-export const selectMessageIds = createSelector(
-  selectMessageState,
-  state => state.ids
-);
-
-export const selectAllMessages = createSelector(
-  selectMessageEntities,
+export {
   selectMessageIds,
-  (entities, ids) => ids.map(id => entities[id])
-);
+  selectMessageEntities,
+  selectAllMessages,
+  selectMessageTotal
+};
 
 export const selectMessagesLoading = createSelector(
   selectMessageState,
@@ -27,26 +25,4 @@ export const selectMessagesLoading = createSelector(
 export const selectMessagesError = createSelector(
   selectMessageState,
   state => state.error
-);
-
-// Typing users
-export const selectTypingUsers = createSelector(
-  selectMessageState,
-  state => state.typingUsers
-);
-
-export const selectTypingUsersInConversation = (conversationId: string) => createSelector(
-  selectTypingUsers,
-  typingUsers => typingUsers.filter(u => u.conversationId === conversationId)
-);
-
-// Online users
-export const selectOnlineUsers = createSelector(
-  selectMessageState,
-  state => state.onlineUsers
-);
-
-export const selectIsUserOnline = (userId: string) => createSelector(
-  selectOnlineUsers,
-  onlineUsers => onlineUsers.includes(userId)
 );

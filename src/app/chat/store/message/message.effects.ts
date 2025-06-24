@@ -91,12 +91,8 @@ export class MessageEffects {
     this.actions$.pipe(
       ofType(MessageActions.loadMessages),
       tap(({ conversationId }) => {
-        console.log('Joining conversation from effects:', conversationId);
-        // Check socket connection before joining room
         if (!this.socketService.getSocket().connected) {
-          console.log('Socket not connected, connecting first...');
           this.socketService.connect();
-          // Wait a moment for connection to be established
           setTimeout(() => {
             this.socketService.joinConversation(conversationId);
           }, 1000);
@@ -120,30 +116,6 @@ export class MessageEffects {
     )
   );
 
-  // Handle typing indicators
-  handleTyping$ = createEffect(() =>
-    this.socketService.onTyping().pipe(
-      map(({ userId, isTyping }) =>
-        isTyping
-          ? MessageActions.userStartedTyping({ userId })
-          : MessageActions.userStoppedTyping({ userId })
-      )
-    )
-  );
-
-  // Handle online status
-  handleOnlineStatus$ = createEffect(() =>
-    this.socketService.onOnlineStatus().pipe(
-      tap(data => console.log('Received online status in effects:', data)),
-      map(({ userId, status }) => {
-        console.log('Processing online status:', { userId, status });
-        return status === 'online'
-          ? MessageActions.userWentOnline({ userId })
-          : MessageActions.userWentOffline({ userId });
-      })
-    )
-  );
-
   // Handle reactions
   handleReaction$ = createEffect(() =>
     this.socketService.onReaction().pipe(
@@ -157,15 +129,6 @@ export class MessageEffects {
     this.socketService.onReactionRemoved().pipe(
       map(({ messageId, userId }) =>
         MessageActions.messageReactionRemoved({ messageId, userId })
-      )
-    )
-  );
-
-  // Handle conversation updates
-  handleConversationUpdated$ = createEffect(() =>
-    this.socketService.onConversationUpdated().pipe(
-      map(({ conversationId, type, data }) =>
-        MessageActions.conversationUpdated({ conversationId, updateType: type, data })
       )
     )
   );
