@@ -13,7 +13,7 @@ import { SocketService } from '../../services/socket/socket.service';
   templateUrl: './leftbar.component.html',
   styleUrls: ['./leftbar.component.css']
 })
-export class LeftbarComponent implements OnInit, OnDestroy {
+export class LeftbarComponent implements OnInit {
   conversations$: Observable<Conversation[]>;
   conversationsWithOtherUserId$: Observable<{ conversation: Conversation, otherUserId: string | null }[]>;
   users$: Observable<any[]>;
@@ -27,8 +27,6 @@ export class LeftbarComponent implements OnInit, OnDestroy {
   groupName = '';
   searchUser = '';
 
-
-  private conversationsSub?: Subscription;
 
   constructor(
     private store: Store,
@@ -45,6 +43,7 @@ export class LeftbarComponent implements OnInit, OnDestroy {
 
     this.conversationsWithOtherUserId$ = this.conversations$.pipe(
       map(conversations => {
+        console.log('Conversations:', conversations);
         const myId = this.authService.getCurrentUserId();
         const mapped = conversations.map(conversation => ({
           conversation,
@@ -71,10 +70,6 @@ export class LeftbarComponent implements OnInit, OnDestroy {
     this.socketService.onGroupCreated().subscribe(() => {
       this.store.dispatch(ConversationActions.loadConversations());
     });
-  }
-
-  ngOnDestroy(): void {
-    this.conversationsSub?.unsubscribe();
   }
 
   selectConversation(conversation: Conversation): void {
@@ -108,7 +103,13 @@ export class LeftbarComponent implements OnInit, OnDestroy {
       this.isCreatingGroup = true;
 
       const currentUserId = this.authService.getCurrentUserId();
-      const allParticipants = currentUserId ? [currentUserId, ...participantIds] : participantIds;
+      const uniqueParticipants = new Set(participantIds);
+      if (currentUserId) {
+        uniqueParticipants.add(currentUserId);
+      }
+      const allParticipants = Array.from(uniqueParticipants);
+
+      console.log('Creating group with participants:', allParticipants);
 
       this.store.dispatch(ConversationActions.createConversation({
         data: {
