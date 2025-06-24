@@ -24,8 +24,8 @@ export class MessageEffects {
   sendMessage$ = createEffect(() =>
     this.actions$.pipe(
       ofType(MessageActions.sendMessage),
-      mergeMap(({ conversationId, content }) =>
-        this.messageService.sendMessage(conversationId, content).pipe(
+      mergeMap(({ conversationId, content, attachments }) =>
+        this.messageService.sendMessage(conversationId, content, attachments ?? []).pipe(
           map(message => [
             MessageActions.sendMessageSuccess({ message }),
             // Only update lastMessage if message._id is defined (avoid loop)

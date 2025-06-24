@@ -19,7 +19,7 @@ export class MessageService {
   ) { }
 
   // Send new message - try socket first, fallback to HTTP API
-  sendMessage(conversationId: string, content: string): Observable<Message> {
+  sendMessage(conversationId: string, content: string, attachments: string[] = []): Observable<Message> {
     const currentUserId = this.authService.getCurrentUserId();
     if (!currentUserId) {
       throw new Error('User not authenticated');
@@ -29,6 +29,7 @@ export class MessageService {
       conversationId,
       content,
       senderId: currentUserId,
+      attachments,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

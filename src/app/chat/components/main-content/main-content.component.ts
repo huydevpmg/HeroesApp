@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, firstValueFrom } from 'rxjs';
 import { map, distinctUntilChanged, filter } from 'rxjs/operators';
 import { Conversation } from '../../models/conversation.model';
 import { Message } from '../../models/message.model';
@@ -9,6 +9,8 @@ import * as MessageActions from '../../store/message/message.actions';
 import * as MessageSelectors from '../../store/message/message.selectors';
 import { AuthService } from '../../../auth/services/auth.service';
 import { SocketService } from '../../services/socket/socket.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-main-content',
@@ -27,13 +29,17 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedConversationId: string = '';
   private messagesSub!: Subscription;
   private socketMessageSub!: Subscription;
+  selectedFiles: File[] = [];
+  previews: string[] = [];
+  uploading = false;
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef<HTMLDivElement>;
 
   constructor(
     private store: Store,
     private authService: AuthService,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private http: HttpClient
   ) {
     this.selectedConversation$ = this.store.select(ConversationSelectors.selectSelectedConversation).pipe(
       map(conv => conv ?? null)
@@ -46,7 +52,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.otherUserId$ = this.selectedConversation$.pipe(
       map(conversation => {
-        if (!conversation || conversation.isGroup) return null;
+        if (!conversation || conversation.isGroup) { return null };
         const myId = this.authService.getCurrentUserId();
         return conversation.participants.find(id => id !== myId) || null;
       })
@@ -93,6 +99,46 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isMediaAttachment(url: string): boolean {
     return /\.(jpg|jpeg|png|gif|webp|mp4|webm|ogg|mov)$/i.test(url);
+  }
+
+  isAttachmentObject(att: any): boolean {
+    return att && typeof att === 'object' && ('url' in att || 'type' in att);
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      this.selectedFiles = Array.from(input.files);
+      this.previews = this.selectedFiles.map(file =>
+        file.type.startsWith('image/') ? URL.createObjectURL(file) : ''
+      );
+    }
+  }
+
+  async sendMessageWithFiles(content: string) {
+    if (!this.selectedConversationId) return;
+    this.uploading = true;
+    let attachmentIds: string[] = [];
+    const userId = this.authService.getCurrentUserId() || '';
+    if (this.selectedFiles.length) {
+      const uploads = this.selectedFiles.map(file => {
+        const form = new FormData();
+        form.append('file', file);
+        form.append('conversationId', this.selectedConversationId);
+        form.append('uploadedBy', userId);
+        return firstValueFrom(this.http.post<{ _id: string }>(`${environment.apiUrl}/attachments`, form));
+      });
+      const results = await Promise.all(uploads);
+      attachmentIds = results.filter(r => r && r._id).map(r => r!._id);
+    }
+    this.store.dispatch(MessageActions.sendMessage({
+      conversationId: this.selectedConversationId,
+      content,
+      attachments: attachmentIds
+    }));
+    this.selectedFiles = [];
+    this.previews = [];
+    this.uploading = false;
   }
 
   private scrollToBottom() {

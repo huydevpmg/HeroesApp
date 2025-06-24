@@ -18,7 +18,7 @@ export const loadMessagesFailure = createAction(
 // Send message
 export const sendMessage = createAction(
   '[Message] Send Message',
-  props<{ conversationId: string; content: string }>()
+  props<{ conversationId: string; content: string; attachments?: string[] }>()
 );
 export const sendMessageSuccess = createAction(
   '[Message] Send Message Success',
