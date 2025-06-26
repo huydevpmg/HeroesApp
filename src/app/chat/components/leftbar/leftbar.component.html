@@ -46,7 +46,15 @@
           <small class="time-ago" [appTimeAgo]="item.conversation.updatedAt ?? ''"></small>
         </div>
         <div class="last-message">
-          <p class="mb-0 text-truncate">{{ item.conversation.lastMessage?.content || 'No messages yet' }}</p>
+          <p class="mb-0 text-truncate">
+            <ng-container *ngIf="item.conversation.lastMessage?.content?.trim(); else showAttachmentName">
+              {{ item.conversation.lastMessage?.content }}
+            </ng-container>
+            <ng-template #showAttachmentName>
+              <span *ngIf="item.conversation.lastAttachmentName">{{ item.conversation.lastAttachmentName }}</span>
+              <span *ngIf="!item.conversation.lastAttachmentName">No messages yet</span>
+            </ng-template>
+          </p>
           <span *ngIf="item.conversation.unreadCount" class="badge bg-primary rounded-pill">
             {{ item.conversation.unreadCount }}
           </span>

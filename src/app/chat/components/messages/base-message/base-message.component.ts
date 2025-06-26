@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Message } from '../../../models/message.model';
 import { AuthService } from '../../../../auth/services/auth.service';
+import { Attachment } from '../../../models/attachment.model';
 
 @Component({
   selector: 'app-base-message',
@@ -8,16 +8,54 @@ import { AuthService } from '../../../../auth/services/auth.service';
   styleUrls: ['./base-message.component.css']
 })
 export class BaseMessageComponent implements OnInit {
-  @Input() message!: Message;
+  @Input() message!: any;
   @Input() conversationId!: string;
-  
+  @Input() isLast: boolean = false;
+
   isCurrentUser = false;
   currentUserId: string | null = null;
+  previewAttachment: Attachment | null = null;
 
   constructor(protected authService: AuthService) { }
 
   ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUserId();
     this.isCurrentUser = this.message.senderId === this.currentUserId;
+  }
+
+  isImage(url: string): boolean {
+    return /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+  }
+
+  isVideo(url: string): boolean {
+    return /\.(mp4|webm|ogg|mov)$/i.test(url);
+  }
+
+  onAttachmentClick(attachment: Attachment): void {
+    if (attachment.type.startsWith('image/') || attachment.type.startsWith('video/')) {
+      this.previewAttachment = attachment;
+    } else if (attachment.url) {
+      window.open(attachment.url, '_blank');
+    }
+  }
+
+  closePreview(): void {
+    this.previewAttachment = null;
+  }
+
+  getFileExtension(filename: string): string {
+    if (!filename) return '';
+    const parts = filename.split('.');
+    return parts.length > 1 ? parts.pop()?.toLowerCase() || '' : '';
+  }
+
+  formatFileSize(bytes: number): string {
+    if (!bytes || bytes === 0) return '0 B';
+
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    const size = (bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1);
+
+    return `${size} ${sizes[i]}`;
   }
 }

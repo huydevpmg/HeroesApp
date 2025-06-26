@@ -48,64 +48,91 @@
           {{ error }}
         </div>
 
-        <ng-container *ngFor="let message of messages$ | async">
-          <!-- Text Message -->
-          <app-text-message *ngIf="!message.attachments?.length && !message.parentMessage" [message]="message"
-            [conversationId]="conversation._id!">
-          </app-text-message>
+        <ng-container *ngFor="let message of messagesWithAttachment$ | async; let isLast = last">
+          <app-base-message [message]="message" [conversationId]="conversation._id!" [isLast]="isLast">
+          </app-base-message>
 
-          <!-- Media Message -->
-          <app-media-message
-            *ngIf="!!message.attachments && message.attachments.length && isMediaAttachment(message.attachments[0])"
-            [message]="message" [conversationId]="conversation._id!">
-          </app-media-message>
-
-          <!-- Attachment Message -->
-          <app-attachment-message
-            *ngIf="!!message.attachments && message.attachments.length && !isMediaAttachment(message.attachments[0])"
-            [message]="message" [conversationId]="conversation._id!">
-          </app-attachment-message>
-
-          <!-- Reply Message -->
           <app-reply-message *ngIf="message.parentMessage" [message]="message" [conversationId]="conversation._id!">
           </app-reply-message>
         </ng-container>
       </div>
 
       <div class="chat-input">
-        <div class="input-group align-items-end">
-          <button class="btn btn-link">
-            <i class="bi bi-emoji-smile"></i>
-          </button>
-          <input type="text" class="form-control" placeholder="Type a message..." #messageInput
-            (keyup.enter)="sendMessageWithFiles(messageInput.value); messageInput.value = ''">
-          <input type="file" #fileInput multiple style="display:none" (change)="onFileSelected($event)">
-          <button class="btn btn-link" (click)="fileInput.click()">
-            <i class="bi bi-paperclip"></i>
-          </button>
-          <button class="btn btn-primary" [disabled]="uploading"
-            (click)="sendMessageWithFiles(messageInput.value); messageInput.value = ''">
-            <i class="bi bi-send"></i>
-          </button>
-        </div>
-        <div class="d-flex flex-wrap gap-2 mt-2" *ngIf="previews.length">
-          <ng-container *ngFor="let preview of previews; let i = index">
-            <div class="position-relative">
-              <img *ngIf="preview" [src]="preview" style="max-width: 80px; max-height: 80px; border-radius: 8px;">
-              <div *ngIf="!preview"
-                class="file-icon-preview bg-light border rounded d-flex align-items-center justify-content-center"
-                style="width:80px;height:80px;">
-                <i class="bi bi-file-earmark-text fs-2 text-secondary"></i>
+        <!-- File Preview Section -->
+        <div class="file-preview-container" *ngIf="selectedFiles.length">
+          <div class="file-preview-header">
+            <span class="file-count">{{ selectedFiles.length }} file(s) selected</span>
+            <button class="btn-clear-all" (click)="clearAllFiles()">
+              <i class="bi bi-x"></i> Clear all
+            </button>
+          </div>
+          <div class="file-preview-list">
+            <div class="file-preview-item" *ngFor="let file of selectedFiles; let i = index">
+              <!-- Image Preview -->
+              <div class="file-preview-content" *ngIf="isImageFile(file); else fileIcon">
+                <img [src]="previews[i]" [alt]="file.name" class="file-preview-image">
               </div>
-              <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0"
-                (click)="selectedFiles.splice(i,1); previews.splice(i,1)">
+
+              <!-- File Icon -->
+              <ng-template #fileIcon>
+                <div class="file-preview-content file-icon-container">
+                  <div class="file-icon" [ngClass]="getFileIconClass(file)">
+                    <i [class]="getFileIcon(file)"></i>
+                  </div>
+                </div>
+              </ng-template>
+
+              <!-- File Info -->
+              <div class="file-info">
+                <div class="file-name" [title]="file.name">{{ truncateFileName(file.name, 25) }}</div>
+                <div class="file-size">{{ formatFileSize(file.size) }}</div>
+              </div>
+
+              <!-- Remove Button -->
+              <button class="file-remove-btn" (click)="removeFile(i)">
                 <i class="bi bi-x"></i>
               </button>
             </div>
-          </ng-container>
+          </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="input-section">
+          <div class="input-group">
+            <button class="btn btn-input-action" type="button">
+              <i class="bi bi-emoji-smile"></i>
+            </button>
+
+            <input type="text" class="form-control message-input" placeholder="Type a message..." #messageInput
+              (keyup.enter)="sendMessageWithFiles(messageInput.value); messageInput.value = ''" [disabled]="uploading">
+
+            <input type="file" #fileInput multiple style="display:none" (change)="onFileSelected($event)" accept="*/*">
+
+            <button class="btn btn-input-action" type="button" (click)="fileInput.click()">
+              <i class="bi bi-paperclip"></i>
+            </button>
+
+            <button class="btn btn-send" type="button" [disabled]="uploading"
+              (click)="sendMessageWithFiles(messageInput.value); messageInput.value = ''">
+              <div class="btn-send-content">
+                <div class="loading-spinner" *ngIf="uploading"></div>
+                <i class="bi bi-send" *ngIf="!uploading"></i>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
+
+      <div class="conversation-last-message text-muted small mt-1">
+        <ng-container *ngIf="conversation.lastMessage && conversation.lastMessage; else showAttachmentName">
+          {{ conversation.lastMessage }}
+        </ng-container>
+        <ng-template #showAttachmentName>
+          <span *ngIf="conversation.lastAttachmentName">{{ conversation.lastAttachmentName }}</span>
+        </ng-template>
+      </div>
     </ng-container>
+
     <ng-template #noConversation>
       <div class="d-flex flex-column align-items-center justify-content-center h-100 w-100" style="min-height:400px;">
         <img src="https://cdn-icons-png.flaticon.com/512/3095/3095583.png" alt="Select conversation"

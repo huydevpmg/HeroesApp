@@ -148,3 +148,8 @@ export const getAllUsersFailure = createAction(
   '[Conversation] Get All Users Failure',
   props<{ error: string }>()
 );
+
+export const updateConversationLastAttachmentName = createAction(
+  '[Conversation] Update Last Attachment Name',
+  props<{ conversationId: string; lastAttachmentName: string }>()
+);

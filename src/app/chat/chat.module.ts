@@ -15,11 +15,10 @@ import { conversationReducer } from './store/conversation/conversation.reducer';
 import { messageReducer } from './store/message/message.reducer';
 import { ConversationEffects } from './store/conversation/conversation.effects';
 import { MessageEffects } from './store/message/message.effects';
-import { TextMessageComponent } from './components/messages/text-message/text-message.component';
-import { MediaMessageComponent } from './components/messages/media-message/media-message.component';
-import { AttachmentMessageComponent } from './components/messages/attachment-message/attachment-message.component';
 import { ReplyMessageComponent } from './components/messages/reply-message/reply-message.component';
 import { BaseMessageComponent } from './components/messages/base-message/base-message.component';
+import { attachmentReducer } from './store/attachment/attachment.reducer';
+import { AttachmentEffects } from './store/attachment/attachment.effects';
 
 @NgModule({
   declarations: [
@@ -28,9 +27,6 @@ import { BaseMessageComponent } from './components/messages/base-message/base-me
     MainContentComponent,
     TimeAgoDirective,
     ChatInfoComponent,
-    TextMessageComponent,
-    MediaMessageComponent,
-    AttachmentMessageComponent,
     ReplyMessageComponent,
     BaseMessageComponent
   ],
@@ -40,7 +36,8 @@ import { BaseMessageComponent } from './components/messages/base-message/base-me
     FormsModule,
     StoreModule.forFeature('conversation', conversationReducer),
     StoreModule.forFeature('messages', messageReducer),
-    EffectsModule.forFeature([ConversationEffects, MessageEffects])
+    StoreModule.forFeature('attachments', attachmentReducer),
+    EffectsModule.forFeature([ConversationEffects, MessageEffects, AttachmentEffects]),
   ]
 })
 export class ChatModule { }
