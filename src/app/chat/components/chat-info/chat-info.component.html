@@ -1,66 +1,175 @@
 <div class="chat-info-container">
+
   <div class="chat-info" [class.hidden]="!isVisible">
     <div class="chat-info-header">
-      <h6 class="mb-0">Chat Info</h6>
-      <button class="btn btn-link" (click)="onClose()">
+      <h5 class="mb-0 fw-bold convo-title">Conversation Info</h5>
+      <button class="btn btn-sm btn-outline-secondary" (click)="onClose()">
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
 
     <div class="chat-info-content">
-      <!-- User Profile -->
-      <div class="user-profile">
-        <div class="user-avatar">
-          <img [src]="chatInfo.avatar" [alt]="chatInfo.name">
-          <span class="status-indicator" [class.online]="chatInfo.status === 'Online'"></span>
-        </div>
-        <h5 class="user-name">{{ chatInfo.name }}</h5>
-        <p class="user-status">{{ chatInfo.lastSeen }}</p>
-        <div class="user-actions">
-          <button class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-chat-dots me-1"></i> Message
-          </button>
-          <button class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-person-plus me-1"></i> Follow
-          </button>
-        </div>
-      </div>
-
-      <!-- About Section -->
-      <div class="info-section">
-        <h6 class="section-title">About</h6>
-        <p class="about-text">{{ chatInfo.about }}</p>
-      </div>
-
-      <!-- Shared Media -->
-      <div class="info-section">
-        <h6 class="section-title">Shared Media</h6>
-        <div class="shared-media">
-          <div class="media-item" *ngFor="let media of chatInfo.sharedMedia">
-            <img [src]="media.url" [alt]="'Shared ' + media.type">
-          </div>
-          <div class="media-item more-media" *ngIf="chatInfo.sharedMedia.length > 6">
-            <span>+{{ chatInfo.sharedMedia.length - 6 }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Shared Files -->
-      <div class="info-section">
-        <h6 class="section-title">Shared Files</h6>
-        <div class="shared-files">
-          <div class="file-item" *ngFor="let file of chatInfo.sharedFiles">
-            <div class="file-icon">
-              <i class="bi" [ngClass]="file.icon"></i>
+      <ng-container *ngIf="conversationInfo$ | async as chatInfo; else noConversation">
+        <!-- Conversation Details -->
+        <div class="conversation-section">
+          <div class="d-flex align-items-center mb-3">
+            <div class="conversation-avatar me-3">
+              <div class="rounded-circle bg-secondary group-avatar">
+                <i class="bi bi-people-fill"></i>
+              </div>
             </div>
-            <div class="file-info">
-              <p class="file-name">{{ file.name }}</p>
-              <small class="file-size">{{ file.size }}</small>
+            <div>
+              <h6 class="mb-1 fw-semibold">{{ chatInfo.conversationName }}</h6>
+              <small class="text-muted">{{ chatInfo.membersCount }} members</small>
             </div>
-            <button class="btn btn-link btn-sm">
-              <i class="bi bi-download"></i>
-            </button>
           </div>
+        </div>
+
+        <!-- Team Members -->
+        <div class="info-section team-members">
+          <div class="d-flex justify-content-between align-items-center mb-3 mx-1">
+            <h6 class="section-title mb-0">Team Members</h6>
+            <span class="badge bg-secondary rounded-pill">{{ chatInfo.teamMembers.length }}</span>
+          </div>
+          <div class="members-list">
+            <div class="member-item d-flex align-items-center mb-2" *ngFor="let member of chatInfo.teamMembers">
+              <div class="member-avatar me-2" (click)="showUserProfile(member)" style="cursor: pointer;">
+                <img [src]="member.avatar" [alt]="member.fullName" class="rounded-circle">
+                <span class="status-dot" [class]="member.status"></span>
+              </div>
+              <div class="flex-grow-1">
+                <p class="member-name mb-0">{{ member.fullName }}</p>
+                <small class="text-muted">{{ member.role }}</small>
+              </div>
+              <div class="member-actions">
+                <button class="btn btn-outline-dark btn-sm" (click)="viewProfile(member)">
+                  <i class="bi bi-chat-square"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shared Images -->
+        <div class="info-section">
+          <div class="d-flex justify-content-between align-items-center mb-3 mx-1">
+            <h6 class="section-title mb-0">Shared Images</h6>
+            <small class="text-muted">{{ chatInfo.sharedImages.length }} files</small>
+          </div>
+          <div class="shared-images-grid">
+            <div class="image-grid-item" *ngFor="let image of chatInfo.sharedImages; let i = index"
+              [class.show-more]="i === 8 && chatInfo.sharedImages.length > 9"
+              (click)="i === 8 && chatInfo.sharedImages.length > 9 ? viewAllImages() : viewImage(image)">
+
+              <img [src]="image.url" [alt]="image.name" class="grid-image">
+
+              <div class="more-overlay" *ngIf="i === 8 && chatInfo.sharedImages.length > 9">
+                <span class="more-text">+{{ chatInfo.sharedImages.length - 9 }}</span>
+              </div>
+
+              <div class="image-hover-overlay" *ngIf="!(i === 8 && chatInfo.sharedImages.length > 9)">
+                <i class="bi bi-eye text-white"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- View All Button -->
+          <button class="btn btn-outline-dark rounded-3 btn-sm w-100 mt-3" (click)="viewAllImages()"
+            *ngIf="chatInfo.sharedImages.length > 9">
+            <i class="bi bi-images me-2"></i>
+            View All Images
+          </button>
+        </div>
+
+        <!-- Shared Files -->
+        <div class="info-section">
+          <div class="d-flex justify-content-between align-items-center mb-3 mx-1">
+            <h6 class="section-title mb-0">Shared Files</h6>
+            <small class="text-muted">{{ chatInfo.sharedFiles.length }} files</small>
+          </div>
+          <div class="shared-files">
+            <div class="file-item d-flex align-items-center p-2 mb-1 rounded" *ngFor="let file of chatInfo.sharedFiles">
+              <div class="file-icon me-3">
+                <i class="bi" [ngClass]="file.icon" [style.color]="file.color"></i>
+              </div>
+              <div class="file-info flex-grow-1">
+                <p class="file-name mb-1">{{ file.name }}</p>
+                <div class="d-flex justify-content-between">
+                  <small class="file-properties">{{ file.size }}</small>
+                  <small class="file-properties">{{ file.uploadDate }}</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #noConversation>
+        <div class="d-flex flex-column align-items-center justify-content-center h-100">
+          <i class="bi bi-chat-square-text display-4 text-muted mb-3"></i>
+          <p class="text-muted">Select a conversation to view details</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <div class="user-profile-card" [class.show]="selectedMember" *ngIf="selectedMember">
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h6 class="mb-0 text-dark">
+            <i class="bi bi-person-circle me-2"></i>Profile
+          </h6>
+          <button class="btn btn-sm btn-outline-secondary" (click)="closeUserProfile()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      </div>
+      <div class="profile-body">
+        <div class="text-center mb-3">
+          <div class="profile-avatar-large mb-3">
+            <img [src]="selectedMember.avatar" [alt]="selectedMember.fullName" class="rounded-circle">
+          </div>
+
+          <div class="mb-2">
+            <h6 class="mb-1 fw-bold text-truncate" [title]="selectedMember.fullName">
+              {{ selectedMember.fullName }}
+            </h6>
+            <span class="badge badge-sm" [class.bg-warning]="selectedMember.role === 'Owner'"
+              [class.bg-info]="selectedMember.role === 'Member'">
+              {{ selectedMember.role }}
+            </span>
+          </div>
+
+          <div class="d-flex justify-content-center align-items-center mb-3">
+            <div class="status-indicator">
+              <i class="bi bi-circle-fill me-1" [class.text-success]="selectedMember.status === 'online'"
+                [class.text-secondary]="selectedMember.status === 'offline'"></i>
+              <small class="fw-medium">
+                {{ selectedMember.status === 'online' ? 'Online' : 'Offline' }}
+              </small>
+            </div>
+          </div>
+
+          <div class="member-details">
+            <div class="detail-item mb-2">
+              <i class="bi bi-envelope detail-icon"></i>
+              <span class="detail-text text-truncate" [title]="selectedMember.email">
+                {{ selectedMember.email }}
+              </span>
+            </div>
+            <div class="detail-item mb-3">
+              <i class="bi bi-person-badge detail-icon"></i>
+              <span class="detail-text text-truncate" [title]="selectedMember.username">
+                {{ selectedMember.username }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="d-grid gap-2" *ngIf="selectedMember.role !== 'Owner'">
+          <button class="btn btn-dark btn-sm" (click)="sendMessage(selectedMember)">
+            <i class="bi bi-chat-dots me-2"></i>Send Message
+          </button>
         </div>
       </div>
     </div>
