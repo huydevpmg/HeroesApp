@@ -18,8 +18,7 @@ export class MessageService {
     private authService: AuthService
   ) { }
 
-  // Send new message - try socket first, fallback to HTTP API
-  sendMessage(conversationId: string, content: string, attachments: string[] = []): Observable<Message> {
+  sendMessage(conversationId: string, content: string, attachmentId?: string): Observable<Message> {
     const currentUserId = this.authService.getCurrentUserId();
     if (!currentUserId) {
       throw new Error('User not authenticated');
@@ -29,12 +28,11 @@ export class MessageService {
       conversationId,
       content,
       senderId: currentUserId,
-      attachments,
+      attachmentId: attachmentId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
-    // Create Observable from socket Promise
     return new Observable<Message>(observer => {
       this.socketService.sendMessage(message as Message)
         .then(response => {

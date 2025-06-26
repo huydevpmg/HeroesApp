@@ -127,6 +127,14 @@ export const conversationReducer = createReducer(
         state
       )
   ),
+  on(
+    ConversationActions.updateConversationLastAttachmentName,
+    (state, { conversationId, lastAttachmentName }) =>
+      conversationAdapter.updateOne(
+        { id: conversationId, changes: { lastAttachmentName } },
+        state
+      )
+  ),
 
   // Select
   on(ConversationActions.selectConversation, (state, { id }) => ({

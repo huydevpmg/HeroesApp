@@ -24,14 +24,15 @@ export class MessageEffects {
   sendMessage$ = createEffect(() =>
     this.actions$.pipe(
       ofType(MessageActions.sendMessage),
-      mergeMap(({ conversationId, content, attachments }) =>
-        this.messageService.sendMessage(conversationId, content, attachments ?? []).pipe(
+      mergeMap(({ conversationId, content, attachmentId }) =>
+        this.messageService.sendMessage(conversationId, content, attachmentId).pipe(
           map(message => [
             MessageActions.sendMessageSuccess({ message }),
-            // Only update lastMessage if message._id is defined (avoid loop)
             ...(message && message._id ? [ConversationActions.updateConversationLastMessage({ conversationId, message })] : [])
           ]),
-          catchError(error => of([MessageActions.sendMessageFailure({ error: error.message })]))
+          catchError(error => {
+            return of([MessageActions.sendMessageFailure({ error: error.message })]);
+          })
         )
       ),
       mergeMap(actions => from(actions))

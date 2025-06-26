@@ -218,14 +218,25 @@ export class SocketService {
   }
 
   private sendMessageToServer(message: Message, resolve: Function, reject: Function): void {
-    this.socket.timeout(5000).emit(this.EVENTS.SEND_MESSAGE, {
+    console.log('🔥 Sending message via socket:', message);
+    // Build payload, include single or multiple attachment IDs
+    const payload: any = {
       conversationId: message.conversationId,
       content: message.content,
       senderId: message.senderId,
       parentMessage: message.parentMessage,
-      heroContext: message.heroContext,
-      attachments: message.attachments
-    }, (err: any, response: any) => {
+      heroContext: message.heroContext
+    };
+    // single file support
+    if (message.attachmentId) {
+      payload.attachmentId = message.attachmentId;
+    }
+    // multiple files support
+    const multi = (message as any).attachmentIds;
+    if (Array.isArray(multi) && multi.length) {
+      payload.attachments = multi;
+    }
+    this.socket.timeout(5000).emit(this.EVENTS.SEND_MESSAGE, payload, (err: any, response: any) => {
       if (err) {
         reject(err);
       } else {

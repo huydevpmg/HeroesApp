@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Message } from '../../models/message.model';
+import { Attachment, Message } from '../../models/message.model';
 
 // Load messages
 export const loadMessages = createAction(
@@ -18,7 +18,12 @@ export const loadMessagesFailure = createAction(
 // Send message
 export const sendMessage = createAction(
   '[Message] Send Message',
-  props<{ conversationId: string; content: string; attachments?: string[] }>()
+  props<{
+    conversationId: string;
+    content: string;
+    attachmentId?: string;
+    fileName?: string;
+  }>()
 );
 export const sendMessageSuccess = createAction(
   '[Message] Send Message Success',

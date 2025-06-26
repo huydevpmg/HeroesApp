@@ -5,17 +5,106 @@
       alt="Avatar">
   </div>
   <div class="message-content">
-    <div class="message-bubble animate__animated animate__fadeInUp">
-      <ng-content></ng-content>
+    <!-- Text Message Only -->
+    <div class="message-bubble text" *ngIf="message.content && !message.attachmentId">
+      <p>{{ message.content }}</p>
     </div>
+
+    <!-- Message with Attachment -->
+    <div class="attachment-container" *ngIf="message.attachmentId">
+      <div class="message-bubble text" *ngIf="message.content">
+        <p>{{ message.content }}</p>
+      </div>
+
+      <!-- Attachment Content -->
+      <div class="attachment-bubble">
+        <div class="attachment-loading" *ngIf="!message.attachment">
+          <div class="loading-spinner"></div>
+        </div>
+
+        <!-- Attachment Content -->
+        <ng-container *ngIf="message.attachment">
+          <!-- Image Attachment -->
+          <ng-container *ngIf="message.attachment.type && message.attachment.type.startsWith('image/')">
+            <img [src]="message.attachment.url" [alt]="message.attachment.name || 'Image attachment'"
+              class="attachment-image" (click)="onAttachmentClick(message.attachment)">
+          </ng-container>
+
+          <!-- Video Attachment -->
+          <ng-container *ngIf="message.attachment.type && message.attachment.type.startsWith('video/')">
+            <video [src]="message.attachment.url" class="attachment-video" controls
+              [attr.poster]="message.attachment.thumbnailUrl">
+            </video>
+          </ng-container>
+
+          <!-- File Attachment (documents, etc.) -->
+          <ng-container
+            *ngIf="message.attachment.type && !message.attachment.type.startsWith('image/') && !message.attachment.type.startsWith('video/')">
+            <div class="attachment-file" (click)="onAttachmentClick(message.attachment)">
+              <div class="file-icon">
+                <ng-container [ngSwitch]="getFileExtension(message.attachment.name)">
+                  <span *ngSwitchCase="'pdf'">📄</span>
+                  <span *ngSwitchCase="'doc'">📝</span>
+                  <span *ngSwitchCase="'docx'">📝</span>
+                  <span *ngSwitchCase="'xls'">📊</span>
+                  <span *ngSwitchCase="'xlsx'">📊</span>
+                  <span *ngSwitchCase="'ppt'">📊</span>
+                  <span *ngSwitchCase="'pptx'">📊</span>
+                  <span *ngSwitchCase="'txt'">📃</span>
+                  <span *ngSwitchCase="'zip'">🗜️</span>
+                  <span *ngSwitchCase="'rar'">🗜️</span>
+                  <span *ngSwitchDefault>📎</span>
+                </ng-container>
+              </div>
+              <div class="file-info">
+                <div class="file-name text-dark" [title]="message.attachment.name">
+
+                  {{ message.attachment.name }}
+                </div>
+                <div class="file-size text-dark">
+                  {{ formatFileSize(message.attachment.size) }}
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Message Info -->
     <div class="message-info">
       <span class="message-time">{{ message.createdAt | date:'shortTime' }}</span>
-      <span class="message-status" *ngIf="isCurrentUser">{{ message.status }}</span>
+      <span class="message-status" *ngIf="isCurrentUser && isLast">
+        {{ message.status }}
+      </span>
     </div>
+
+    <!-- Reactions -->
     <div class="message-reactions" *ngIf="message.reactions?.length">
       <div class="reaction" *ngFor="let reaction of message.reactions">
         <span class="reaction-emoji">{{ reaction.emoji }}</span>
         <span class="reaction-count">{{ reaction.userId }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade show" tabindex="-1"
+  [ngStyle]="{display: previewAttachment ? 'block' : 'none', background: 'rgba(0,0,0,0.5)'}" *ngIf="previewAttachment"
+  style="z-index: 2000;" (click)="closePreview()">
+  <div class="modal-dialog modal-dialog-centered modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Preview</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closePreview()"></button>
+      </div>
+      <div class="modal-body text-center">
+        <ng-container *ngIf="previewAttachment.type.startsWith('image/')">
+          <img [src]="previewAttachment.url" [alt]="previewAttachment.name" class="img-fluid rounded">
+        </ng-container>
+        <ng-container *ngIf="previewAttachment.type.startsWith('video/')">
+          <video [src]="previewAttachment.url" controls class="w-100 rounded" style="max-height:60vh;"></video>
+        </ng-container>
       </div>
     </div>
   </div>

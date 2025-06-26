@@ -3,14 +3,17 @@ import { Store } from '@ngrx/store';
 import { Observable, Subscription, firstValueFrom } from 'rxjs';
 import { map, distinctUntilChanged, filter } from 'rxjs/operators';
 import { Conversation } from '../../models/conversation.model';
-import { Message } from '../../models/message.model';
+import { Attachment, Message } from '../../models/message.model';
 import * as ConversationSelectors from '../../store/conversation/conversation.selectors';
 import * as MessageActions from '../../store/message/message.actions';
 import * as MessageSelectors from '../../store/message/message.selectors';
+import * as AttachmentActions from '../../store/attachment/attachment.actions';
+import { selectMessagesWithAttachment } from '../../store/message/message.selectors';
 import { AuthService } from '../../../auth/services/auth.service';
 import { SocketService } from '../../services/socket/socket.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { selectAttachmentEntities } from '../../store/attachment/attachment.selectors';
 
 @Component({
   selector: 'app-main-content',
@@ -21,6 +24,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   showRightbar = true;
   selectedConversation$: Observable<Conversation | null>;
   messages$: Observable<Message[]>;
+  messagesWithAttachment$: Observable<any>;
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
   typingUsers$: Observable<{ userId: string; timestamp: number; }[]>;
@@ -57,6 +61,8 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
         return conversation.participants.find(id => id !== myId) || null;
       })
     );
+
+    this.messagesWithAttachment$ = this.store.select(selectMessagesWithAttachment);
   }
 
   ngOnInit(): void {
@@ -72,10 +78,18 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
           this.store.dispatch(MessageActions.loadMessages({ conversationId }));
         }
       });
-
-    // Subscribe to socketService.onMessage and dispatch to store
     this.socketMessageSub = this.socketService.onMessage().subscribe(message => {
       this.store.dispatch(MessageActions.receiveMessage({ message }));
+    });
+
+    this.messages$.subscribe(messages => {
+      this.store.select(selectAttachmentEntities).subscribe(entities => {
+        messages.forEach(msg => {
+          if (msg.attachmentId && !entities[msg.attachmentId]) {
+            this.store.dispatch(AttachmentActions.loadAttachment({ attachmentId: msg.attachmentId! }));
+          }
+        });
+      });
     });
   }
 
@@ -89,13 +103,13 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
     this.showRightbar = !this.showRightbar;
   }
 
-  sendMessage(content: string) {
-    if (!this.selectedConversationId) { return };
-    this.store.dispatch(MessageActions.sendMessage({
-      conversationId: this.selectedConversationId,
-      content
-    }));
-  }
+  // sendMessage(content: string) {
+  //   if (!this.selectedConversationId) { return };
+  //   this.store.dispatch(MessageActions.sendMessage({
+  //     conversationId: this.selectedConversationId,
+  //     content
+  //   }));
+  // }
 
   isMediaAttachment(url: string): boolean {
     return /\.(jpg|jpeg|png|gif|webp|mp4|webm|ogg|mov)$/i.test(url);
@@ -103,6 +117,70 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isAttachmentObject(att: any): boolean {
     return att && typeof att === 'object' && ('url' in att || 'type' in att);
+  }
+
+  isImageFile(file: File): boolean {
+    return file.type.startsWith('image/');
+  }
+
+  getFileIcon(file: File): string {
+    const extension = this.getFileExtension(file.name);
+    const iconMap: { [key: string]: string } = {
+      'pdf': 'bi bi-file-earmark-pdf',
+      'doc': 'bi bi-file-earmark-word',
+      'docx': 'bi bi-file-earmark-word',
+      'xls': 'bi bi-file-earmark-excel',
+      'xlsx': 'bi bi-file-earmark-excel',
+      'ppt': 'bi bi-file-earmark-ppt',
+      'pptx': 'bi bi-file-earmark-ppt',
+      'txt': 'bi bi-file-earmark-text',
+      'zip': 'bi bi-file-earmark-zip',
+      'rar': 'bi bi-file-earmark-zip',
+      'mp4': 'bi bi-camera-video',
+      'avi': 'bi bi-camera-video',
+      'mov': 'bi bi-camera-video',
+      'mp3': 'bi bi-music-note',
+      'wav': 'bi bi-music-note',
+      'flac': 'bi bi-music-note'
+    };
+    return iconMap[extension] || 'bi bi-file-earmark';
+  }
+
+  getFileIconClass(file: File): string {
+    const extension = this.getFileExtension(file.name);
+    if (['mp4', 'avi', 'mov', 'webm'].includes(extension)) return 'video';
+    if (['mp3', 'wav', 'flac', 'aac'].includes(extension)) return 'audio';
+    return extension;
+  }
+
+  getFileExtension(filename: string): string {
+    return filename.split('.').pop()?.toLowerCase() || '';
+  }
+
+  truncateFileName(filename: string, maxLength: number): string {
+    if (filename.length <= maxLength) return filename;
+    const extension = filename.split('.').pop();
+    const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.'));
+    const truncatedName = nameWithoutExt.substring(0, maxLength - extension!.length - 4) + '...';
+    return `${truncatedName}.${extension}`;
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  removeFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+    this.previews.splice(index, 1);
+  }
+
+  clearAllFiles(): void {
+    this.selectedFiles = [];
+    this.previews = [];
   }
 
   onFileSelected(event: Event) {
@@ -116,29 +194,64 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async sendMessageWithFiles(content: string) {
-    if (!this.selectedConversationId) return;
+    if (!this.selectedConversationId) { return; }
+    if (!content.trim() && this.selectedFiles.length === 0) { return; }
+
     this.uploading = true;
-    let attachmentIds: string[] = [];
     const userId = this.authService.getCurrentUserId() || '';
-    if (this.selectedFiles.length) {
-      const uploads = this.selectedFiles.map(file => {
-        const form = new FormData();
-        form.append('file', file);
-        form.append('conversationId', this.selectedConversationId);
-        form.append('uploadedBy', userId);
-        return firstValueFrom(this.http.post<{ _id: string }>(`${environment.apiUrl}/attachments`, form));
-      });
-      const results = await Promise.all(uploads);
-      attachmentIds = results.filter(r => r && r._id).map(r => r!._id);
+
+    try {
+      if (this.selectedFiles.length === 0) {
+        this.store.dispatch(MessageActions.sendMessage({
+          conversationId: this.selectedConversationId,
+          content
+        }));
+        this.selectedFiles = [];
+        this.previews = [];
+        this.uploading = false;
+      }
+      else if (this.selectedFiles.length === 1) {
+        const file = this.selectedFiles[0];
+        this.store.dispatch(AttachmentActions.uploadAttachment({
+          file: file,
+          content: content.trim(),
+          conversationId: this.selectedConversationId,
+          uploadedBy: userId,
+          fileName: file.name
+        }));
+        this.selectedFiles = [];
+        this.previews = [];
+        this.uploading = false;
+      }
+      else {
+        if (content.trim()) {
+          this.store.dispatch(MessageActions.sendMessage({
+            conversationId: this.selectedConversationId,
+            content: content.trim()
+          }));
+        }
+
+        let uploadCount = 0;
+        const total = this.selectedFiles.length;
+        this.selectedFiles.forEach((file, idx) => {
+          this.store.dispatch(AttachmentActions.uploadAttachment({
+            file: file,
+            content: '',
+            conversationId: this.selectedConversationId,
+            uploadedBy: userId,
+            fileName: idx === this.selectedFiles.length - 1 ? file.name : undefined
+          }));
+          uploadCount++;
+          if (uploadCount === total) {
+            this.selectedFiles = [];
+            this.previews = [];
+            this.uploading = false;
+          }
+        });
+      }
+    } catch (error) {
+      this.uploading = false;
     }
-    this.store.dispatch(MessageActions.sendMessage({
-      conversationId: this.selectedConversationId,
-      content,
-      attachments: attachmentIds
-    }));
-    this.selectedFiles = [];
-    this.previews = [];
-    this.uploading = false;
   }
 
   private scrollToBottom() {

@@ -1,5 +1,7 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { MessageState, messageAdapter } from './message.state';
+import { selectAttachmentEntities } from '../attachment/attachment.selectors';
+
 
 export const selectMessageState = createFeatureSelector<MessageState>('messages');
 
@@ -25,4 +27,16 @@ export const selectMessagesLoading = createSelector(
 export const selectMessagesError = createSelector(
   selectMessageState,
   state => state.error
+);
+
+
+
+export const selectMessagesWithAttachment = createSelector(
+  selectAllMessages,
+  selectAttachmentEntities,
+  (messages, attachmentEntities) =>
+    messages.map(msg => ({
+      ...msg,
+      attachment: msg.attachmentId ? attachmentEntities[msg.attachmentId] : undefined
+    }))
 );
