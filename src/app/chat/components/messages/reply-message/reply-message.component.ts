@@ -10,7 +10,7 @@ import { AuthService } from '../../../../auth/services/auth.service';
 @Component({
   selector: 'app-reply-message',
   templateUrl: './reply-message.component.html',
-  styleUrls: ['./reply-message.component.css', '../base-message/base-message.component.css']
+  styleUrls: ['./reply-message.component.css']
 })
 export class ReplyMessageComponent extends BaseMessageComponent implements OnInit {
   parentMessage$: Observable<Message | null> = of(null);
@@ -21,7 +21,7 @@ export class ReplyMessageComponent extends BaseMessageComponent implements OnIni
 
   override ngOnInit(): void {
     super.ngOnInit();
-    
+
     if (this.message.parentMessage) {
       this.parentMessage$ = this.store.select(MessageSelectors.selectAllMessages).pipe(
         map(messages => messages.find(m => m._id === this.message.parentMessage) || null)

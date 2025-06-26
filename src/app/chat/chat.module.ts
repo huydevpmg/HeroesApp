@@ -15,7 +15,6 @@ import { conversationReducer } from './store/conversation/conversation.reducer';
 import { messageReducer } from './store/message/message.reducer';
 import { ConversationEffects } from './store/conversation/conversation.effects';
 import { MessageEffects } from './store/message/message.effects';
-import { MediaMessageComponent } from './components/messages/media-message/media-message.component';
 import { ReplyMessageComponent } from './components/messages/reply-message/reply-message.component';
 import { BaseMessageComponent } from './components/messages/base-message/base-message.component';
 import { attachmentReducer } from './store/attachment/attachment.reducer';
@@ -28,7 +27,6 @@ import { AttachmentEffects } from './store/attachment/attachment.effects';
     MainContentComponent,
     TimeAgoDirective,
     ChatInfoComponent,
-    MediaMessageComponent,
     ReplyMessageComponent,
     BaseMessageComponent
   ],
