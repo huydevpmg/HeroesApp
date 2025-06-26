@@ -43,15 +43,13 @@ export class LeftbarComponent implements OnInit {
 
     this.conversationsWithOtherUserId$ = this.conversations$.pipe(
       map(conversations => {
-        console.log('Conversations:', conversations);
         const myId = this.authService.getCurrentUserId();
-        const mapped = conversations.map(conversation => ({
+        return conversations.map(conversation => ({
           conversation,
           otherUserId: !conversation.isGroup
             ? conversation.participants.find(id => id !== myId) || null
             : null
         }));
-        return mapped;
       })
     );
   }

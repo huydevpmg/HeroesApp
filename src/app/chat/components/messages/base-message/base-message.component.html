@@ -1,110 +1,203 @@
-<div class="message" [class.sent]="isCurrentUser" [class.received]="!isCurrentUser">
+<!-- Chỉ hiển thị khi shouldShowMessage = true -->
+<div class="message" *ngIf="shouldShowMessage" [class.sent]="isCurrentUser" [class.received]="!isCurrentUser"
+  [class.deleted]="isGloballyDeleted">
+
+  <!-- Avatar for received messages - LUÔN HIỂN THỊ cho received messages -->
   <div class="message-avatar shadow" *ngIf="!isCurrentUser">
     <img
       src="https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg"
       alt="Avatar">
   </div>
-  <div class="message-content">
-    <!-- Text Message Only -->
-    <div class="message-bubble text" *ngIf="message.content && !message.attachmentId">
-      <p>{{ message.content }}</p>
-    </div>
 
-    <!-- Message with Attachment -->
-    <div class="attachment-container" *ngIf="message.attachmentId">
-      <div class="message-bubble text" *ngIf="message.content">
+  <!-- Hiển thị nội dung message bình thường hoặc deleted message -->
+  <ng-container *ngIf="!isGloballyDeleted; else deletedMsg">
+    <div class="message-content">
+      <!-- Text Message Only -->
+      <div class="message-bubble text" *ngIf="message.content && !message.attachmentId">
         <p>{{ message.content }}</p>
       </div>
 
-      <!-- Attachment Content -->
-      <div class="attachment-bubble">
-        <div class="attachment-loading" *ngIf="!message.attachment">
-          <div class="loading-spinner"></div>
+      <!-- Message with Attachment -->
+      <div class="attachment-container" *ngIf="message.attachmentId">
+        <div class="message-bubble text" *ngIf="message.content">
+          <p>{{ message.content }}</p>
         </div>
 
         <!-- Attachment Content -->
-        <ng-container *ngIf="message.attachment">
-          <!-- Image Attachment -->
-          <ng-container *ngIf="message.attachment.type && message.attachment.type.startsWith('image/')">
-            <img [src]="message.attachment.url" [alt]="message.attachment.name || 'Image attachment'"
-              class="attachment-image" (click)="onAttachmentClick(message.attachment)">
-          </ng-container>
+        <div class="attachment-bubble">
+          <div class="attachment-loading" *ngIf="!message.attachment">
+            <div class="loading-spinner"></div>
+          </div>
 
-          <!-- Video Attachment -->
-          <ng-container *ngIf="message.attachment.type && message.attachment.type.startsWith('video/')">
-            <video [src]="message.attachment.url" class="attachment-video" controls
-              [attr.poster]="message.attachment.thumbnailUrl">
-            </video>
-          </ng-container>
+          <!-- Attachment Content -->
+          <ng-container *ngIf="message.attachment">
+            <!-- Image Attachment -->
+            <ng-container *ngIf="message.attachment.type && message.attachment.type.startsWith('image/')">
+              <img [src]="message.attachment.url" [alt]="message.attachment.name || 'Image attachment'"
+                class="attachment-image" (click)="onAttachmentClick(message.attachment)">
+            </ng-container>
 
-          <!-- File Attachment (documents, etc.) -->
-          <ng-container
-            *ngIf="message.attachment.type && !message.attachment.type.startsWith('image/') && !message.attachment.type.startsWith('video/')">
-            <div class="attachment-file" (click)="onAttachmentClick(message.attachment)">
-              <div class="file-icon">
-                <ng-container [ngSwitch]="getFileExtension(message.attachment.name)">
-                  <span *ngSwitchCase="'pdf'">📄</span>
-                  <span *ngSwitchCase="'doc'">📝</span>
-                  <span *ngSwitchCase="'docx'">📝</span>
-                  <span *ngSwitchCase="'xls'">📊</span>
-                  <span *ngSwitchCase="'xlsx'">📊</span>
-                  <span *ngSwitchCase="'ppt'">📊</span>
-                  <span *ngSwitchCase="'pptx'">📊</span>
-                  <span *ngSwitchCase="'txt'">📃</span>
-                  <span *ngSwitchCase="'zip'">🗜️</span>
-                  <span *ngSwitchCase="'rar'">🗜️</span>
-                  <span *ngSwitchDefault>📎</span>
-                </ng-container>
-              </div>
-              <div class="file-info">
-                <div class="file-name text-dark" [title]="message.attachment.name">
+            <!-- Video Attachment -->
+            <ng-container *ngIf="message.attachment.type && message.attachment.type.startsWith('video/')">
+              <video [src]="message.attachment.url" class="attachment-video" controls
+                [attr.poster]="message.attachment.thumbnailUrl">
+              </video>
+            </ng-container>
 
-                  {{ message.attachment.name }}
+            <!-- File Attachment -->
+            <ng-container
+              *ngIf="message.attachment.type && !message.attachment.type.startsWith('image/') && !message.attachment.type.startsWith('video/')">
+              <div class="attachment-file" (click)="onAttachmentClick(message.attachment)">
+                <div class="file-icon">
+                  <ng-container [ngSwitch]="getFileExtension(message.attachment.name)">
+                    <span *ngSwitchCase="'pdf'">📄</span>
+                    <span *ngSwitchCase="'doc'">📝</span>
+                    <span *ngSwitchCase="'docx'">📝</span>
+                    <span *ngSwitchCase="'xls'">📊</span>
+                    <span *ngSwitchCase="'xlsx'">📊</span>
+                    <span *ngSwitchCase="'ppt'">📊</span>
+                    <span *ngSwitchCase="'pptx'">📊</span>
+                    <span *ngSwitchCase="'txt'">📃</span>
+                    <span *ngSwitchCase="'zip'">🗜️</span>
+                    <span *ngSwitchCase="'rar'">🗜️</span>
+                    <span *ngSwitchDefault>📎</span>
+                  </ng-container>
                 </div>
-                <div class="file-size text-dark">
-                  {{ formatFileSize(message.attachment.size) }}
+                <div class="file-info">
+                  <div class="file-name text-dark" [title]="message.attachment.name">
+                    {{ message.attachment.name }}
+                  </div>
+                  <div class="file-size text-dark">
+                    {{ formatFileSize(message.attachment.size) }}
+                  </div>
                 </div>
               </div>
-            </div>
+            </ng-container>
           </ng-container>
-        </ng-container>
+        </div>
+      </div>
+
+      <!-- Message Info -->
+      <div class="message-info">
+        <span class="message-time">{{ message.createdAt | date:'shortTime' }}</span>
+        <span class="message-status" *ngIf="isCurrentUser && isLast">
+          {{ message.status }}
+        </span>
+      </div>
+
+      <!-- Reactions -->
+      <div class="message-reactions" *ngIf="message.reactions?.length">
+        <div class="reaction" *ngFor="let reaction of message.reactions">
+          <span class="reaction-emoji">{{ reaction.emoji }}</span>
+          <span class="reaction-count">{{ reaction.userId }}</span>
+        </div>
       </div>
     </div>
 
-    <!-- Message Info -->
-    <div class="message-info">
-      <span class="message-time">{{ message.createdAt | date:'shortTime' }}</span>
-      <span class="message-status" *ngIf="isCurrentUser && isLast">
-        {{ message.status }}
-      </span>
+    <!-- Message Actions -->
+    <div class="message-actions">
+      <button class="action-btn" (click)="onReact()" title="React">
+        <i class="bi bi-emoji-smile"></i>
+      </button>
+      <button class="action-btn" (click)="onReply()" title="Reply">
+        <i class="bi bi-reply"></i>
+      </button>
+      <div class="dropdown position-relative">
+        <button class="action-btn" (click)="onMore()" title="More" [class.active]="showDropdown">
+          <i class="bi bi-three-dots"></i>
+        </button>
+        <ul class="dropdown-menu" [class.show]="showDropdown">
+          <li>
+            <a class="dropdown-item" href="#" (click)="onEdit(); $event.preventDefault()">
+              <i class="bi bi-pencil me-2"></i>Edit
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#" (click)="onDelete(); $event.preventDefault()">
+              <i class="bi bi-trash me-2"></i>Delete
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
+  </ng-container>
 
-    <!-- Reactions -->
-    <div class="message-reactions" *ngIf="message.reactions?.length">
-      <div class="reaction" *ngFor="let reaction of message.reactions">
-        <span class="reaction-emoji">{{ reaction.emoji }}</span>
-        <span class="reaction-count">{{ reaction.userId }}</span>
+  <!-- Template cho globally deleted message - VẪN CÓ AVATAR -->
+  <ng-template #deletedMsg>
+    <div class="deleted-message-bubble" [class.sent]="isCurrentUser" [class.received]="!isCurrentUser">
+      <div class="deleted-message-content">
+        <span class="deleted-text">Message was deleted</span>
+      </div>
+      <div class="message-info deleted-info">
+        <span class="message-time">{{ message.createdAt | date:'shortTime' }}</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Modal preview attachment -->
+  <div class="modal fade show" tabindex="-1"
+    [ngStyle]="{display: previewAttachment ? 'block' : 'none', background: 'rgba(0,0,0,0.5)'}" *ngIf="previewAttachment"
+    style="z-index: 2000;" (click)="closePreview()">
+    <div class="modal-dialog modal-dialog-centered modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Preview</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="closePreview()"></button>
+        </div>
+        <div class="modal-body text-center">
+          <ng-container *ngIf="previewAttachment.type.startsWith('image/')">
+            <img [src]="previewAttachment.url" [alt]="previewAttachment.name" class="img-fluid rounded">
+          </ng-container>
+          <ng-container *ngIf="previewAttachment.type.startsWith('video/')">
+            <video [src]="previewAttachment.url" controls class="w-100 rounded" style="max-height:60vh;"></video>
+          </ng-container>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<div class="modal fade show" tabindex="-1"
-  [ngStyle]="{display: previewAttachment ? 'block' : 'none', background: 'rgba(0,0,0,0.5)'}" *ngIf="previewAttachment"
-  style="z-index: 2000;" (click)="closePreview()">
-  <div class="modal-dialog modal-dialog-centered modal-lg" (click)="$event.stopPropagation()">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Preview</h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="closePreview()"></button>
-      </div>
-      <div class="modal-body text-center">
-        <ng-container *ngIf="previewAttachment.type.startsWith('image/')">
-          <img [src]="previewAttachment.url" [alt]="previewAttachment.name" class="img-fluid rounded">
-        </ng-container>
-        <ng-container *ngIf="previewAttachment.type.startsWith('video/')">
-          <video [src]="previewAttachment.url" controls class="w-100 rounded" style="max-height:60vh;"></video>
-        </ng-container>
+  <!-- Modal delete message -->
+  <div class="modal fade show" tabindex="-1"
+    [ngStyle]="{display: showDeleteModal ? 'block' : 'none', background: 'rgba(0,0,0,0.5)'}" *ngIf="showDeleteModal"
+    style="z-index: 2000;" (click)="closeDeleteModal()">
+    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title text-dark fw-bold">Delete Message</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="closeDeleteModal()"></button>
+        </div>
+        <div class="modal-body pt-2">
+          <p class="text-muted mb-4">Who do you want to delete this message for?</p>
+
+          <div class="delete-options">
+            <!-- Delete for everyone -->
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="radio" name="deleteOption" id="deleteEveryone" value="everyone"
+                [(ngModel)]="deleteOption">
+              <label class="form-check-label" for="deleteEveryone">
+                <div class="option-title">Delete for everyone</div>
+                <small class="text-muted">This message will be deleted for all participants in this
+                  conversation.</small>
+              </label>
+            </div>
+
+            <!-- Delete for me -->
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="deleteOption" id="deleteJustMe" value="justme"
+                [(ngModel)]="deleteOption">
+              <label class="form-check-label" for="deleteJustMe">
+                <div class="option-title">Delete for you</div>
+                <small class="text-muted">This message will only be deleted from your view of the conversation.</small>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">Cancel</button>
+          <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+            <i class="bi bi-trash me-2"></i>Delete
+          </button>
+        </div>
       </div>
     </div>
   </div>

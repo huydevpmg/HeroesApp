@@ -43,7 +43,6 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
     private store: Store,
     private authService: AuthService,
     private socketService: SocketService,
-    private http: HttpClient
   ) {
     this.selectedConversation$ = this.store.select(ConversationSelectors.selectSelectedConversation).pipe(
       map(conv => conv ?? null)
@@ -252,6 +251,20 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
     } catch (error) {
       this.uploading = false;
     }
+  }
+
+  onEditMessage(message: any) {
+    console.log('Edit message:', message);
+    // TODO: Implement edit message functionality
+    // You can add logic here to:
+    // 1. Show edit modal/dialog
+    // 2. Dispatch edit message action
+    // 3. Update message content
+  }
+
+  onDeleteMessage(event: { message: any, deleteType: 'everyone' | 'justme' }) {
+    const { message, deleteType } = event;
+    this.store.dispatch(MessageActions.deleteMessage({ messageId: message._id, deleteType }));
   }
 
   private scrollToBottom() {

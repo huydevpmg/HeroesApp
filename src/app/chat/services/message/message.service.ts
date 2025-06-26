@@ -108,9 +108,11 @@ export class MessageService {
     return this.http.put<Message>(`${this.apiUrl}/${messageId}/status`, { status });
   }
 
-  // Delete message
-  deleteMessage(messageId: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${messageId}`);
+  // Delete message (soft-delete)
+  deleteMessage(messageId: string, deleteType: 'everyone' | 'justme', userId?: string): Observable<void> {
+    const body: any = { deleteType };
+    if (userId) body.userId = userId;
+    return this.http.patch<void>(`${this.apiUrl}/${messageId}/delete`, body);
   }
 
   // Add reaction to message - socket only

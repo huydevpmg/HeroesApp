@@ -37,7 +37,7 @@ export const sendMessageFailure = createAction(
 // Delete message
 export const deleteMessage = createAction(
   '[Message] Delete Message',
-  props<{ messageId: string }>()
+  props<{ messageId: string; deleteType: 'everyone' | 'justme' }>()
 );
 export const deleteMessageSuccess = createAction(
   '[Message] Delete Message Success',
@@ -60,6 +60,12 @@ export const updateMessageStatusSuccess = createAction(
 export const updateMessageStatusFailure = createAction(
   '[Message] Update Message Status Failure',
   props<{ error: string }>()
+);
+
+// Update message
+export const updateMessageSuccess = createAction(
+  '[Message] Update Message Success',
+  props<{ message: Message }>()
 );
 
 // Add reaction

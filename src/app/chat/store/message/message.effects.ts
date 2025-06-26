@@ -30,9 +30,7 @@ export class MessageEffects {
             MessageActions.sendMessageSuccess({ message }),
             ...(message && message._id ? [ConversationActions.updateConversationLastMessage({ conversationId, message })] : [])
           ]),
-          catchError(error => {
-            return of([MessageActions.sendMessageFailure({ error: error.message })]);
-          })
+          catchError(error => of([MessageActions.sendMessageFailure({ error: error.message })]))
         )
       ),
       mergeMap(actions => from(actions))
@@ -42,10 +40,15 @@ export class MessageEffects {
   deleteMessage$ = createEffect(() =>
     this.actions$.pipe(
       ofType(MessageActions.deleteMessage),
-      mergeMap(({ messageId }) =>
-        this.messageService.deleteMessage(messageId).pipe(
+      mergeMap(({ messageId, deleteType }) =>
+        from(this.messageService.deleteMessage(messageId, deleteType)).pipe(
+          tap(() => {
+            if (deleteType === 'everyone') {
+              this.socketService.emitMessageDeletedGlobal(messageId);
+            }
+          }),
           map(() => MessageActions.deleteMessageSuccess({ messageId })),
-          catchError(error => of(MessageActions.deleteMessageFailure({ error: error.message })))
+          catchError(error => of(MessageActions.deleteMessageFailure({ error: error?.message || 'Delete failed' })))
         )
       )
     )
@@ -92,7 +95,7 @@ export class MessageEffects {
     this.actions$.pipe(
       ofType(MessageActions.loadMessages),
       tap(({ conversationId }) => {
-        if (!this.socketService.getSocket().connected) {
+        if (!this.socketService.connected) {
           this.socketService.connect();
           setTimeout(() => {
             this.socketService.joinConversation(conversationId);
@@ -110,14 +113,33 @@ export class MessageEffects {
     this.socketService.onMessage().pipe(
       map(message => [
         MessageActions.receiveMessage({ message }),
-        // Only update lastMessage if message._id is defined (avoid loop)
         ...(message && message._id ? [ConversationActions.updateConversationLastMessage({ conversationId: message.conversationId, message })] : [])
       ]),
       mergeMap(actions => from(actions))
     )
   );
 
-  // Handle reactions
+  // Handle message updated (edit)
+  handleMessageUpdated$ = createEffect(() =>
+    this.socketService.onMessageUpdated().pipe(
+      map(message => MessageActions.updateMessageSuccess({ message }))
+    )
+  );
+
+  // Handle message deleted (global)
+  handleMessageDeletedGlobal$ = createEffect(() =>
+    this.socketService.onMessageDeletedGlobal().pipe(
+      map(({ messageId }) => MessageActions.deleteMessageSuccess({ messageId }))
+    )
+  );
+
+  // Handle message deleted (personal)
+  handleMessageDeletedPersonal$ = createEffect(() =>
+    this.socketService.onMessageDeletedPersonal().pipe(
+      map(({ messageId }) => MessageActions.deleteMessageSuccess({ messageId }))
+    )
+  );
+
   handleReaction$ = createEffect(() =>
     this.socketService.onReaction().pipe(
       map(({ messageId, userId, emoji }) =>

@@ -49,16 +49,16 @@
         </div>
 
         <ng-container *ngFor="let message of messagesWithAttachment$ | async; let isLast = last">
-          <app-base-message [message]="message" [conversationId]="conversation._id!" [isLast]="isLast">
+          <app-base-message [message]="message" [conversationId]="conversation._id!" [isLast]="isLast"
+            (edit)="onEditMessage($event)" (delete)="onDeleteMessage($event)">
           </app-base-message>
 
-          <app-reply-message *ngIf="message.parentMessage" [message]="message" [conversationId]="conversation._id!">
-          </app-reply-message>
+          <!-- <app-reply-message *ngIf="message.parentMessage" [message]="message" [conversationId]="conversation._id!">
+          </app-reply-message> -->
         </ng-container>
       </div>
 
       <div class="chat-input">
-        <!-- File Preview Section -->
         <div class="file-preview-container" *ngIf="selectedFiles.length">
           <div class="file-preview-header">
             <span class="file-count">{{ selectedFiles.length }} file(s) selected</span>
@@ -121,15 +121,6 @@
             </button>
           </div>
         </div>
-      </div>
-
-      <div class="conversation-last-message text-muted small mt-1">
-        <ng-container *ngIf="conversation.lastMessage && conversation.lastMessage; else showAttachmentName">
-          {{ conversation.lastMessage }}
-        </ng-container>
-        <ng-template #showAttachmentName>
-          <span *ngIf="conversation.lastAttachmentName">{{ conversation.lastAttachmentName }}</span>
-        </ng-template>
       </div>
     </ng-container>
 
