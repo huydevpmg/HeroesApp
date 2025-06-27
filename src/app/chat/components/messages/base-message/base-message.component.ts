@@ -1,11 +1,20 @@
-import { Component, Input, Output, EventEmitter, OnInit, HostListener, ElementRef } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  HostListener,
+  ElementRef,
+} from '@angular/core';
 import { AuthService } from '../../../../auth/services/auth.service';
-import { Attachment } from '../../../models/attachment.model';
+import { Attachment } from '../../../../shared/enums/models/attachment.model';
+import { DeleteType } from '../../../../shared/enums/models/delete-type.enum';
 
 @Component({
   selector: 'app-base-message',
   templateUrl: './base-message.component.html',
-  styleUrls: ['./base-message.component.css']
+  styleUrls: ['./base-message.component.css'],
 })
 export class BaseMessageComponent implements OnInit {
   @Input() message!: any;
@@ -16,21 +25,39 @@ export class BaseMessageComponent implements OnInit {
   @Output() reply = new EventEmitter<any>();
   @Output() more = new EventEmitter<any>();
   @Output() edit = new EventEmitter<any>();
-  @Output() delete = new EventEmitter<any>();
+  @Output() delete = new EventEmitter<{
+    message: any;
+    deleteType: DeleteType;
+  }>();
 
   isCurrentUser = false;
   currentUserId: string | null = null;
   previewAttachment: Attachment | null = null;
   showDropdown = false;
   showDeleteModal = false;
-  deleteOption: 'everyone' | 'justme' = 'justme';
+  deleteOption: DeleteType = DeleteType.JUSTME;
 
-  constructor(protected authService: AuthService, private elementRef: ElementRef) { }
+  fileIconMap: { [key: string]: string } = {
+    pdf: '📄',
+    doc: '📝',
+    docx: '📝',
+    xls: '📊',
+    xlsx: '📊',
+    ppt: '📊',
+    pptx: '📊',
+    txt: '📃',
+    zip: '🗜️',
+    rar: '🗜️',
+  };
+
+  constructor(
+    protected authService: AuthService,
+    private elementRef: ElementRef
+  ) { }
 
   ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUserId();
     this.isCurrentUser = this.message.senderId === this.currentUserId;
-    console.log('BaseMessageComponent initialized with message:', this.message);
   }
 
   isImage(url: string): boolean {
@@ -42,7 +69,10 @@ export class BaseMessageComponent implements OnInit {
   }
 
   onAttachmentClick(attachment: Attachment): void {
-    if (attachment.type.startsWith('image/') || attachment.type.startsWith('video/')) {
+    if (
+      attachment.type.startsWith('image/') ||
+      attachment.type.startsWith('video/')
+    ) {
       this.previewAttachment = attachment;
     } else if (attachment.url) {
       window.open(attachment.url, '_blank');
@@ -54,13 +84,17 @@ export class BaseMessageComponent implements OnInit {
   }
 
   getFileExtension(filename: string): string {
-    if (!filename) return '';
+    if (!filename) {
+      return '';
+    }
     const parts = filename.split('.');
     return parts.length > 1 ? parts.pop()?.toLowerCase() || '' : '';
   }
 
   formatFileSize(bytes: number): string {
-    if (!bytes || bytes === 0) return '0 B';
+    if (!bytes || bytes === 0) {
+      return '0 B';
+    }
 
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
@@ -92,17 +126,16 @@ export class BaseMessageComponent implements OnInit {
   }
 
   confirmDelete() {
-    console.log('Delete type selected:', this.deleteOption);
     this.delete.emit({
       message: this.message,
-      deleteType: this.deleteOption
+      deleteType: this.deleteOption,
     });
     this.closeDeleteModal();
   }
 
   closeDeleteModal() {
     this.showDeleteModal = false;
-    this.deleteOption = 'justme';
+    this.deleteOption = DeleteType.JUSTME;
   }
 
   onClickOutside() {
@@ -117,7 +150,9 @@ export class BaseMessageComponent implements OnInit {
   }
 
   get shouldShowMessage(): boolean {
-    if (!this.currentUserId || !this.message) { return false };
+    if (!this.currentUserId || !this.message) {
+      return false;
+    }
     if (this.message.deletedForUserIds?.includes(this.currentUserId)) {
       return false;
     }
@@ -126,5 +161,9 @@ export class BaseMessageComponent implements OnInit {
   }
   get isGloballyDeleted(): boolean {
     return !!this.message?.isDeleteGlobal;
+  }
+
+  getFileIconByExt(ext: string): string {
+    return this.fileIconMap[ext] || '📎';
   }
 }

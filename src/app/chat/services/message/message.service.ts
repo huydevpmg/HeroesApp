@@ -1,155 +1,40 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, tap, of, catchError, throwError } from 'rxjs';
-import { environment } from '../../../../environments/environment';
-import { Message } from '../../models/message.model';
-import { SocketService } from '../socket/socket.service';
-import { AuthService } from '../../../auth/services/auth.service';
+import { Store, select } from '@ngrx/store';
+import * as MessageActions from '../../store/message/message.actions';
+import * as MessageSelectors from '../../store/message/message.selectors';
+import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MessageService {
-  private apiUrl = `${environment.apiUrl}/messages`;
+  messages$ = this.store.pipe(select(MessageSelectors.selectAllMessages));
+  loading$ = this.store.pipe(select(MessageSelectors.selectMessagesLoading));
+  error$ = this.store.pipe(select(MessageSelectors.selectMessagesError));
 
-  constructor(
-    private http: HttpClient,
-    private socketService: SocketService,
-    private authService: AuthService
-  ) { }
+  constructor(private store: Store) { }
 
-  sendMessage(conversationId: string, content: string, attachmentId?: string): Observable<Message> {
-    const currentUserId = this.authService.getCurrentUserId();
-    if (!currentUserId) {
-      throw new Error('User not authenticated');
-    }
-
-    const message: Partial<Message> = {
-      conversationId,
-      content,
-      senderId: currentUserId,
-      attachmentId: attachmentId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    return new Observable<Message>(observer => {
-      this.socketService.sendMessage(message as Message)
-        .then(response => {
-          if (response && response.success) {
-            observer.next(response.message);
-            observer.complete();
-          } else {
-            console.warn('Socket message failed, falling back to HTTP API');
-            // Fallback method to send message via HTTP API
-            this.sendMessageViaHttp(message as Message).subscribe({
-              next: (httpResponse) => {
-                observer.next(httpResponse);
-                observer.complete();
-              },
-              error: (httpError) => {
-                console.error('Failed to send message via both socket and HTTP:', httpError);
-                observer.error(httpError);
-              }
-            });
-          }
-        })
-        .catch(error => {
-          console.error('Error sending message via socket:', error);
-          console.warn('Socket error, falling back to HTTP API');
-          // Fallback method to send message via HTTP API
-          this.sendMessageViaHttp(message as Message).subscribe({
-            next: (httpResponse) => {
-              observer.next(httpResponse);
-              observer.complete();
-            },
-            error: (httpError) => {
-              console.error('Failed to send message via both socket and HTTP:', httpError);
-              observer.error(httpError);
-            }
-          });
-        });
-    });
+  sendMessage(conversationId: string, content: string, attachmentId?: string, fileName?: string) {
+    this.store.dispatch(MessageActions.sendMessage({ conversationId, content, attachmentId, fileName }));
   }
 
-  // Fallback method to send message via HTTP API
-  private sendMessageViaHttp(message: Message): Observable<Message> {
-    const token = this.authService.getAccessToken();
-    if (!token) {
-      return throwError(() => new Error('User not authenticated'));
-    }
-
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
-
-    return this.http.post<Message>(`${this.apiUrl}`, message, { headers })
-      .pipe(
-        catchError(error => {
-          console.error('HTTP API error:', error);
-          return throwError(() => error);
-        })
-      );
+  loadMessages(conversationId: string) {
+    this.store.dispatch(MessageActions.loadMessages({ conversationId }));
   }
 
-  getMessages(conversationId: string): Observable<Message[]> {
-    const token = this.authService.getAccessToken();
-
-    return this.http.get<Message[]>(`${this.apiUrl}`, {
-      params: { conversationId },
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
+  updateMessageStatus(messageId: string, status: string) {
+    this.store.dispatch(MessageActions.updateMessageStatus({ messageId, status }));
   }
 
-  updateMessageStatus(messageId: string, status: string): Observable<Message> {
-    return this.http.put<Message>(`${this.apiUrl}/${messageId}/status`, { status });
+  deleteMessage(messageId: string, deleteType: DeleteType) {
+    this.store.dispatch(MessageActions.deleteMessage({ messageId, deleteType }));
   }
 
-  // Delete message (soft-delete)
-  deleteMessage(messageId: string, deleteType: 'everyone' | 'justme', userId?: string): Observable<void> {
-    const body: any = { deleteType };
-    if (userId) body.userId = userId;
-    return this.http.patch<void>(`${this.apiUrl}/${messageId}/delete`, body);
+  addReaction(messageId: string, emoji: string) {
+    this.store.dispatch(MessageActions.addReaction({ messageId, emoji }));
   }
 
-  // Add reaction to message - socket only
-  addReaction(messageId: string, emoji: string): Observable<Message> {
-    return new Observable<Message>(observer => {
-      this.socketService.addReaction(messageId, emoji)
-        .then(response => {
-          if (response && response.success) {
-            observer.next(response.message);
-            observer.complete();
-          } else {
-            observer.error(new Error('Failed to add reaction via socket'));
-          }
-        })
-        .catch(error => {
-          console.error('Error adding reaction via socket:', error);
-          observer.error(error);
-        });
-    });
-  }
-
-  // Remove reaction from message - socket only
-  removeReaction(messageId: string): Observable<Message> {
-    return new Observable<Message>(observer => {
-      this.socketService.removeReaction(messageId)
-        .then(response => {
-          if (response && response.success) {
-            observer.next(response.message);
-            observer.complete();
-          } else {
-            observer.error(new Error('Failed to remove reaction via socket'));
-          }
-        })
-        .catch(error => {
-          console.error('Error removing reaction via socket:', error);
-          observer.error(error);
-        });
-    });
+  removeReaction(messageId: string) {
+    this.store.dispatch(MessageActions.removeReaction({ messageId }));
   }
 }

@@ -1,5 +1,4 @@
 import { AbstractControl, AsyncValidatorFn, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { HeroService } from '../../hero/service/hero.service';
 import { catchError, map, Observable, of, switchMap, timer } from 'rxjs';
 
 export function nameValidator(): ValidatorFn {

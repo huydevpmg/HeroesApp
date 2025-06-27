@@ -32,8 +32,8 @@
           <!-- Attachment Content -->
           <ng-container *ngIf="message.attachment">
             <!-- Image Attachment -->
-            <ng-container *ngIf="message.attachment.type && message.attachment.type.startsWith('image/')">
-              <img [src]="message.attachment.url" [alt]="message.attachment.name || 'Image attachment'"
+            <ng-container *ngIf="message.attachment?.type && message.attachment?.type.startsWith('image/')">
+              <img [src]="message.attachment?.url" [alt]="message.attachment?.name || 'Image attachment'"
                 class="attachment-image" (click)="onAttachmentClick(message.attachment)">
             </ng-container>
 
@@ -49,19 +49,7 @@
               *ngIf="message.attachment.type && !message.attachment.type.startsWith('image/') && !message.attachment.type.startsWith('video/')">
               <div class="attachment-file" (click)="onAttachmentClick(message.attachment)">
                 <div class="file-icon">
-                  <ng-container [ngSwitch]="getFileExtension(message.attachment.name)">
-                    <span *ngSwitchCase="'pdf'">📄</span>
-                    <span *ngSwitchCase="'doc'">📝</span>
-                    <span *ngSwitchCase="'docx'">📝</span>
-                    <span *ngSwitchCase="'xls'">📊</span>
-                    <span *ngSwitchCase="'xlsx'">📊</span>
-                    <span *ngSwitchCase="'ppt'">📊</span>
-                    <span *ngSwitchCase="'pptx'">📊</span>
-                    <span *ngSwitchCase="'txt'">📃</span>
-                    <span *ngSwitchCase="'zip'">🗜️</span>
-                    <span *ngSwitchCase="'rar'">🗜️</span>
-                    <span *ngSwitchDefault>📎</span>
-                  </ng-container>
+                  {{ getFileIconByExt(getFileExtension(message.attachment.name)) }}
                 </div>
                 <div class="file-info">
                   <div class="file-name text-dark" [title]="message.attachment.name">

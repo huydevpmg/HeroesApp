@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { of, forkJoin } from 'rxjs';
-import { catchError, map, mergeMap, tap } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { catchError, map, mergeMap } from 'rxjs/operators';
 import * as AttachmentActions from './attachment.actions';
 import * as MessageActions from '../message/message.actions';
 import * as ConversationActions from '../conversation/conversation.actions';
-import { Attachment } from '../../models/message.model';
-import { AttachmentService } from '../../services/attachments/attachment.service';
-import { ConversationService } from '../../services/conversation/conversation.service';
+import { Attachment } from '../../../shared/enums/models/message.model';
+import { AttachmentApiService } from '../../services/attachments/attachment-api.service';
 
 @Injectable()
 export class AttachmentEffects {
@@ -57,7 +56,7 @@ export class AttachmentEffects {
               attachmentId: attachment._id,
               fileName: fileName
             }),
-            ConversationActions.updateConversationLastAttachmentName({
+            ConversationActions.updateLastAttachmentName({
               conversationId: attachment.conversationId,
               lastAttachmentName: fileName
             })
@@ -73,21 +72,8 @@ export class AttachmentEffects {
     )
   );
 
-  updateLastAttachmentName$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(ConversationActions.updateConversationLastAttachmentName),
-      mergeMap(({ conversationId, lastAttachmentName }) =>
-        this.conversationService.updateLastAttachmentName(conversationId, lastAttachmentName).pipe(
-          map(() => ({ type: '[Conversation] Update Last Attachment Name Success' })),
-          catchError(() => of({ type: '[Conversation] Update Last Attachment Name Failure' }))
-        )
-      )
-    )
-  );
-
   constructor(
     private actions$: Actions,
-    private attachmentService: AttachmentService,
-    private conversationService: ConversationService
+    private attachmentService: AttachmentApiService,
   ) { }
 }

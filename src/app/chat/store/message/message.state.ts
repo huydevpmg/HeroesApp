@@ -1,5 +1,5 @@
 import { EntityState, EntityAdapter, createEntityAdapter } from '@ngrx/entity';
-import { Message } from '../../models/message.model';
+import { Message } from '../../../shared/enums/models/message.model';
 
 
 // State for managing Messages

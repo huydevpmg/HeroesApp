@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { Message } from '../../models/message.model';
+import { Message } from '../../../shared/enums/models/message.model';
 import { SocketCoreService } from './socket-core.service';
 import { SOCKET_EVENTS } from './socket-events.constants';
 

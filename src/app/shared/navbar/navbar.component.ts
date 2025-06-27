@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HeroModel } from '../../hero/models/hero.model';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -40,7 +40,7 @@ export class NavbarComponent implements OnInit {
   add(hero: HeroModel): void {
     if (this.heroForm.valid) {
       this.heroService.createHero(hero).subscribe({
-        next: (newHero) => {
+        next: () => {
           this.heroEvents.notifyHeroAdded();
           this.heroForm.reset();
         },

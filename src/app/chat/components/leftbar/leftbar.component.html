@@ -149,7 +149,7 @@
                   <img
                     [src]=" 'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'"
                     [alt]="user.fullName">
-                  <div class="user-status" [class.online]="isUserOnline(user._id)"></div>
+                  <div class="user-status" [class.online]="isUserOnline()"></div>
                 </div>
                 <div class="user-info">
                   <div class="user-name">{{ user.fullName }}</div>

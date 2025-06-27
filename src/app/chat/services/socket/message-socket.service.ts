@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { Message } from '../../models/message.model';
+import { Message } from '../../../shared/enums/models/message.model';
 import { SocketCoreService } from './socket-core.service';
 import { SOCKET_EVENTS } from './socket-events.constants';
+import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +27,6 @@ export class MessageSocketService {
   private setupMessageListeners(): void {
     // Message received
     this.socketCore.on(SOCKET_EVENTS.RECEIVE_MESSAGE, (message: Message) => {
-      console.log('Message received:', message);
       this.messageSubject.next(message);
     });
 
@@ -37,19 +37,16 @@ export class MessageSocketService {
 
     // Message updated
     this.socketCore.on(SOCKET_EVENTS.MESSAGE_UPDATED, (message: Message) => {
-      console.log('Message updated:', message);
       this.messageUpdatedSubject.next(message);
     });
 
     // Message deleted globally
     this.socketCore.on(SOCKET_EVENTS.MESSAGE_DELETED_GLOBAL, (data: { messageId: string; conversationId: string }) => {
-      console.log('Message deleted globally:', data);
       this.messageDeletedGlobalSubject.next(data);
     });
 
     // Message deleted personally
     this.socketCore.on(SOCKET_EVENTS.MESSAGE_DELETED_PERSONAL, (data: { messageId: string; userId: string; conversationId: string }) => {
-      console.log('Message deleted personally:', data);
       this.messageDeletedPersonalSubject.next(data);
     });
   }
@@ -57,8 +54,6 @@ export class MessageSocketService {
   // Send message
   sendMessage(message: Message): Promise<{ success: boolean; message: Message }> {
     return new Promise((resolve, reject) => {
-      console.log('Sending message via socket:', message);
-
       const payload: any = {
         conversationId: message.conversationId,
         content: message.content,
@@ -86,7 +81,6 @@ export class MessageSocketService {
             console.error('Failed to send message:', err);
             reject(err);
           } else {
-            console.log('✅ Message sent successfully:', response);
             resolve(response);
           }
         }
@@ -97,8 +91,6 @@ export class MessageSocketService {
   // Edit message
   editMessage(messageId: string, content: string): Promise<{ success: boolean; message: Message }> {
     return new Promise((resolve) => {
-      console.log('✏️ Editing message:', { messageId, content });
-
       this.socketCore.emit(
         SOCKET_EVENTS.EDIT_MESSAGE,
         { messageId, content },
@@ -115,10 +107,8 @@ export class MessageSocketService {
   }
 
   // Delete message
-  deleteMessage(messageId: string, deleteType: 'everyone' | 'justme'): Promise<{ success: boolean; message: string }> {
+  deleteMessage(messageId: string, deleteType: DeleteType): Promise<{ success: boolean; message: string }> {
     return new Promise((resolve) => {
-      console.log('Deleting message:', { messageId, deleteType });
-
       this.socketCore.emit(
         SOCKET_EVENTS.DELETE_MESSAGE,
         { messageId, deleteType },

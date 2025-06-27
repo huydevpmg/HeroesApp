@@ -20,13 +20,9 @@ export class PresenceSocketService {
   private setupPresenceListeners(): void {
     this.socketCore.on(SOCKET_EVENTS.USER_STATUS_CHANGE, (data: any) => {
       if (data.onlineUsers) {
-        // Initial online users list
-        console.log('Online users updated:', data.onlineUsers);
         this.onlineUserIds = new Set(data.onlineUsers);
         this.onlineUserIdsSubject.next(new Set(this.onlineUserIds));
       } else if (data.userId && data.status) {
-        // Individual user status change
-        console.log(`User ${data.userId} is now ${data.status}`);
 
         if (data.status === 'online') {
           this.onlineUserIds.add(data.userId);

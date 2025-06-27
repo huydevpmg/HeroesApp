@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { Conversation } from '../../models/conversation.model';
+import { Conversation } from '../../../shared/enums/models/conversation.model';
 import { SocketCoreService } from './socket-core.service';
 import { SOCKET_EVENTS } from './socket-events.constants';
 import { Store } from '@ngrx/store';
@@ -24,53 +24,44 @@ export class ConversationSocketService {
   private setupConversationListeners(): void {
     // New group created
     this.socketCore.on(SOCKET_EVENTS.NEW_GROUP, (group: Conversation) => {
-      console.log('New group created:', group);
       this.groupCreatedSubject.next(group);
       this.store.dispatch(ConversationActions.loadConversationSuccess({ conversation: group }));
     });
 
     // User joined conversation
     this.socketCore.on(SOCKET_EVENTS.JOIN_ROOM, (data: { userId: string; conversationId: string }) => {
-      console.log('User joined conversation:', data);
       this.userJoinedSubject.next(data);
     });
 
     // Conversation pinned
     this.socketCore.on(SOCKET_EVENTS.PIN_CONVERSATION, (data: { conversationId: string; result: any }) => {
-      console.log('Conversation pinned:', data);
       this.conversationUpdatedSubject.next({ conversationId: data.conversationId, type: 'pin', data: data.result });
     });
 
     // Conversation archived
     this.socketCore.on(SOCKET_EVENTS.ARCHIVE_CONVERSATION, (data: { conversationId: string; result: any }) => {
-      console.log('Conversation archived:', data);
       this.conversationUpdatedSubject.next({ conversationId: data.conversationId, type: 'archive', data: data.result });
     });
 
     // Label added
     this.socketCore.on(SOCKET_EVENTS.ADD_LABEL, (data: { conversationId: string; result: any }) => {
-      console.log('Label added to conversation:', data);
       this.conversationUpdatedSubject.next({ conversationId: data.conversationId, type: 'label', data: data.result });
     });
 
     // Label removed
     this.socketCore.on(SOCKET_EVENTS.REMOVE_LABEL, (data: { conversationId: string; result: any }) => {
-      console.log('Label removed from conversation:', data);
       this.conversationUpdatedSubject.next({ conversationId: data.conversationId, type: 'label', data: data.result });
     });
   }
 
   // Join conversation room
   joinConversation(conversationId: string): void {
-    console.log('Joining conversation:', conversationId);
     this.socketCore.emit(SOCKET_EVENTS.JOIN_ROOM, conversationId);
   }
 
   // Connect or create 1-on-1 conversation
   connectConversation(partnerId: string): Promise<{ success: boolean; conversationId: string }> {
     return new Promise((resolve) => {
-      console.log('Connecting to conversation with partner:', partnerId);
-
       this.socketCore.emit(
         SOCKET_EVENTS.CONNECT_CONVERSATION,
         { partnerId },
@@ -88,8 +79,6 @@ export class ConversationSocketService {
 
   // Emit group creation
   emitGroupCreated(conversation: Conversation): void {
-    console.log('Emitting group created:', conversation);
-
     this.socketCore.emit(SOCKET_EVENTS.GROUP_CREATED, {
       _id: conversation._id,
       name: conversation.name,
@@ -103,8 +92,6 @@ export class ConversationSocketService {
   // Pin conversation
   pinConversation(conversationId: string): Promise<{ success: boolean; result: any }> {
     return new Promise((resolve) => {
-      console.log('Pinning conversation:', conversationId);
-
       this.socketCore.emit(
         SOCKET_EVENTS.PIN_CONVERSATION,
         { conversationId },

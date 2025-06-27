@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Attachment, Message } from '../../models/message.model';
+import { Message } from '../../../shared/enums/models/message.model';
 
 // Load messages
 export const loadMessages = createAction(

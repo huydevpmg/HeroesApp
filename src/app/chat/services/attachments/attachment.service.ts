@@ -1,30 +1,19 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../../environments/environment';
-import { Attachment } from '../../models/message.model';
+import { Attachment } from '../../../shared/enums/models/message.model';
+import { AttachmentApiService } from './attachment-api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AttachmentService {
-  private apiUrl = `${environment.apiUrl}/attachments`;
-
-  constructor(private http: HttpClient) { }
+  constructor(private attachmentApi: AttachmentApiService) { }
 
   uploadAttachment(file: File, content: string, conversationId: string, uploadedBy: string, fileName?: string): Observable<Attachment> {
-    const form = new FormData();
-    form.append('file', file);
-    form.append('content', content);
-    form.append('conversationId', conversationId);
-    form.append('uploadedBy', uploadedBy);
-    if (fileName) {
-      form.append('fileName', fileName);
-    }
-    return this.http.post<Attachment>(this.apiUrl, form);
+    return this.attachmentApi.uploadAttachment(file, content, conversationId, uploadedBy, fileName);
   }
 
   getAttachmentById(attachmentId: string): Observable<Attachment> {
-    return this.http.get<Attachment>(`${this.apiUrl}/${attachmentId}`);
+    return this.attachmentApi.getAttachmentById(attachmentId);
   }
 }

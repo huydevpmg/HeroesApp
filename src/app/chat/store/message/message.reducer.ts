@@ -23,7 +23,7 @@ export const messageReducer = createReducer(
   ),
 
   on(MessageActions.deleteMessageSuccess, (state, { messageId }) =>
-    messageAdapter.removeOne(messageId, state)
+    messageAdapter.updateOne({ id: messageId, changes: { isDeleteGlobal: true } }, state)
   ),
 
   on(MessageActions.deleteMessageFailure, (state, { error }) => ({ ...state, error })),

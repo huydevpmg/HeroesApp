@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { SocketCoreService } from './socket-core.service';
 import { SOCKET_EVENTS } from './socket-events.constants';
+import { Attachment } from '../../../shared/enums/models/message.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,26 +20,22 @@ export class AttachmentSocketService {
   private setupAttachmentListeners(): void {
     // Attachment created
     this.socketCore.on(SOCKET_EVENTS.ATTACHMENT_CREATED, (data: { attachment: any; conversationId: string }) => {
-      console.log('Attachment created:', data);
       this.attachmentCreatedSubject.next(data);
     });
 
     // Attachment deleted
     this.socketCore.on(SOCKET_EVENTS.ATTACHMENT_DELETED, (data: { attachmentId: string; conversationId: string }) => {
-      console.log('Attachment deleted:', data);
       this.attachmentDeletedSubject.next(data);
     });
   }
 
   // Emit attachment created (if needed)
-  emitAttachmentCreated(attachment: any, conversationId: string): void {
-    console.log('Emitting attachment created:', { attachment, conversationId });
+  emitAttachmentCreated(attachment: Attachment, conversationId: string): void {
     this.socketCore.emit(SOCKET_EVENTS.ATTACHMENT_CREATED, { attachment, conversationId });
   }
 
   // Emit attachment deleted (if needed)
   emitAttachmentDeleted(attachmentId: string, conversationId: string): void {
-    console.log('Emitting attachment deleted:', { attachmentId, conversationId });
     this.socketCore.emit(SOCKET_EVENTS.ATTACHMENT_DELETED, { attachmentId, conversationId });
   }
 

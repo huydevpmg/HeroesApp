@@ -1,8 +1,7 @@
-// src/app/heroes/store/effects/hero.effects.ts
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
-import { catchError, exhaustMap, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, exhaustMap, map, tap } from 'rxjs/operators';
 import * as HeroActions from '../hero/hero.actions';
 import { HeroService } from '../../service/hero.service';
 import { Router } from '@angular/router';
@@ -96,16 +95,6 @@ export class HeroEffects {
         HeroActions.updateHeroSuccess,
         HeroActions.deleteManyHeroesSuccess
       ),
-      tap(action => {
-        let message = '';
-        if (action.type === HeroActions.createHeroSuccess.type) {
-          message = `Hero ${action.hero.name} created successfully`;
-        } else if (action.type === HeroActions.updateHeroSuccess.type) {
-          message = `Hero ${action.hero.name} updated successfully`;
-        } else if (action.type === HeroActions.deleteManyHeroesSuccess.type) {
-          message = 'Hero deleted successfully';
-        }
-      })
     ),
     { dispatch: false }
   );
@@ -130,7 +119,7 @@ export class HeroEffects {
       ofType(HeroActions.addTagToHero),
       exhaustMap(({ heroIds, tag }) =>
         this.heroService.addTagToHeroes(heroIds, tag).pipe(
-          map(hero => HeroActions.addTagToHeroSuccess({ heroIds, tag })),
+          map(() => HeroActions.addTagToHeroSuccess({ heroIds, tag })),
           catchError(error =>
             of(HeroActions.addTagToHeroFailure({ error: error.message }))
           )
@@ -145,7 +134,7 @@ export class HeroEffects {
       ofType(HeroActions.removeTagFromHero),
       exhaustMap(({ heroIds, tag }) =>
         this.heroService.removeTagFromHeroes(heroIds, tag).pipe(
-          map(hero => HeroActions.removeTagFromHeroSuccess({ heroIds, tag })),
+          map(() => HeroActions.removeTagFromHeroSuccess({ heroIds, tag })),
           catchError(error =>
             of(HeroActions.removeTagFromHeroFailure({ error: error.message }))
           )

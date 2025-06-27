@@ -6,8 +6,9 @@ import { ConversationSocketService } from './conversation-socket.service';
 import { PresenceSocketService } from './status-socket.service';
 import { ReactionSocketService } from './reaction-socket.service';
 import { AttachmentSocketService } from './attachment-socket.service';
-import { Message } from '../../models/message.model';
-import { Conversation } from '../../models/conversation.model';
+import { Attachment, Message } from '../../../shared/enums/models/message.model';
+import { Conversation } from '../../../shared/enums/models/conversation.model';
+import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
 @Injectable({
   providedIn: 'root'
 })
@@ -47,7 +48,7 @@ export class SocketService {
     return this.messageSocket.editMessage(messageId, content);
   }
 
-  deleteMessage(messageId: string, deleteType: 'everyone' | 'justme'): Promise<{ success: boolean; message: string }> {
+  deleteMessage(messageId: string, deleteType: DeleteType): Promise<{ success: boolean; message: string }> {
     return this.messageSocket.deleteMessage(messageId, deleteType);
   }
 
@@ -123,7 +124,7 @@ export class SocketService {
   }
 
   // === ATTACHMENT METHODS ===
-  emitAttachmentCreated(attachment: any, conversationId: string): void {
+  emitAttachmentCreated(attachment: Attachment, conversationId: string): void {
     this.attachmentSocket.emitAttachmentCreated(attachment, conversationId);
   }
 
@@ -200,7 +201,7 @@ export class SocketService {
   }
 
   // Attachment observables
-  onAttachmentCreated(): Observable<{ attachment: any; conversationId: string }> {
+  onAttachmentCreated(): Observable<{ attachment: Attachment; conversationId: string }> {
     return this.attachmentSocket.onAttachmentCreated();
   }
 
@@ -209,7 +210,7 @@ export class SocketService {
   }
 
   onAttachmentChange(): Observable<{
-    attachment?: any;
+    attachment?: Attachment;
     attachmentId?: string;
     conversationId: string;
     action: 'created' | 'deleted'

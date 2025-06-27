@@ -1,53 +1,52 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../../../environments/environment';
-import { Conversation } from '../../models/conversation.model';
-import { tap } from 'rxjs/operators';
+import { Store, select } from '@ngrx/store';
+import { Conversation } from '../../../shared/enums/models/conversation.model';
+import * as ConversationActions from '../../store/conversation/conversation.actions';
+import * as ConversationSelectors from '../../store/conversation/conversation.selectors';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConversationService {
-  private apiUrl = `${environment.apiUrl}/conversations`;
+  // Expose observable state for component to subscribe
+  conversations$ = this.store.pipe(select(ConversationSelectors.selectAllConversations));
+  selectedConversation$ = this.store.pipe(select(ConversationSelectors.selectSelectedConversation));
+  loading$ = this.store.pipe(select(ConversationSelectors.selectConversationLoading));
+  error$ = this.store.pipe(select(ConversationSelectors.selectConversationError));
 
-  constructor(private http: HttpClient) { }
+  constructor(private store: Store) { }
 
-  // Create 1on1 conversation (findOrCreate)
-  findOrCreate1on1Conversation(participantId: string): Observable<Conversation> {
-    return this.http.post<Conversation>(`${this.apiUrl}/1on1`, { participantId });
+  // Dispatch actions
+  loadConversations() {
+    this.store.dispatch(ConversationActions.loadConversations());
   }
 
-  // Create group conversation
-  createConversation(data: Partial<Conversation>): Observable<Conversation> {
-    return this.http.post<Conversation>(`${this.apiUrl}/`, data);
+  selectConversation(id: string) {
+    this.store.dispatch(ConversationActions.selectConversation({ id }));
   }
 
-  // Get all conversations (current user)
-  getConversations(): Observable<Conversation[]> {
-    return this.http.get<Conversation[]>(`${this.apiUrl}`)
+  createConversation(data: Partial<Conversation>) {
+    this.store.dispatch(ConversationActions.createConversation({ data }));
   }
 
-  // Get conversation by id
-  getConversationById(id: string): Observable<Conversation> {
-    return this.http.get<Conversation>(`${this.apiUrl}/${id}`);
+  updateConversation(id: string, data: Partial<Conversation>) {
+    this.store.dispatch(ConversationActions.updateConversation({ id, data }));
   }
 
-  // Update conversation (PATCH)
-  updateConversation(id: string, data: Partial<Conversation>): Observable<Conversation> {
-    return this.http.patch<Conversation>(`${this.apiUrl}/${id}`, data);
+  updateLastAttachmentName(conversationId: string, lastAttachmentName: string) {
+    this.store.dispatch(ConversationActions.updateLastAttachmentName({ conversationId, lastAttachmentName }));
+  }
+  getAllUsers() {
+    this.store.dispatch(ConversationActions.getAllUsers());
+  }
+  findOrCreate1on1Conversation(participantId: string) {
+    this.store.dispatch(ConversationActions.findOrCreate1on1Conversation({ participantId }));
+  }
+  getConversationById(id: string) {
+    this.store.dispatch(ConversationActions.loadConversation({ id }));
+  }
+  getConversations() {
+    this.store.dispatch(ConversationActions.loadConversations());
   }
 
-  updateLastAttachmentName(conversationId: string, lastAttachmentName: string): Observable<Conversation> {
-    return this.http.patch<Conversation>(`${this.apiUrl}/${conversationId}/last-attachment`, { lastAttachmentName });
-  }
-
-  getAllUsers(): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.authService}/api/profile`);
-  }
-
-  // Delete conversation (if you want to use this, uncomment backend route)
-  // deleteConversation(id: string): Observable<void> {
-  //   return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  // }
 }

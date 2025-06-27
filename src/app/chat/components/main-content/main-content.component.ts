@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription, firstValueFrom } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, distinctUntilChanged, filter } from 'rxjs/operators';
-import { Conversation } from '../../models/conversation.model';
-import { Attachment, Message } from '../../models/message.model';
+import { Conversation } from '../../../shared/enums/models/conversation.model';
+import { Message } from '../../../shared/enums/models/message.model';
 import * as ConversationSelectors from '../../store/conversation/conversation.selectors';
 import * as MessageActions from '../../store/message/message.actions';
 import * as MessageSelectors from '../../store/message/message.selectors';
@@ -11,9 +11,9 @@ import * as AttachmentActions from '../../store/attachment/attachment.actions';
 import { selectMessagesWithAttachment } from '../../store/message/message.selectors';
 import { AuthService } from '../../../auth/services/auth.service';
 import { SocketService } from '../../services/socket/socket.service';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
 import { selectAttachmentEntities } from '../../store/attachment/attachment.selectors';
+import { MessageService } from '../../services/message/message.service';
+import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
 
 @Component({
   selector: 'app-main-content',
@@ -43,6 +43,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
     private store: Store,
     private authService: AuthService,
     private socketService: SocketService,
+    private messageService: MessageService
   ) {
     this.selectedConversation$ = this.store.select(ConversationSelectors.selectSelectedConversation).pipe(
       map(conv => conv ?? null)
@@ -147,8 +148,8 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getFileIconClass(file: File): string {
     const extension = this.getFileExtension(file.name);
-    if (['mp4', 'avi', 'mov', 'webm'].includes(extension)) return 'video';
-    if (['mp3', 'wav', 'flac', 'aac'].includes(extension)) return 'audio';
+    if (['mp4', 'avi', 'mov', 'webm'].includes(extension)) { return 'video'; }
+    if (['mp3', 'wav', 'flac', 'aac'].includes(extension)) { return 'audio'; }
     return extension;
   }
 
@@ -157,7 +158,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   truncateFileName(filename: string, maxLength: number): string {
-    if (filename.length <= maxLength) return filename;
+    if (filename.length <= maxLength) { return filename; }
     const extension = filename.split('.').pop();
     const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.'));
     const truncatedName = nameWithoutExt.substring(0, maxLength - extension!.length - 4) + '...';
@@ -165,7 +166,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   formatFileSize(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) { return '0 Bytes'; }
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -248,7 +249,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         });
       }
-    } catch (error) {
+    } catch {
       this.uploading = false;
     }
   }
@@ -262,15 +263,15 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
     // 3. Update message content
   }
 
-  onDeleteMessage(event: { message: any, deleteType: 'everyone' | 'justme' }) {
+  onDeleteMessage(event: { message: any, deleteType: DeleteType }) {
     const { message, deleteType } = event;
-    this.store.dispatch(MessageActions.deleteMessage({ messageId: message._id, deleteType }));
+    this.messageService.deleteMessage(message._id, deleteType);
   }
 
   private scrollToBottom() {
     try {
       this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
-    } catch (e) { }
+    } catch { }
   }
 
   ngOnDestroy() {
