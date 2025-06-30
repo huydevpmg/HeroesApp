@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { HeroService } from '../../service/hero.service';
@@ -58,7 +58,7 @@ export class AddHeroModalComponent {
   }
 
   firstErrorKey(errors: any): string | null {
-    if (!errors) return null;
+    if (!errors) { return null; }
     const keys = Object.keys(errors);
     return keys.length > 0 ? keys[0] : null;
   }

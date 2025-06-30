@@ -1,22 +1,59 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  HostListener,
+  ElementRef,
+} from '@angular/core';
 import { AuthService } from '../../../../auth/services/auth.service';
-import { Attachment } from '../../../models/attachment.model';
+import { Attachment } from '../../../../shared/enums/models/attachment.model';
+import { DeleteType } from '../../../../shared/enums/models/delete-type.enum';
 
 @Component({
   selector: 'app-base-message',
   templateUrl: './base-message.component.html',
-  styleUrls: ['./base-message.component.css']
+  styleUrls: ['./base-message.component.css'],
 })
 export class BaseMessageComponent implements OnInit {
   @Input() message!: any;
   @Input() conversationId!: string;
   @Input() isLast: boolean = false;
 
+  @Output() react = new EventEmitter<any>();
+  @Output() reply = new EventEmitter<any>();
+  @Output() more = new EventEmitter<any>();
+  @Output() edit = new EventEmitter<any>();
+  @Output() delete = new EventEmitter<{
+    message: any;
+    deleteType: DeleteType;
+  }>();
+
   isCurrentUser = false;
   currentUserId: string | null = null;
   previewAttachment: Attachment | null = null;
+  showDropdown = false;
+  showDeleteModal = false;
+  deleteOption: DeleteType = DeleteType.JUSTME;
 
-  constructor(protected authService: AuthService) { }
+  fileIconMap: { [key: string]: string } = {
+    pdf: '📄',
+    doc: '📝',
+    docx: '📝',
+    xls: '📊',
+    xlsx: '📊',
+    ppt: '📊',
+    pptx: '📊',
+    txt: '📃',
+    zip: '🗜️',
+    rar: '🗜️',
+  };
+
+  constructor(
+    protected authService: AuthService,
+    private elementRef: ElementRef
+  ) { }
 
   ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUserId();
@@ -32,7 +69,10 @@ export class BaseMessageComponent implements OnInit {
   }
 
   onAttachmentClick(attachment: Attachment): void {
-    if (attachment.type.startsWith('image/') || attachment.type.startsWith('video/')) {
+    if (
+      attachment.type.startsWith('image/') ||
+      attachment.type.startsWith('video/')
+    ) {
       this.previewAttachment = attachment;
     } else if (attachment.url) {
       window.open(attachment.url, '_blank');
@@ -44,18 +84,86 @@ export class BaseMessageComponent implements OnInit {
   }
 
   getFileExtension(filename: string): string {
-    if (!filename) return '';
+    if (!filename) {
+      return '';
+    }
     const parts = filename.split('.');
     return parts.length > 1 ? parts.pop()?.toLowerCase() || '' : '';
   }
 
   formatFileSize(bytes: number): string {
-    if (!bytes || bytes === 0) return '0 B';
+    if (!bytes || bytes === 0) {
+      return '0 B';
+    }
 
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     const size = (bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1);
 
     return `${size} ${sizes[i]}`;
+  }
+
+  onReact() {
+    this.react.emit(this.message);
+  }
+
+  onReply() {
+    this.reply.emit(this.message);
+  }
+
+  onMore() {
+    this.showDropdown = !this.showDropdown;
+  }
+
+  onEdit() {
+    this.edit.emit(this.message);
+    this.showDropdown = false;
+  }
+
+  onDelete() {
+    this.showDeleteModal = true;
+    this.showDropdown = false;
+  }
+
+  confirmDelete() {
+    this.delete.emit({
+      message: this.message,
+      deleteType: this.deleteOption,
+    });
+    this.closeDeleteModal();
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.deleteOption = DeleteType.JUSTME;
+  }
+
+  onClickOutside() {
+    this.showDropdown = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  clickOutside(event: any) {
+    if (!this.elementRef.nativeElement.contains(event.target)) {
+      this.showDropdown = false;
+    }
+  }
+
+  get shouldShowMessage(): boolean {
+    if (!this.currentUserId || !this.message) {
+      return false;
+    }
+    if (this.message.deletedForUserIds?.includes(this.currentUserId)) {
+      return false;
+    }
+
+    return true;
+  }
+  get isGloballyDeleted(): boolean {
+    return !!this.message?.isDeleteGlobal;
+  }
+
+  getFileIconByExt(ext: string): string {
+    return this.fileIconMap[ext] || '📎';
   }
 }

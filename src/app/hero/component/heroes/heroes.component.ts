@@ -79,7 +79,7 @@ export class HeroesComponent implements OnInit, OnDestroy {
   }
 
   deleteSelectedHeroes() {
-    if (this.selectedIds.length === 0) return;
+    if (this.selectedIds.length === 0) { return };
 
     this.store.dispatch(deleteManyHeroes({ ids: this.selectedIds }));
     this.selectedIds = [];

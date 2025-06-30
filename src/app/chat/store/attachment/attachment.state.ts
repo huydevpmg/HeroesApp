@@ -1,5 +1,5 @@
 import { EntityState, EntityAdapter, createEntityAdapter } from '@ngrx/entity';
-import { Attachment } from '../../models/message.model';
+import { Attachment } from '../../../shared/enums/models/message.model';
 
 export interface AttachmentState extends EntityState<Attachment> {
   loading: boolean;

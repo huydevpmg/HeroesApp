@@ -1,11 +1,10 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { Conversation } from '../../models/conversation.model';
+import { Conversation } from '../../../shared/enums/models/conversation.model';
 import { map, Observable, combineLatest } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { AuthService } from '../../../auth/services/auth.service';
 import { SocketService } from '../../services/socket/socket.service';
-import * as ConversationSelectors from '../../store/conversation/conversation.selectors';
-import * as ConversationActions from '../../store/conversation/conversation.actions';
+import { ConversationService } from '../../services/conversation/conversation.service';
 
 @Component({
   selector: 'app-chat-info',
@@ -27,11 +26,12 @@ export class ChatInfoComponent implements OnInit {
   constructor(
     private store: Store,
     private authService: AuthService,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private conversationService: ConversationService
   ) {
-    this.selectedConversation$ = this.store.select(ConversationSelectors.selectSelectedConversation);
-    this.loading$ = this.store.select(ConversationSelectors.selectConversationLoading);
-    this.error$ = this.store.select(ConversationSelectors.selectConversationError);
+    this.selectedConversation$ = this.conversationService.selectedConversation$;
+    this.loading$ = this.conversationService.loading$;
+    this.error$ = this.conversationService.error$;
     this.onlineUsers$ = this.socketService.onOnlineUserIds().pipe(
       map(set => Array.from(set))
     );
@@ -56,16 +56,16 @@ export class ChatInfoComponent implements OnInit {
               status: onlineUsers.includes(participant._id) ? 'online' : 'offline'
             }
           }),
-          sharedImages: this.getSharedImages(conversation),
-          sharedFiles: this.getSharedFiles(conversation)
+          sharedImages: this.getSharedImages(),
+          sharedFiles: this.getSharedFiles()
         };
       })
     );
   }
 
   ngOnInit() {
-    this.store.dispatch(ConversationActions.loadConversations());
-    this.store.dispatch(ConversationActions.getAllUsers());
+    this.conversationService.loadConversations();
+    this.conversationService.getAllUsers();
   }
 
   onClose() {
@@ -88,7 +88,6 @@ export class ChatInfoComponent implements OnInit {
     console.log('Send message to:', member);
   }
 
-
   viewImage(image: any) {
     console.log('View image:', image);
   }
@@ -105,11 +104,11 @@ export class ChatInfoComponent implements OnInit {
     console.log('View file:', file);
   }
 
-  private getSharedImages(conversation: any) {
+  private getSharedImages() {
     return this.getMockSharedImages();
   }
 
-  private getSharedFiles(conversation: any) {
+  private getSharedFiles() {
     return this.getMockSharedFiles();
   }
 

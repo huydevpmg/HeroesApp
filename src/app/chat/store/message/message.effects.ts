@@ -4,8 +4,9 @@ import { of, from } from 'rxjs';
 import { map, mergeMap, catchError, tap } from 'rxjs/operators';
 import * as MessageActions from './message.actions';
 import * as ConversationActions from '../conversation/conversation.actions';
-import { MessageService } from '../../services/message/message.service';
 import { SocketService } from '../../services/socket/socket.service';
+import { MessageApiService } from '../../services/message/message-api.service';
+import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
 
 @Injectable()
 export class MessageEffects {
@@ -13,7 +14,7 @@ export class MessageEffects {
     this.actions$.pipe(
       ofType(MessageActions.loadMessages),
       mergeMap(({ conversationId }) =>
-        this.messageService.getMessages(conversationId).pipe(
+        this.messageApiService.getMessages(conversationId).pipe(
           map(messages => MessageActions.loadMessagesSuccess({ messages })),
           catchError(error => of(MessageActions.loadMessagesFailure({ error: error.message })))
         )
@@ -25,14 +26,12 @@ export class MessageEffects {
     this.actions$.pipe(
       ofType(MessageActions.sendMessage),
       mergeMap(({ conversationId, content, attachmentId }) =>
-        this.messageService.sendMessage(conversationId, content, attachmentId).pipe(
+        this.messageApiService.sendMessage(conversationId, content, attachmentId).pipe(
           map(message => [
             MessageActions.sendMessageSuccess({ message }),
             ...(message && message._id ? [ConversationActions.updateConversationLastMessage({ conversationId, message })] : [])
           ]),
-          catchError(error => {
-            return of([MessageActions.sendMessageFailure({ error: error.message })]);
-          })
+          catchError(error => of([MessageActions.sendMessageFailure({ error: error.message })]))
         )
       ),
       mergeMap(actions => from(actions))
@@ -42,10 +41,15 @@ export class MessageEffects {
   deleteMessage$ = createEffect(() =>
     this.actions$.pipe(
       ofType(MessageActions.deleteMessage),
-      mergeMap(({ messageId }) =>
-        this.messageService.deleteMessage(messageId).pipe(
+      mergeMap(({ messageId, deleteType }) =>
+        from(this.messageApiService.deleteMessage(messageId, deleteType as DeleteType)).pipe(
+          tap(() => {
+            if (deleteType === DeleteType.EVERYONE) {
+              this.socketService.emitMessageDeletedGlobal(messageId);
+            }
+          }),
           map(() => MessageActions.deleteMessageSuccess({ messageId })),
-          catchError(error => of(MessageActions.deleteMessageFailure({ error: error.message })))
+          catchError(error => of(MessageActions.deleteMessageFailure({ error: error?.message || 'Delete failed' })))
         )
       )
     )
@@ -55,7 +59,7 @@ export class MessageEffects {
     this.actions$.pipe(
       ofType(MessageActions.updateMessageStatus),
       mergeMap(({ messageId, status }) =>
-        this.messageService.updateMessageStatus(messageId, status).pipe(
+        this.messageApiService.updateMessageStatus(messageId, status).pipe(
           map(message => MessageActions.updateMessageStatusSuccess({ message })),
           catchError(error => of(MessageActions.updateMessageStatusFailure({ error: error.message })))
         )
@@ -67,7 +71,7 @@ export class MessageEffects {
     this.actions$.pipe(
       ofType(MessageActions.addReaction),
       mergeMap(({ messageId, emoji }) =>
-        this.messageService.addReaction(messageId, emoji).pipe(
+        this.messageApiService.addReaction(messageId, emoji).pipe(
           map(message => MessageActions.addReactionSuccess({ message })),
           catchError(error => of(MessageActions.addReactionFailure({ error: error.message })))
         )
@@ -79,7 +83,7 @@ export class MessageEffects {
     this.actions$.pipe(
       ofType(MessageActions.removeReaction),
       mergeMap(({ messageId }) =>
-        this.messageService.removeReaction(messageId).pipe(
+        this.messageApiService.removeReaction(messageId).pipe(
           map(message => MessageActions.removeReactionSuccess({ message })),
           catchError(error => of(MessageActions.removeReactionFailure({ error: error.message })))
         )
@@ -92,7 +96,7 @@ export class MessageEffects {
     this.actions$.pipe(
       ofType(MessageActions.loadMessages),
       tap(({ conversationId }) => {
-        if (!this.socketService.getSocket().connected) {
+        if (!this.socketService.connected) {
           this.socketService.connect();
           setTimeout(() => {
             this.socketService.joinConversation(conversationId);
@@ -110,14 +114,33 @@ export class MessageEffects {
     this.socketService.onMessage().pipe(
       map(message => [
         MessageActions.receiveMessage({ message }),
-        // Only update lastMessage if message._id is defined (avoid loop)
         ...(message && message._id ? [ConversationActions.updateConversationLastMessage({ conversationId: message.conversationId, message })] : [])
       ]),
       mergeMap(actions => from(actions))
     )
   );
 
-  // Handle reactions
+  // Handle message updated (edit)
+  handleMessageUpdated$ = createEffect(() =>
+    this.socketService.onMessageUpdated().pipe(
+      map(message => MessageActions.updateMessageSuccess({ message }))
+    )
+  );
+
+  // Handle message deleted (global)
+  handleMessageDeletedGlobal$ = createEffect(() =>
+    this.socketService.onMessageDeletedGlobal().pipe(
+      map(({ messageId }) => MessageActions.deleteMessageSuccess({ messageId }))
+    )
+  );
+
+  // Handle message deleted (personal)
+  handleMessageDeletedPersonal$ = createEffect(() =>
+    this.socketService.onMessageDeletedPersonal().pipe(
+      map(({ messageId }) => MessageActions.deleteMessageSuccess({ messageId }))
+    )
+  );
+
   handleReaction$ = createEffect(() =>
     this.socketService.onReaction().pipe(
       map(({ messageId, userId, emoji }) =>
@@ -136,7 +159,7 @@ export class MessageEffects {
 
   constructor(
     private actions$: Actions,
-    private messageService: MessageService,
+    private messageApiService: MessageApiService,
     private socketService: SocketService
   ) { }
 }

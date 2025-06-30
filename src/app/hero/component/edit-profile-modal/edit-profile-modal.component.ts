@@ -82,7 +82,7 @@ export class EditProfileModalComponent implements OnInit {
   }
 
   firstErrorKey(errors: any): string | null {
-    if (!errors) return null;
+    if (!errors) { return null; }
     const keys = Object.keys(errors);
     return keys.length > 0 ? keys[0] : null;
   }

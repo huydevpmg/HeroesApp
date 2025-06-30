@@ -1,6 +1,4 @@
 import { Component } from "@angular/core";
-import { RouterOutlet } from "@angular/router";
-import { NavbarComponent } from './../../shared/navbar/navbar.component';
 
 @Component({
   selector: 'app-core-layout',
@@ -9,4 +7,4 @@ import { NavbarComponent } from './../../shared/navbar/navbar.component';
     <router-outlet></router-outlet>
   `
 })
-export class CoreLayoutComponent {}
+export class CoreLayoutComponent { }

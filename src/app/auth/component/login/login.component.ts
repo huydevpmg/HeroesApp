@@ -33,7 +33,9 @@ export class LoginComponent {
   }
 
   onSubmit() {
-    if (this.loginForm.invalid) return;
+    if (this.loginForm.invalid) {
+      return;
+    }
 
     const credentials: LoginRequestModel = this.loginForm.value;
     this.authService.login(credentials).subscribe({

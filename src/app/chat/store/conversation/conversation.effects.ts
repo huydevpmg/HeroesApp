@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { of, from } from 'rxjs';
+import { of } from 'rxjs';
 import { map, mergeMap, catchError, tap } from 'rxjs/operators';
 import * as ConversationActions from './conversation.actions';
-import { ConversationService } from '../../services/conversation/conversation.service';
+import { ConversationApiService } from '../../services/conversation/conversation-api.service';
 import { SocketService } from '../../services/socket/socket.service';
+import { Conversation } from '../../../shared/enums/models/conversation.model';
 
 @Injectable()
 export class ConversationEffects {
@@ -12,8 +13,8 @@ export class ConversationEffects {
     this.actions$.pipe(
       ofType(ConversationActions.loadConversations),
       mergeMap(() =>
-        this.conversationService.getConversations().pipe(
-          map(conversations => ConversationActions.loadConversationsSuccess({ conversations })),
+        this.conversationApi.getConversations().pipe(
+          map((conversations: Conversation[]) => ConversationActions.loadConversationsSuccess({ conversations })),
           catchError(error => of(ConversationActions.loadConversationsFailure({ error: error.message })))
         )
       )
@@ -24,8 +25,8 @@ export class ConversationEffects {
     this.actions$.pipe(
       ofType(ConversationActions.loadConversation),
       mergeMap(({ id }) =>
-        this.conversationService.getConversationById(id).pipe(
-          map(conversation => ConversationActions.loadConversationSuccess({ conversation })),
+        this.conversationApi.getConversationById(id).pipe(
+          map((conversation: Conversation) => ConversationActions.loadConversationSuccess({ conversation })),
           catchError(error => of(ConversationActions.loadConversationFailure({ error: error.message })))
         )
       )
@@ -36,8 +37,8 @@ export class ConversationEffects {
     this.actions$.pipe(
       ofType(ConversationActions.findOrCreate1on1Conversation),
       mergeMap(({ participantId }) =>
-        this.conversationService.findOrCreate1on1Conversation(participantId).pipe(
-          map(conversation => ConversationActions.findOrCreate1on1ConversationSuccess({ conversation })),
+        this.conversationApi.findOrCreate1on1Conversation(participantId).pipe(
+          map((conversation: Conversation) => ConversationActions.findOrCreate1on1ConversationSuccess({ conversation })),
           catchError(error => of(ConversationActions.findOrCreate1on1ConversationFailure({ error: error.message })))
         )
       )
@@ -48,12 +49,11 @@ export class ConversationEffects {
     this.actions$.pipe(
       ofType(ConversationActions.createConversation),
       mergeMap(({ data }) =>
-        this.conversationService.createConversation(data).pipe(
-          tap(conversation => {
-            // Emit socket event after group is created
+        this.conversationApi.createConversation(data).pipe(
+          tap((conversation: Conversation) => {
             this.socketService.emitGroupCreated(conversation);
           }),
-          map(conversation => ConversationActions.createConversationSuccess({ conversation })),
+          map((conversation: Conversation) => ConversationActions.createConversationSuccess({ conversation })),
           catchError(error => of(ConversationActions.createConversationFailure({ error: error.message })))
         )
       )
@@ -64,8 +64,20 @@ export class ConversationEffects {
     this.actions$.pipe(
       ofType(ConversationActions.updateConversation),
       mergeMap(({ id, data }) =>
-        this.conversationService.updateConversation(id, data).pipe(
-          map(conversation => ConversationActions.updateConversationSuccess({ conversation })),
+        this.conversationApi.updateConversation(id, data).pipe(
+          map((conversation: Conversation) => ConversationActions.updateConversationSuccess({ conversation })),
+          catchError(error => of(ConversationActions.updateConversationFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  updateLastAttachmentName$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ConversationActions.updateLastAttachmentName),
+      mergeMap(({ conversationId, lastAttachmentName }) =>
+        this.conversationApi.updateLastAttachmentName(conversationId, lastAttachmentName).pipe(
+          map((conversation: Conversation) => ConversationActions.updateConversationSuccess({ conversation })),
           catchError(error => of(ConversationActions.updateConversationFailure({ error: error.message })))
         )
       )
@@ -76,8 +88,8 @@ export class ConversationEffects {
     this.actions$.pipe(
       ofType(ConversationActions.getAllUsers),
       mergeMap(() =>
-        this.conversationService.getAllUsers().pipe(
-          map(users => ConversationActions.getAllUsersSuccess({ users })),
+        this.conversationApi.getAllUsers().pipe(
+          map((users: any[]) => ConversationActions.getAllUsersSuccess({ users })),
           catchError(error => of(ConversationActions.getAllUsersFailure({ error: error.message })))
         )
       )
@@ -92,7 +104,8 @@ export class ConversationEffects {
 
   constructor(
     private actions$: Actions,
-    private conversationService: ConversationService,
+    private conversationService: ConversationApiService,
+    private conversationApi: ConversationApiService,
     private socketService: SocketService
   ) { }
 }

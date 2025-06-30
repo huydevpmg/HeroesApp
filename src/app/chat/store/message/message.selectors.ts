@@ -29,7 +29,10 @@ export const selectMessagesError = createSelector(
   state => state.error
 );
 
-
+export const selectMessagesByConversation = (conversationId: string) => createSelector(
+  selectAllMessages,
+  (messages) => messages.filter(m => m.conversationId === conversationId)
+);
 
 export const selectMessagesWithAttachment = createSelector(
   selectAllMessages,
@@ -40,3 +43,9 @@ export const selectMessagesWithAttachment = createSelector(
       attachment: msg.attachmentId ? attachmentEntities[msg.attachmentId] : undefined
     }))
 );
+
+// // Select deleted message ids (if you want to track deleted for animation/undo)
+// export const selectDeletedMessageIds = createSelector(
+//   selectAllMessages,
+//   (messages) => messages.filter(m => m.isDeleted).map(m => m._id)
+// );

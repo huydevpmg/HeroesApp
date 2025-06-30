@@ -1,5 +1,5 @@
 import { EntityState, EntityAdapter, createEntityAdapter } from '@ngrx/entity';
-import { Conversation } from '../../models/conversation.model';
+import { Conversation } from '../../../shared/enums/models/conversation.model';
 
 export interface User {
   _id: string;

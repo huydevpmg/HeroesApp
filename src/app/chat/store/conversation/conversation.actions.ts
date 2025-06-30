@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Conversation } from '../../models/conversation.model';
+import { Conversation } from '../../../shared/enums/models/conversation.model';
 
 // Load Conversations
 export const loadConversations = createAction(
@@ -149,7 +149,7 @@ export const getAllUsersFailure = createAction(
   props<{ error: string }>()
 );
 
-export const updateConversationLastAttachmentName = createAction(
+export const updateLastAttachmentName = createAction(
   '[Conversation] Update Last Attachment Name',
   props<{ conversationId: string; lastAttachmentName: string }>()
 );
