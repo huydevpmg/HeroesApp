@@ -40,6 +40,10 @@ export class ConversationApiService {
     return this.http.get<any[]>(`${environment.authService}/api/profile`);
   }
 
+  leaveGroup(conversationId: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/leave/${conversationId}`, {});
+  }
+
   // deleteConversation(id: string): Observable<void> {
   //   return this.http.delete<void>(`${this.apiUrl}/${id}`);
   // }

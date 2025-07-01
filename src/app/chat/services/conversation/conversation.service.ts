@@ -48,5 +48,7 @@ export class ConversationService {
   getConversations() {
     this.store.dispatch(ConversationActions.loadConversations());
   }
-
+  leaveGroup(conversationId: string) {
+    this.store.dispatch(ConversationActions.leaveGroup({ conversationId }));
+  }
 }

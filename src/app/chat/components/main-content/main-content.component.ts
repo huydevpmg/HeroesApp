@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, combineLatest } from 'rxjs';
 import { map, distinctUntilChanged, filter } from 'rxjs/operators';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
 import { Message } from '../../../shared/enums/models/message.model';
@@ -31,8 +31,10 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   onlineUsers$: Observable<string[]>;
   otherUserId$: Observable<string | null>;
   selectedConversationId: string = '';
-  private messagesSub!: Subscription;
-  private socketMessageSub!: Subscription;
+
+  private messagesSub?: Subscription;
+  private socketMessageSub?: Subscription;
+  private conversationSub?: Subscription;
   selectedFiles: File[] = [];
   previews: string[] = [];
   uploading = false;
@@ -66,7 +68,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.selectedConversation$
+    this.conversationSub = this.selectedConversation$
       .pipe(
         map(conversation => conversation?._id),
         distinctUntilChanged(),
@@ -76,19 +78,19 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
         if (conversationId && conversationId !== this.selectedConversationId) {
           this.selectedConversationId = conversationId;
           this.store.dispatch(MessageActions.loadMessages({ conversationId }));
+          this.socketService.joinConversation(conversationId);
         }
       });
+
     this.socketMessageSub = this.socketService.onMessage().subscribe(message => {
       this.store.dispatch(MessageActions.receiveMessage({ message }));
     });
 
-    this.messages$.subscribe(messages => {
-      this.store.select(selectAttachmentEntities).subscribe(entities => {
-        messages.forEach(msg => {
-          if (msg.attachmentId && !entities[msg.attachmentId]) {
-            this.store.dispatch(AttachmentActions.loadAttachment({ attachmentId: msg.attachmentId! }));
-          }
-        });
+    combineLatest([this.messages$, this.store.select(selectAttachmentEntities)]).subscribe(([messages, entities]) => {
+      messages.forEach(msg => {
+        if (msg.attachmentId && !entities[msg.attachmentId]) {
+          this.store.dispatch(AttachmentActions.loadAttachment({ attachmentId: msg.attachmentId! }));
+        }
       });
     });
   }
@@ -102,14 +104,6 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleRightbar() {
     this.showRightbar = !this.showRightbar;
   }
-
-  // sendMessage(content: string) {
-  //   if (!this.selectedConversationId) { return };
-  //   this.store.dispatch(MessageActions.sendMessage({
-  //     conversationId: this.selectedConversationId,
-  //     content
-  //   }));
-  // }
 
   isMediaAttachment(url: string): boolean {
     return /\.(jpg|jpeg|png|gif|webp|mp4|webm|ogg|mov)$/i.test(url);
@@ -255,17 +249,29 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onEditMessage(message: any) {
-    console.log('Edit message:', message);
-    // TODO: Implement edit message functionality
-    // You can add logic here to:
-    // 1. Show edit modal/dialog
-    // 2. Dispatch edit message action
-    // 3. Update message content
+
   }
 
   onDeleteMessage(event: { message: any, deleteType: DeleteType }) {
     const { message, deleteType } = event;
     this.messageService.deleteMessage(message._id, deleteType);
+  }
+
+  getSystemMessageText(message: Message): string {
+    console.log('getSystemMessageText', message);
+    if (!message || message.type !== 'SYSTEM') { return ''; }
+    switch (message.systemType) {
+      case 'USER_LEAVE':
+        return `${message.meta?.fullName || 'A user'} left the group`;
+      case 'USER_REMOVED':
+        return `${message.meta?.fullName || 'A user'} was removed from the group`;
+      case 'USER_ADDED':
+        return `${message.meta?.fullName || 'A user'} was added to the group`;
+      case 'GROUP_RENAME':
+        return `Group was renamed${message.meta?.newName ? ' to ' + message.meta.newName : ''}`;
+      default:
+        return 'System event';
+    }
   }
 
   private scrollToBottom() {
@@ -277,5 +283,6 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.messagesSub?.unsubscribe();
     this.socketMessageSub?.unsubscribe();
+    this.conversationSub?.unsubscribe();
   }
 }

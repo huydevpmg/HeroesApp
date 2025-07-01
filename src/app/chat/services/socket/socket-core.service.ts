@@ -25,6 +25,13 @@ export class SocketCoreService {
   }
 
   private initializeSocket(): void {
+    // Cleanup existing socket connection first
+    if (this.socket) {
+      console.log('🧹 Cleaning up existing socket connection');
+      this.socket.removeAllListeners();
+      this.socket.disconnect();
+    }
+
     try {
       const token = this.authService.getAccessToken();
       if (!token) {
@@ -32,6 +39,7 @@ export class SocketCoreService {
         return;
       }
 
+      console.log('🔌 Initializing new socket connection');
       this.socket = io(environment.socketUrl, {
         withCredentials: true,
         transports: ['websocket'],

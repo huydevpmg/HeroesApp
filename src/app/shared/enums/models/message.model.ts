@@ -3,20 +3,6 @@ export interface Reaction {
   emoji: string;
 }
 
-
-export interface Attachment {
-  _id: string;
-  name: string;
-  url: string;
-  type: string;
-  size: number;
-  uploadedBy: string;
-  conversationId: string;
-  createdAt: string;
-  updatedAt: string;
-  __v?: number;
-}
-
 export interface Message {
   _id?: string;
   content: string;
@@ -31,5 +17,8 @@ export interface Message {
   deletedForUserIds?: string[];
   createdAt?: string;
   updatedAt?: string;
+  type?: 'USER' | 'SYSTEM';
+  systemType?: string;
+  meta?: any;
 }
 

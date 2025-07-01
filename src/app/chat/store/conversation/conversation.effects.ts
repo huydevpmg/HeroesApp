@@ -6,6 +6,7 @@ import * as ConversationActions from './conversation.actions';
 import { ConversationApiService } from '../../services/conversation/conversation-api.service';
 import { SocketService } from '../../services/socket/socket.service';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
+import * as MessageActions from '../message/message.actions';
 
 @Injectable()
 export class ConversationEffects {
@@ -102,9 +103,42 @@ export class ConversationEffects {
     )
   );
 
+  leaveGroup$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ConversationActions.leaveGroup),
+      mergeMap(({ conversationId }) =>
+        this.conversationApi.leaveGroup(conversationId).pipe(
+          map(() => ConversationActions.leaveGroupSuccess({ conversationId })),
+          catchError(error => of(ConversationActions.leaveGroupFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  handleLeaveGroupSocket$ = createEffect(() =>
+    this.socketService.onLeaveGroup().pipe(
+      map(({ conversationId }) =>
+        ConversationActions.leaveGroupSuccess({ conversationId })
+      )
+    )
+  );
+
+  handleConversationUpdatedSocket$ = createEffect(() =>
+    this.socketService.onConversationUpdated().pipe(
+      map(() => ConversationActions.loadConversations())
+    )
+  );
+
+  handleConversationUpdatedSocketLoadMessages$ = createEffect(() =>
+    this.socketService.onConversationUpdated().pipe(
+      map(({ conversationId }) =>
+        MessageActions.loadMessages({ conversationId })
+      )
+    )
+  );
+
   constructor(
     private actions$: Actions,
-    private conversationService: ConversationApiService,
     private conversationApi: ConversationApiService,
     private socketService: SocketService
   ) { }

@@ -13,9 +13,13 @@ export class ConversationSocketService {
   private socketCore = inject(SocketCoreService);
   private store = inject(Store);
 
+  // Track current joined conversation to avoid duplicate joins
+  private currentJoinedConversation: string | null = null;
+
   private groupCreatedSubject = new Subject<Conversation>();
   private conversationUpdatedSubject = new Subject<{ conversationId: string; type: 'pin' | 'archive' | 'label'; data: any }>();
   private userJoinedSubject = new Subject<{ userId: string; conversationId: string }>();
+  private leaveGroupSubject = new Subject<{ conversationId: string; userId: string }>();
 
   constructor() {
     this.setupConversationListeners();
@@ -31,6 +35,17 @@ export class ConversationSocketService {
     // User joined conversation
     this.socketCore.on(SOCKET_EVENTS.JOIN_ROOM, (data: { userId: string; conversationId: string }) => {
       this.userJoinedSubject.next(data);
+    });
+
+    this.socketCore.on(SOCKET_EVENTS.LEAVE_GROUP, (data: { conversationId: string; userId: string }) => {
+      this.leaveGroupSubject.next(data);
+    });
+
+    this.socketCore.on(SOCKET_EVENTS.LEAVE_GROUP_NOTIFY, (data: { conversationId: string; userId: string }) => {
+      this.store.dispatch(ConversationActions.removeUserFromConversation({
+        conversationId: data.conversationId,
+        userId: data.userId
+      }));
     });
 
     // Conversation pinned
@@ -56,6 +71,12 @@ export class ConversationSocketService {
 
   // Join conversation room
   joinConversation(conversationId: string): void {
+    // Avoid joining the same conversation multiple times
+    if (this.currentJoinedConversation === conversationId) {
+      return;
+    }
+
+    this.currentJoinedConversation = conversationId;
     this.socketCore.emit(SOCKET_EVENTS.JOIN_ROOM, conversationId);
   }
 
@@ -167,6 +188,11 @@ export class ConversationSocketService {
     });
   }
 
+  // Emit conversation updated
+  emitConversationUpdated(conversationId: string): void {
+    this.socketCore.emit(SOCKET_EVENTS.CONVERSATION_UPDATED, { conversationId });
+  }
+
   // Observables
   onGroupCreated(): Observable<Conversation> {
     return this.groupCreatedSubject.asObservable();
@@ -178,5 +204,9 @@ export class ConversationSocketService {
 
   onUserJoined(): Observable<{ userId: string; conversationId: string }> {
     return this.userJoinedSubject.asObservable();
+  }
+
+  onLeaveGroup(): Observable<{ conversationId: string; userId: string }> {
+    return this.leaveGroupSubject.asObservable();
   }
 }

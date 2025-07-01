@@ -6,9 +6,10 @@ import { ConversationSocketService } from './conversation-socket.service';
 import { PresenceSocketService } from './status-socket.service';
 import { ReactionSocketService } from './reaction-socket.service';
 import { AttachmentSocketService } from './attachment-socket.service';
-import { Attachment, Message } from '../../../shared/enums/models/message.model';
+import { Message } from '../../../shared/enums/models/message.model';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
 import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
+import { Attachment } from '../../../shared/enums/models/attachment.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -172,6 +173,10 @@ export class SocketService {
 
   onUserJoined(): Observable<{ userId: string; conversationId: string }> {
     return this.conversationSocket.onUserJoined();
+  }
+
+  onLeaveGroup(): Observable<{ conversationId: string; userId: string }> {
+    return this.conversationSocket.onLeaveGroup();
   }
 
   // Presence observables
