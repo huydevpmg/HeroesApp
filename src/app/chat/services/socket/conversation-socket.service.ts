@@ -5,6 +5,8 @@ import { SocketCoreService } from './socket-core.service';
 import { SOCKET_EVENTS } from './socket-events.constants';
 import { Store } from '@ngrx/store';
 import * as ConversationActions from '../../store/conversation/conversation.actions';
+import { selectAllConversations } from '../../store/conversation/conversation.selectors';
+import { filter, delay } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -16,9 +18,30 @@ export class ConversationSocketService {
   private groupCreatedSubject = new Subject<Conversation>();
   private conversationUpdatedSubject = new Subject<{ conversationId: string; type: 'pin' | 'archive' | 'label'; data: any }>();
   private userJoinedSubject = new Subject<{ userId: string; conversationId: string }>();
+  private autoJoinInitialized = false;
 
   constructor() {
     this.setupConversationListeners();
+  }
+
+  initializeAutoJoin() {
+    if (this.autoJoinInitialized) {
+      return;
+    }
+    this.autoJoinInitialized = true;
+
+    this.store.select(selectAllConversations)
+      .pipe(
+        delay(100),
+        filter(conversations => Array.isArray(conversations) && conversations.length > 0)
+      )
+      .subscribe(conversations => {
+        conversations.forEach(conv => {
+          if (conv && conv._id) {
+            this.joinConversation(conv._id);
+          }
+        });
+      });
   }
 
   private setupConversationListeners(): void {
@@ -56,6 +79,7 @@ export class ConversationSocketService {
 
   // Join conversation room
   joinConversation(conversationId: string): void {
+    console.log(`Frontend: Joining room ${conversationId}`);
     this.socketCore.emit(SOCKET_EVENTS.JOIN_ROOM, conversationId);
   }
 

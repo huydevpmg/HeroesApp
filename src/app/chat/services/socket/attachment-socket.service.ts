@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { SocketCoreService } from './socket-core.service';
 import { SOCKET_EVENTS } from './socket-events.constants';
-import { Attachment } from '../../../shared/enums/models/message.model';
+import { Attachment } from '../../../shared/enums/models/attachment.model';
 
 @Injectable({
   providedIn: 'root'

@@ -35,7 +35,7 @@ export class BaseMessageComponent implements OnInit {
   previewAttachment: Attachment | null = null;
   showDropdown = false;
   showDeleteModal = false;
-  deleteOption: DeleteType = DeleteType.JUSTME;
+  deleteOption: DeleteType = DeleteType.EVERYONE;
 
   fileIconMap: { [key: string]: string } = {
     pdf: '📄',
@@ -121,11 +121,16 @@ export class BaseMessageComponent implements OnInit {
   }
 
   onDelete() {
+    this.deleteOption;
     this.showDeleteModal = true;
     this.showDropdown = false;
   }
 
   confirmDelete() {
+    if (!this.deleteOption) {
+      alert('Please select a delete option');
+      return;
+    }
     this.delete.emit({
       message: this.message,
       deleteType: this.deleteOption,
@@ -160,7 +165,9 @@ export class BaseMessageComponent implements OnInit {
     return true;
   }
   get isGloballyDeleted(): boolean {
-    return !!this.message?.isDeleteGlobal;
+    const result = !!this.message?.isDeleteGlobal;
+    console.log(`Component: Message ${this.message?._id} - isDeleteGlobal:`, this.message?.isDeleteGlobal, 'result:', result);
+    return result;
   }
 
   getFileIconByExt(ext: string): string {

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Attachment } from '../../../shared/enums/models/message.model';
+import { Attachment } from '../../../shared/enums/models/attachment.model';
 
 @Injectable({
   providedIn: 'root'

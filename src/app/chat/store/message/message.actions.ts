@@ -1,5 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { Message } from '../../../shared/enums/models/message.model';
+import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
 
 // Load messages
 export const loadMessages = createAction(
@@ -37,11 +38,11 @@ export const sendMessageFailure = createAction(
 // Delete message
 export const deleteMessage = createAction(
   '[Message] Delete Message',
-  props<{ messageId: string; deleteType: 'everyone' | 'justme' }>()
+  props<{ messageId: string; deleteType: DeleteType }>()
 );
 export const deleteMessageSuccess = createAction(
   '[Message] Delete Message Success',
-  props<{ messageId: string }>()
+  props<{ messageId: string; deleteType: DeleteType }>()
 );
 export const deleteMessageFailure = createAction(
   '[Message] Delete Message Failure',

@@ -6,9 +6,11 @@ import { ConversationSocketService } from './conversation-socket.service';
 import { PresenceSocketService } from './status-socket.service';
 import { ReactionSocketService } from './reaction-socket.service';
 import { AttachmentSocketService } from './attachment-socket.service';
-import { Attachment, Message } from '../../../shared/enums/models/message.model';
+import { Message } from '../../../shared/enums/models/message.model';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
 import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
+import { SOCKET_EVENTS } from './socket-events.constants';
+import { Attachment } from '../../../shared/enums/models/attachment.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -133,9 +135,7 @@ export class SocketService {
   }
 
   emitMessageDeletedGlobal(messageId: string) {
-    if ((this as any).socketCore && (this as any).socketCore.connected) {
-      (this as any).socketCore.emit('message_deleted_global', { messageId });
-    }
+    this.socketCore.emit(SOCKET_EVENTS.MESSAGE_DELETED_GLOBAL, { messageId });
   }
 
   // === OBSERVABLE METHODS ===

@@ -48,7 +48,7 @@ export class MessageEffects {
               this.socketService.emitMessageDeletedGlobal(messageId);
             }
           }),
-          map(() => MessageActions.deleteMessageSuccess({ messageId })),
+          map(() => MessageActions.deleteMessageSuccess({ messageId, deleteType })),
           catchError(error => of(MessageActions.deleteMessageFailure({ error: error?.message || 'Delete failed' })))
         )
       )
@@ -130,14 +130,22 @@ export class MessageEffects {
   // Handle message deleted (global)
   handleMessageDeletedGlobal$ = createEffect(() =>
     this.socketService.onMessageDeletedGlobal().pipe(
-      map(({ messageId }) => MessageActions.deleteMessageSuccess({ messageId }))
+      map(({ messageId }) => [
+        MessageActions.deleteMessageSuccess({ messageId, deleteType: DeleteType.EVERYONE }),
+        ConversationActions.loadConversations() // Reload conversations để cập nhật lastMessage
+      ]),
+      mergeMap(actions => from(actions))
     )
   );
 
   // Handle message deleted (personal)
   handleMessageDeletedPersonal$ = createEffect(() =>
     this.socketService.onMessageDeletedPersonal().pipe(
-      map(({ messageId }) => MessageActions.deleteMessageSuccess({ messageId }))
+      map(({ messageId }) => [
+        MessageActions.deleteMessageSuccess({ messageId, deleteType: DeleteType.JUSTME }),
+        ConversationActions.loadConversations()
+      ]),
+      mergeMap(actions => from(actions))
     )
   );
 

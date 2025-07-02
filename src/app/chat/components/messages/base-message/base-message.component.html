@@ -110,7 +110,7 @@
     </div>
   </ng-container>
 
-  <!-- Template cho globally deleted message - VẪN CÓ AVATAR -->
+  <!-- Template cho globally deleted message-->
   <ng-template #deletedMsg>
     <div class="deleted-message-bubble" [class.sent]="isCurrentUser" [class.received]="!isCurrentUser">
       <div class="deleted-message-content">
@@ -159,7 +159,7 @@
 
           <div class="delete-options">
             <!-- Delete for everyone -->
-            <div class="form-check mb-3">
+            <div class="form-check mb-3" *ngIf="message.senderId === currentUserId">
               <input class="form-check-input" type="radio" name="deleteOption" id="deleteEveryone" value="everyone"
                 [(ngModel)]="deleteOption">
               <label class="form-check-label" for="deleteEveryone">

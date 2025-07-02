@@ -48,7 +48,14 @@
         <div class="last-message">
           <p class="mb-0 text-truncate">
             <ng-container *ngIf="item.conversation.lastMessage?.content?.trim(); else showAttachmentName">
-              {{ item.conversation.lastMessage?.content }}
+              <span *ngIf="!item.conversation.lastMessage?.isDeleteGlobal; else showDeletedMessage">
+                {{ item.conversation.lastMessage?.content }}
+              </span>
+              <ng-template #showDeletedMessage>
+                <span class="text-muted fst-italic">
+                  Message was deleted
+                </span>
+              </ng-template>
             </ng-container>
             <ng-template #showAttachmentName>
               <span *ngIf="item.conversation.lastAttachmentName">{{ item.conversation.lastAttachmentName }}</span>

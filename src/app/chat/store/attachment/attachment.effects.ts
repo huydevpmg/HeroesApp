@@ -5,8 +5,8 @@ import { catchError, map, mergeMap } from 'rxjs/operators';
 import * as AttachmentActions from './attachment.actions';
 import * as MessageActions from '../message/message.actions';
 import * as ConversationActions from '../conversation/conversation.actions';
-import { Attachment } from '../../../shared/enums/models/message.model';
 import { AttachmentApiService } from '../../services/attachments/attachment-api.service';
+import { Attachment } from '../../../shared/enums/models/attachment.model';
 
 @Injectable()
 export class AttachmentEffects {

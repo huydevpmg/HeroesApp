@@ -4,12 +4,15 @@ import { Message } from '../../../shared/enums/models/message.model';
 import { SocketCoreService } from './socket-core.service';
 import { SOCKET_EVENTS } from './socket-events.constants';
 import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
+import { Store } from '@ngrx/store';
+import * as ConversationActions from '../../store/conversation/conversation.actions';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MessageSocketService {
   private socketCore = inject(SocketCoreService);
+  private store = inject(Store);
 
   // Message subjects
   private messageSubject = new Subject<Message>();
@@ -28,6 +31,7 @@ export class MessageSocketService {
     // Message received
     this.socketCore.on(SOCKET_EVENTS.RECEIVE_MESSAGE, (message: Message) => {
       this.messageSubject.next(message);
+      this.store.dispatch(ConversationActions.loadConversations());
     });
 
     // Typing indicators
@@ -40,8 +44,8 @@ export class MessageSocketService {
       this.messageUpdatedSubject.next(message);
     });
 
-    // Message deleted globally
     this.socketCore.on(SOCKET_EVENTS.MESSAGE_DELETED_GLOBAL, (data: { messageId: string; conversationId: string }) => {
+      console.log("haha");
       this.messageDeletedGlobalSubject.next(data);
     });
 

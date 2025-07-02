@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Attachment } from '../../../shared/enums/models/message.model';
+import { Attachment } from '../../../shared/enums/models/attachment.model';
 
 export const uploadAttachment = createAction(
   '[Attachment] Upload Attachment',
