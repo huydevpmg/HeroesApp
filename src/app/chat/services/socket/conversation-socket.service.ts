@@ -46,6 +46,7 @@ export class ConversationSocketService {
         conversationId: data.conversationId,
         userId: data.userId
       }));
+      this.store.dispatch(ConversationActions.loadConversations());
     });
 
     // Conversation pinned
