@@ -307,7 +307,7 @@
   position: absolute;
   bottom: -2em;
   right: 8px;
-  z-index: 10;
+  z-index: 100;
   padding: 2px 6px;
   border-radius: 8px;
   font-size: 0.75rem;
@@ -632,5 +632,25 @@
   background-color: #6c757d;
   border-color: #6c757d;
   color: white;
+}
+
+.read-receipt-info {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+  margin-top: 2px;
+  justify-content: flex-end;
+  width: 100%;
+  pointer-events: auto;
+  z-index: 200;
+  position: relative;
+}
+
+.message.received .read-receipt-info {
+  justify-content: flex-start !important;
+  margin-left: 3em;
+  margin-right: 0;
+  width: auto;
 }
 

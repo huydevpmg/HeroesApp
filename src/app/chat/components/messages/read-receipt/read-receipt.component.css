@@ -1,0 +1,19 @@
+.read-avatar-wrapper {
+  position: relative;
+  z-index: 200;
+  pointer-events: auto;
+}
+
+.read-avatar {
+  cursor: pointer;
+  z-index: 200;
+  position: relative;
+}
+
+.tooltip {
+  z-index: 9999 !important;
+}
+
+:host {
+  pointer-events: auto !important;
+}
