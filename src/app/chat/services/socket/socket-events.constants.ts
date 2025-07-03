@@ -30,6 +30,8 @@ export const SOCKET_EVENTS = {
   // Group/Conversation management
   GROUP_CREATED: 'group_created',
   NEW_GROUP: 'new_group',
+  MEMBER_ADDED: 'member_added',
+  MEMBER_REMOVED: 'member_removed',
   PIN_CONVERSATION: 'pin_conversation',
   ARCHIVE_CONVERSATION: 'archive_conversation',
   ADD_LABEL: 'add_label',
@@ -78,6 +80,8 @@ export const EVENT_GROUPS = {
     SOCKET_EVENTS.CONNECT_CONVERSATION,
     SOCKET_EVENTS.GROUP_CREATED,
     SOCKET_EVENTS.NEW_GROUP,
+    SOCKET_EVENTS.MEMBER_ADDED,
+    SOCKET_EVENTS.MEMBER_REMOVED,
     SOCKET_EVENTS.PIN_CONVERSATION,
     SOCKET_EVENTS.ARCHIVE_CONVERSATION,
     SOCKET_EVENTS.ADD_LABEL,

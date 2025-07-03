@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { of } from 'rxjs';
+import { of, from } from 'rxjs';
 import { map, mergeMap, catchError, tap } from 'rxjs/operators';
 import * as ConversationActions from './conversation.actions';
+import * as MessageActions from '../message/message.actions';
 import { ConversationApiService } from '../../services/conversation/conversation-api.service';
 import { SocketService } from '../../services/socket/socket.service';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
@@ -96,9 +97,61 @@ export class ConversationEffects {
     )
   );
 
+  addMembersToGroup$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ConversationActions.addMembersToGroup),
+      mergeMap(({ conversationId, memberIds }) =>
+        this.conversationApi.addMembersToGroup(conversationId, memberIds).pipe(
+          mergeMap((conversation: Conversation) => [
+            ConversationActions.addMembersToGroupSuccess({ conversation }),
+            ConversationActions.loadConversations(),
+            MessageActions.loadMessages({ conversationId })
+          ]),
+          catchError(error => of(ConversationActions.addMembersToGroupFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  removeMemberFromGroup$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ConversationActions.removeMemberFromGroup),
+      mergeMap(({ conversationId, userId }) =>
+        this.conversationApi.removeMemberFromGroup(conversationId, userId).pipe(
+          mergeMap((conversation: Conversation) => [
+            ConversationActions.removeMemberFromGroupSuccess({ conversation }),
+            ConversationActions.loadConversations(),
+            MessageActions.loadMessages({ conversationId }) // Reload messages để hiển thị system message
+          ]),
+          catchError(error => of(ConversationActions.removeMemberFromGroupFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
   handleNewGroup$ = createEffect(() =>
     this.socketService.onGroupCreated().pipe(
       map((conversation) => ConversationActions.createConversationSuccess({ conversation }))
+    )
+  );
+
+  handleMemberAdded$ = createEffect(() =>
+    this.socketService.onMemberAdded().pipe(
+      map(({ conversationId }) => [
+        ConversationActions.loadConversations(), // Force reload to get updated conversation data
+        MessageActions.loadMessages({ conversationId }) // Reload messages để hiển thị system message
+      ]),
+      mergeMap(actions => from(actions))
+    )
+  );
+
+  handleMemberRemoved$ = createEffect(() =>
+    this.socketService.onMemberRemoved().pipe(
+      map(({ conversationId }) => [
+        ConversationActions.loadConversations(), // Force reload to get updated conversation data
+        MessageActions.loadMessages({ conversationId }) // Reload messages để hiển thị system message
+      ]),
+      mergeMap(actions => from(actions))
     )
   );
 

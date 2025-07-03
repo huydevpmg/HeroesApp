@@ -166,7 +166,6 @@ export class BaseMessageComponent implements OnInit {
   }
   get isGloballyDeleted(): boolean {
     const result = !!this.message?.isDeleteGlobal;
-    console.log(`Component: Message ${this.message?._id} - isDeleteGlobal:`, this.message?.isDeleteGlobal, 'result:', result);
     return result;
   }
 

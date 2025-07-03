@@ -14,13 +14,15 @@ export const conversationReducer = createReducer(
     loading: true,
     error: null,
   })),
-  on(ConversationActions.loadConversationsSuccess, (state, { conversations }) =>
-    conversationAdapter.setAll(conversations, {
+  on(ConversationActions.loadConversationsSuccess, (state, { conversations }) => {
+    // Sort conversations by updatedAt desc before setting them
+    const sorted = [...conversations].sort((a, b) => new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime());
+    return conversationAdapter.setAll(sorted, {
       ...state,
       loading: false,
       error: null,
-    })
-  ),
+    });
+  }),
   on(ConversationActions.loadConversationsFailure, (state, { error }) => ({
     ...state,
     loading: false,
@@ -121,11 +123,22 @@ export const conversationReducer = createReducer(
   // Update last message
   on(
     ConversationActions.updateConversationLastMessage,
-    (state, { conversationId, message }) =>
-      conversationAdapter.updateOne(
-        { id: conversationId, changes: { lastMessage: message } },
+    (state, { conversationId, message }) => {
+      const newState = conversationAdapter.updateOne(
+        {
+          id: conversationId,
+          changes: {
+            lastMessage: message,
+            updatedAt: new Date().toISOString()
+          }
+        },
         state
-      )
+      );
+      // Re-sort conversations after updating last message
+      const all = conversationAdapter.getSelectors().selectAll(newState);
+      const sorted = [...all].sort((a, b) => new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime());
+      return conversationAdapter.setAll(sorted, newState);
+    }
   ),
   on(
     ConversationActions.updateLastAttachmentName,
@@ -209,6 +222,54 @@ export const conversationReducer = createReducer(
   })),
 
   on(ConversationActions.getAllUsersFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error,
+  })),
+
+  // Add members to group
+  on(ConversationActions.addMembersToGroup, (state) => ({
+    ...state,
+    loading: true,
+    error: null,
+  })),
+  on(ConversationActions.addMembersToGroupSuccess, (state, { conversation }) => {
+    if (!conversation || !conversation._id) {
+      console.warn('addMembersToGroupSuccess: conversation is undefined or missing _id');
+      return { ...state, loading: false, error: null };
+    }
+    const newState = conversationAdapter.updateOne(
+      { id: conversation._id!, changes: conversation },
+      { ...state, loading: false, error: null }
+    );
+    // Re-sort conversations after adding members
+    const all = conversationAdapter.getSelectors().selectAll(newState);
+    const sorted = [...all].sort((a, b) => new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime());
+    return conversationAdapter.setAll(sorted, newState);
+  }),
+  on(ConversationActions.addMembersToGroupFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error,
+  })),
+
+  // Remove member from group
+  on(ConversationActions.removeMemberFromGroup, (state) => ({
+    ...state,
+    loading: true,
+    error: null,
+  })),
+  on(ConversationActions.removeMemberFromGroupSuccess, (state, { conversation }) => {
+    if (!conversation || !conversation._id) {
+      console.warn('removeMemberFromGroupSuccess: conversation is undefined or missing _id');
+      return { ...state, loading: false, error: null };
+    }
+    return conversationAdapter.updateOne(
+      { id: conversation._id!, changes: conversation },
+      { ...state, loading: false, error: null }
+    );
+  }),
+  on(ConversationActions.removeMemberFromGroupFailure, (state, { error }) => ({
     ...state,
     loading: false,
     error,

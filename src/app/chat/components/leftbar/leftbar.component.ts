@@ -5,7 +5,7 @@ import { Conversation } from '../../../shared/enums/models/conversation.model';
 import * as ConversationActions from '../../store/conversation/conversation.actions';
 import * as ConversationSelectors from '../../store/conversation/conversation.selectors';
 import { AuthService } from '../../../auth/services/auth.service';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { SocketService } from '../../services/socket/socket.service';
 import { ConversationService } from '../../services/conversation/conversation.service';
 
@@ -62,10 +62,13 @@ export class LeftbarComponent implements OnInit {
     this.conversationService.loadConversations();
     this.conversationService.getAllUsers();
     this.users$.subscribe((users) => {
-      this.users = users.map((user) => ({
-        ...user,
-        selected: false,
-      }));
+      const currentUserId = this.authService.getCurrentUserId();
+      this.users = users
+        .filter(user => user._id !== currentUserId)
+        .map((user) => ({
+          ...user,
+          selected: false,
+        }));
     });
     this.socketService.onGroupCreated().subscribe(() => {
       this.conversationService.loadConversations();
@@ -138,7 +141,11 @@ export class LeftbarComponent implements OnInit {
     this.users.forEach((user) => (user.selected = false));
   }
 
-  isUserOnline(): boolean {
-    return false;
+  isUserOnline(userId: string): boolean {
+    let isOnline = false;
+    this.onlineUsers$.pipe(take(1)).subscribe(onlineUsers => {
+      isOnline = onlineUsers.includes(userId);
+    });
+    return isOnline;
   }
 }

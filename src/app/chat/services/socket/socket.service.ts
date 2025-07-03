@@ -174,6 +174,14 @@ export class SocketService {
     return this.conversationSocket.onUserJoined();
   }
 
+  onMemberAdded(): Observable<{ conversationId: string; addedMembers: string[]; conversation: Conversation; systemMessage: any }> {
+    return this.conversationSocket.onMemberAdded();
+  }
+
+  onMemberRemoved(): Observable<{ conversationId: string; removedUserId: string; conversation: Conversation; systemMessage: any }> {
+    return this.conversationSocket.onMemberRemoved();
+  }
+
   // Presence observables
   onOnlineStatus(): Observable<{ userId: string; status: 'online' | 'offline' }> {
     return this.presenceSocket.onOnlineStatus();

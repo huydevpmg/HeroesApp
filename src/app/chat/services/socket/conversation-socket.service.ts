@@ -18,6 +18,8 @@ export class ConversationSocketService {
   private groupCreatedSubject = new Subject<Conversation>();
   private conversationUpdatedSubject = new Subject<{ conversationId: string; type: 'pin' | 'archive' | 'label'; data: any }>();
   private userJoinedSubject = new Subject<{ userId: string; conversationId: string }>();
+  private memberAddedSubject = new Subject<{ conversationId: string; addedMembers: string[]; conversation: Conversation; systemMessage: any }>();
+  private memberRemovedSubject = new Subject<{ conversationId: string; removedUserId: string; conversation: Conversation; systemMessage: any }>();
   private autoJoinInitialized = false;
 
   constructor() {
@@ -75,11 +77,23 @@ export class ConversationSocketService {
     this.socketCore.on(SOCKET_EVENTS.REMOVE_LABEL, (data: { conversationId: string; result: any }) => {
       this.conversationUpdatedSubject.next({ conversationId: data.conversationId, type: 'label', data: data.result });
     });
+
+    // Member added to group
+    this.socketCore.on(SOCKET_EVENTS.MEMBER_ADDED, (data: { conversationId: string; addedMembers: string[]; conversation: Conversation; systemMessage: any }) => {
+      this.memberAddedSubject.next(data);
+      this.store.dispatch(ConversationActions.addMembersToGroupSuccess({ conversation: data.conversation }));
+      this.store.dispatch(ConversationActions.loadConversations());
+    });
+
+    // Member removed from group
+    this.socketCore.on(SOCKET_EVENTS.MEMBER_REMOVED, (data: { conversationId: string; removedUserId: string; conversation: Conversation; systemMessage: any }) => {
+      this.memberRemovedSubject.next(data);
+      this.store.dispatch(ConversationActions.removeMemberFromGroupSuccess({ conversation: data.conversation }));
+    });
   }
 
   // Join conversation room
   joinConversation(conversationId: string): void {
-    console.log(`Frontend: Joining room ${conversationId}`);
     this.socketCore.emit(SOCKET_EVENTS.JOIN_ROOM, conversationId);
   }
 
@@ -202,5 +216,13 @@ export class ConversationSocketService {
 
   onUserJoined(): Observable<{ userId: string; conversationId: string }> {
     return this.userJoinedSubject.asObservable();
+  }
+
+  onMemberAdded(): Observable<{ conversationId: string; addedMembers: string[]; conversation: Conversation; systemMessage: any }> {
+    return this.memberAddedSubject.asObservable();
+  }
+
+  onMemberRemoved(): Observable<{ conversationId: string; removedUserId: string; conversation: Conversation; systemMessage: any }> {
+    return this.memberRemovedSubject.asObservable();
   }
 }
