@@ -29,7 +29,6 @@ export class ConversationSocketService {
     // New group created
     this.socketCore.on(SOCKET_EVENTS.NEW_GROUP, (group: Conversation) => {
       this.groupCreatedSubject.next(group);
-      this.store.dispatch(ConversationActions.loadConversationSuccess({ conversation: group }));
     });
 
     // User joined conversation

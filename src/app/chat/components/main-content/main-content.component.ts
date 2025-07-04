@@ -258,7 +258,6 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getSystemMessageText(message: Message): string {
-    console.log('getSystemMessageText', message);
     if (!message || message.type !== 'SYSTEM') { return ''; }
     switch (message.systemType) {
       case 'USER_LEAVE':

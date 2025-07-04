@@ -74,9 +74,7 @@ export class SocketService {
     return this.conversationSocket.connectConversation(partnerId);
   }
 
-  emitGroupCreated(conversation: Conversation): void {
-    this.conversationSocket.emitGroupCreated(conversation);
-  }
+
 
   pinConversation(conversationId: string): Promise<{ success: boolean; result: any }> {
     return this.conversationSocket.pinConversation(conversationId);
