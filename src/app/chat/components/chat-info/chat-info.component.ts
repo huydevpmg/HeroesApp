@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
 import { map, Observable, combineLatest } from 'rxjs';
-import { Store } from '@ngrx/store';
 import { AuthService } from '../../../auth/services/auth.service';
 import { SocketService } from '../../services/socket/socket.service';
 import { ConversationService } from '../../services/conversation/conversation.service';
@@ -24,7 +23,6 @@ export class ChatInfoComponent implements OnInit {
   selectedMember: any = null;
 
   constructor(
-    private store: Store,
     private authService: AuthService,
     private socketService: SocketService,
     private conversationService: ConversationService
@@ -102,6 +100,12 @@ export class ChatInfoComponent implements OnInit {
 
   viewFile(file: any) {
     console.log('View file:', file);
+  }
+
+  onLeaveGroup(selectedConv: Conversation) {
+    if (selectedConv && selectedConv._id) {
+      this.conversationService.leaveGroup(selectedConv._id);
+    }
   }
 
   private getSharedImages() {

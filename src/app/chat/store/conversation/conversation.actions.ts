@@ -153,3 +153,22 @@ export const updateLastAttachmentName = createAction(
   '[Conversation] Update Last Attachment Name',
   props<{ conversationId: string; lastAttachmentName: string }>()
 );
+
+// Leave Group
+export const leaveGroup = createAction(
+  '[Conversation] Leave Group',
+  props<{ conversationId: string }>()
+);
+export const leaveGroupSuccess = createAction(
+  '[Conversation] Leave Group Success',
+  props<{ conversationId: string }>()
+);
+export const leaveGroupFailure = createAction(
+  '[Conversation] Leave Group Failure',
+  props<{ error: string }>()
+);
+
+export const removeUserFromConversation = createAction(
+  '[Conversation] Remove User From Conversation',
+  props<{ conversationId: string; userId: string }>()
+);

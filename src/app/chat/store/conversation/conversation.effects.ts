@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { of } from 'rxjs';
-import { map, mergeMap, catchError, tap } from 'rxjs/operators';
+import { of, from } from 'rxjs';
+import { map, mergeMap, catchError } from 'rxjs/operators';
 import * as ConversationActions from './conversation.actions';
 import { ConversationApiService } from '../../services/conversation/conversation-api.service';
 import { SocketService } from '../../services/socket/socket.service';
@@ -50,10 +50,10 @@ export class ConversationEffects {
       ofType(ConversationActions.createConversation),
       mergeMap(({ data }) =>
         this.conversationApi.createConversation(data).pipe(
-          tap((conversation: Conversation) => {
-            this.socketService.emitGroupCreated(conversation);
-          }),
-          map((conversation: Conversation) => ConversationActions.createConversationSuccess({ conversation })),
+          mergeMap((conversation: Conversation) => from([
+            ConversationActions.createConversationSuccess({ conversation }),
+            ConversationActions.loadConversation({ id: conversation._id! })
+          ])),
           catchError(error => of(ConversationActions.createConversationFailure({ error: error.message })))
         )
       )
@@ -96,15 +96,20 @@ export class ConversationEffects {
     )
   );
 
-  handleNewGroup$ = createEffect(() =>
-    this.socketService.onGroupCreated().pipe(
-      map((conversation) => ConversationActions.createConversationSuccess({ conversation }))
+  leaveGroup$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ConversationActions.leaveGroup),
+      mergeMap(({ conversationId }) =>
+        this.conversationApi.leaveGroup(conversationId).pipe(
+          map(() => ConversationActions.leaveGroupSuccess({ conversationId })),
+          catchError(error => of(ConversationActions.leaveGroupFailure({ error: error.message })))
+        )
+      )
     )
   );
 
   constructor(
     private actions$: Actions,
-    private conversationService: ConversationApiService,
     private conversationApi: ConversationApiService,
     private socketService: SocketService
   ) { }

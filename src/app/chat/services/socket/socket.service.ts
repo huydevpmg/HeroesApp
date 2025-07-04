@@ -75,9 +75,7 @@ export class SocketService {
     return this.conversationSocket.connectConversation(partnerId);
   }
 
-  emitGroupCreated(conversation: Conversation): void {
-    this.conversationSocket.emitGroupCreated(conversation);
-  }
+
 
   pinConversation(conversationId: string): Promise<{ success: boolean; result: any }> {
     return this.conversationSocket.pinConversation(conversationId);
@@ -172,6 +170,10 @@ export class SocketService {
 
   onUserJoined(): Observable<{ userId: string; conversationId: string }> {
     return this.conversationSocket.onUserJoined();
+  }
+
+  onLeaveGroup(): Observable<{ conversationId: string; userId: string }> {
+    return this.conversationSocket.onLeaveGroup();
   }
 
   // Presence observables

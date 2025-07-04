@@ -49,12 +49,16 @@
         </div>
 
         <ng-container *ngFor="let message of messagesWithAttachment$ | async; let isLast = last">
-          <app-base-message [message]="message" [conversationId]="conversation._id!" [isLast]="isLast"
-            (edit)="onEditMessage($event)" (delete)="onDeleteMessage($event)">
-          </app-base-message>
-
-          <!-- <app-reply-message *ngIf="message.parentMessage" [message]="message" [conversationId]="conversation._id!">
-          </app-reply-message> -->
+          <ng-container *ngIf="message.type === 'SYSTEM'; else normalMsg">
+            <div class="system-message text-secondary text-center small py-2">
+              {{ getSystemMessageText(message) }}
+            </div>
+          </ng-container>
+          <ng-template #normalMsg>
+            <app-base-message [message]="message" [conversationId]="conversation._id!" [isLast]="isLast"
+              (edit)="onEditMessage($event)" (delete)="onDeleteMessage($event)">
+            </app-base-message>
+          </ng-template>
         </ng-container>
       </div>
 

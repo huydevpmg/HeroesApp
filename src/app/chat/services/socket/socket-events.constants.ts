@@ -41,6 +41,13 @@ export const SOCKET_EVENTS = {
   // Attachments
   ATTACHMENT_CREATED: 'attachment_created',
   ATTACHMENT_DELETED: 'attachment_deleted',
+
+  // User events
+  LEAVE_GROUP: 'user_left_group',
+  LEAVE_GROUP_NOTIFY: 'user_left_group_notify',
+  CONVERSATION_UPDATED: 'conversation_updated',
+
+
 } as const;
 
 export type SocketEventName = keyof typeof SOCKET_EVENTS;

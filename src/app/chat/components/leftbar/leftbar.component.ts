@@ -67,9 +67,6 @@ export class LeftbarComponent implements OnInit {
         selected: false,
       }));
     });
-    this.socketService.onGroupCreated().subscribe(() => {
-      this.conversationService.loadConversations();
-    });
   }
 
   selectConversation(conversation: Conversation): void {
