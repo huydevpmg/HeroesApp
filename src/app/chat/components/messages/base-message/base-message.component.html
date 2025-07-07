@@ -66,7 +66,7 @@
         <span class="message-status" *ngIf="isCurrentUser && isLast && readByUsers.length === 0">
           {{ message.status }}
         </span>
-        <span class="read-receipt-info" *ngIf="isLast && readByUsers.length > 0">
+        <span class="read-receipt-info" *ngIf="isCurrentUser && isLast && readByUsers.length > 0">
           <app-read-receipt [users]="readByUsers"></app-read-receipt>
         </span>
       </div>

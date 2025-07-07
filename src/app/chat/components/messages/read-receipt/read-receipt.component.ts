@@ -1,4 +1,4 @@
-import { Component, Input, AfterViewInit, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, AfterViewInit, ElementRef, OnChanges, SimpleChanges, OnInit } from '@angular/core';
 
 declare var bootstrap: any;
 
@@ -7,10 +7,14 @@ declare var bootstrap: any;
   templateUrl: './read-receipt.component.html',
   styleUrls: ['./read-receipt.component.css']
 })
-export class ReadReceiptComponent implements AfterViewInit, OnChanges {
+export class ReadReceiptComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() users: any[] = [];
 
   constructor(private elementRef: ElementRef) { }
+
+  ngOnInit(): void {
+    // Component initialized
+  }
 
   ngAfterViewInit(): void {
     this.initTooltips();

@@ -4,26 +4,26 @@ import {
   Output,
   EventEmitter,
   OnInit,
+  OnChanges,
+  SimpleChanges,
   HostListener,
   ElementRef,
-  OnDestroy,
 } from '@angular/core';
 import { AuthService } from '../../../../auth/services/auth.service';
 import { Attachment } from '../../../../shared/enums/models/attachment.model';
 import { DeleteType } from '../../../../shared/enums/models/delete-type.enum';
 import { ReadReceiptSocketService } from '../../../services/socket/read-receipt-socket.service';
-import { Subscription } from 'rxjs';
-import { MessageReadReceiptService } from '../../../services/message-read-receipt/message-read-receipt.service';
 
 @Component({
   selector: 'app-base-message',
   templateUrl: './base-message.component.html',
   styleUrls: ['./base-message.component.css'],
 })
-export class BaseMessageComponent implements OnInit, OnDestroy {
+export class BaseMessageComponent implements OnInit, OnChanges {
   @Input() message!: any;
   @Input() conversationId!: string;
   @Input() isLast: boolean = false;
+  @Input() readReceipts: any[] = [];
 
   @Output() react = new EventEmitter<any>();
   @Output() reply = new EventEmitter<any>();
@@ -42,7 +42,6 @@ export class BaseMessageComponent implements OnInit, OnDestroy {
   deleteOption: DeleteType = DeleteType.JUSTME;
 
   readByUsers: any[] = [];
-  private readReceiptSub?: Subscription;
 
   fileIconMap: { [key: string]: string } = {
     pdf: '📄',
@@ -60,42 +59,25 @@ export class BaseMessageComponent implements OnInit, OnDestroy {
   constructor(
     protected authService: AuthService,
     private elementRef: ElementRef,
-    private readReceiptSocket: ReadReceiptSocketService,
-    private messageReadReceiptService: MessageReadReceiptService
+    private readReceiptSocket: ReadReceiptSocketService
   ) { }
 
   ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUserId();
     this.isCurrentUser = this.message.senderId === this.currentUserId;
 
-    this.messageReadReceiptService.getMessageReadReceipts(this.message._id).subscribe({
-      next: (receipts) => {
-        this.readByUsers = this.processReadByUsers(receipts.map(r => r.user || { userId: r.userId }));
-      },
-      error: (error) => {
-        console.error('Error loading read receipts for message:', this.message._id, error);
-        this.readByUsers = [];
-      }
-    });
-
-    this.readReceiptSub = this.readReceiptSocket.onReadReceiptUpdated().subscribe(event => {
-      if (event.messageId === this.message._id) {
-        const newUser = event.user || { userId: event.userId };
-        if (!this.isDuplicateUser(newUser) && !this.isCurrentUserInList(newUser)) {
-          this.readByUsers = [...this.readByUsers, newUser];
-        } else {
-          console.log('Duplicate or current user read receipt ignored:', newUser);
-        }
-      }
-    });
+    this.readByUsers = this.processReadByUsers(this.readReceipts);
 
     if (!this.isCurrentUser) {
       this.markAsRead();
     }
   }
 
-  ngOnDestroy(): void {
-    this.readReceiptSub?.unsubscribe();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['readReceipts'] && this.currentUserId) {
+      const newReceipts = changes['readReceipts'].currentValue || [];
+      this.readByUsers = this.processReadByUsers(newReceipts);
+    }
   }
 
   private markAsRead() {
@@ -220,24 +202,24 @@ export class BaseMessageComponent implements OnInit, OnDestroy {
   }
 
   private processReadByUsers(users: any[]): any[] {
+    if (!users || !users.length || !this.currentUserId) {
+      return [];
+    }
+    
+    // Filter out current user and deduplicate
     const uniqueUsers = users.filter((user, index, self) => {
       const currentId = this.getUserId(user);
+      
+      // Skip current user
       if (currentId === this.currentUserId) {
         return false;
       }
+      
+      // Deduplicate by user ID
       return index === self.findIndex(u => this.getUserId(u) === currentId);
     });
+    
     return uniqueUsers;
-  }
-
-  private isDuplicateUser(newUser: any): boolean {
-    const newUserId = this.getUserId(newUser);
-    return this.readByUsers.some(u => this.getUserId(u) === newUserId);
-  }
-
-  private isCurrentUserInList(user: any): boolean {
-    const userId = this.getUserId(user);
-    return userId === this.currentUserId;
   }
 
   private getUserId(user: any): string {

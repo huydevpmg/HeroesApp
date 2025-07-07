@@ -50,9 +50,11 @@
           {{ error }}
         </div>
 
-        <ng-container *ngFor="let message of messagesWithAttachment$ | async; let isLast = last">
+        <ng-container
+          *ngFor="let message of messagesWithAttachment$ | async; let isLast = last; trackBy: trackByMessageId">
           <app-base-message [message]="message" [conversationId]="conversation._id!" [isLast]="isLast"
-            (edit)="onEditMessage($event)" (delete)="onDeleteMessage($event)">
+            [readReceipts]="isLast ? lastMessageReadReceipts : []" (edit)="onEditMessage($event)"
+            (delete)="onDeleteMessage($event)">
           </app-base-message>
 
           <!-- <app-reply-message *ngIf="message.parentMessage" [message]="message" [conversationId]="conversation._id!">
