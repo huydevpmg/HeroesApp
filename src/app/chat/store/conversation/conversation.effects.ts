@@ -6,7 +6,6 @@ import { map, mergeMap, catchError } from 'rxjs/operators';
 import * as ConversationActions from './conversation.actions';
 import * as MessageActions from '../message/message.actions';
 import { ConversationApiService } from '../../services/conversation/conversation-api.service';
-import { SocketService } from '../../services/socket/socket.service';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
 
 @Injectable()
@@ -130,12 +129,6 @@ export class ConversationEffects {
     )
   );
 
-  handleNewGroup$ = createEffect(() =>
-    this.socketService.onGroupCreated().pipe(
-      map((conversation) => ConversationActions.createConversationSuccess({ conversation }))
-    )
-  );
-
   leaveGroup$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ConversationActions.leaveGroup),
@@ -148,29 +141,8 @@ export class ConversationEffects {
     )
   );
 
-  handleMemberAdded$ = createEffect(() =>
-    this.socketService.onMemberAdded().pipe(
-      map(({ conversationId }) => [
-        ConversationActions.loadConversations(), // Force reload to get updated conversation data
-        MessageActions.loadMessages({ conversationId }) // Reload messages để hiển thị system message
-      ]),
-      mergeMap(actions => from(actions))
-    )
-  );
-
-  handleMemberRemoved$ = createEffect(() =>
-    this.socketService.onMemberRemoved().pipe(
-      map(({ conversationId }) => [
-        ConversationActions.loadConversations(), // Force reload to get updated conversation data
-        MessageActions.loadMessages({ conversationId }) // Reload messages để hiển thị system message
-      ]),
-      mergeMap(actions => from(actions))
-    )
-  );
-
   constructor(
     private actions$: Actions,
-    private conversationApi: ConversationApiService,
-    private socketService: SocketService
+    private conversationApi: ConversationApiService
   ) { }
 }

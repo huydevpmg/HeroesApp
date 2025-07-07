@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
 import * as ConversationActions from '../../store/conversation/conversation.actions';
+import * as MessageActions from '../../store/message/message.actions';
 import * as ConversationSelectors from '../../store/conversation/conversation.selectors';
 import { SocketService } from '../socket/socket.service';
 
@@ -75,6 +76,18 @@ export class ConversationService {
     // Listen for new groups created by others
     this.socketService.onGroupCreated().subscribe((conversation: Conversation) => {
       this.store.dispatch(ConversationActions.createConversationSuccess({ conversation }));
+      this.store.dispatch(ConversationActions.loadConversations());
+    });
+
+    this.socketService.onMemberAdded().subscribe(({ conversationId }) => {
+      this.store.dispatch(ConversationActions.loadConversations());
+      this.store.dispatch(MessageActions.loadMessages({ conversationId }));
+    });
+
+    // Listen for member removed events  
+    this.socketService.onMemberRemoved().subscribe(({ conversationId }) => {
+      this.store.dispatch(ConversationActions.loadConversations());
+      this.store.dispatch(MessageActions.loadMessages({ conversationId }));
     });
 
     // Listen for leave group events
@@ -86,7 +99,6 @@ export class ConversationService {
     this.socketService.onConversationUpdated().subscribe(({ conversationId, type }) => {
       // Reload conversations to get latest data
       this.store.dispatch(ConversationActions.loadConversations());
-      console.log(`Conversation ${conversationId} updated with type: ${type}`);
     });
   }
 }

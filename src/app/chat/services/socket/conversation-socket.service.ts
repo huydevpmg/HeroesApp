@@ -7,6 +7,7 @@ import { Store } from '@ngrx/store';
 import * as ConversationActions from '../../store/conversation/conversation.actions';
 import { selectAllConversations } from '../../store/conversation/conversation.selectors';
 import { filter, delay } from 'rxjs/operators';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,7 @@ import { filter, delay } from 'rxjs/operators';
 export class ConversationSocketService {
   private socketCore = inject(SocketCoreService);
   private store = inject(Store);
+  private authService = inject(AuthService);
 
   // Track current joined conversation to avoid duplicate joins
   private currentJoinedConversation: string | null = null;
@@ -52,7 +54,7 @@ export class ConversationSocketService {
 
   private setupConversationListeners(): void {
     // New group created
-    this.socketCore.on(SOCKET_EVENTS.NEW_GROUP, (group: Conversation) => {
+    this.socketCore.on(SOCKET_EVENTS.GROUP_CREATED, (group: Conversation) => {
       this.groupCreatedSubject.next(group);
     });
 
@@ -98,6 +100,13 @@ export class ConversationSocketService {
       this.memberAddedSubject.next(data);
       this.store.dispatch(ConversationActions.addMembersToGroupSuccess({ conversation: data.conversation }));
       this.store.dispatch(ConversationActions.loadConversations());
+
+      // If current user is one of the added members, auto-join the conversation
+      const currentUserId = this.authService.getCurrentUserId();
+      if (currentUserId && data.addedMembers.includes(currentUserId)) {
+        // Join the conversation room to receive future messages
+        this.joinConversation(data.conversationId);
+      }
     });
 
     // Member removed from group
@@ -116,7 +125,6 @@ export class ConversationSocketService {
     }
 
     this.currentJoinedConversation = conversationId;
-    console.log(`Frontend: Joining room ${conversationId}`);
     this.socketCore.emit(SOCKET_EVENTS.JOIN_ROOM, conversationId);
   }
 
@@ -137,19 +145,6 @@ export class ConversationSocketService {
       );
     });
   }
-
-  // Emit group creation
-  emitGroupCreated(conversation: Conversation): void {
-    this.socketCore.emit(SOCKET_EVENTS.GROUP_CREATED, {
-      _id: conversation._id,
-      name: conversation.name,
-      participants: conversation.participants,
-      isGroup: conversation.isGroup,
-      createdBy: conversation.createdBy,
-      createdAt: conversation.createdAt
-    });
-  }
-
   // Pin conversation
   pinConversation(conversationId: string): Promise<{ success: boolean; result: any }> {
     return new Promise((resolve) => {
