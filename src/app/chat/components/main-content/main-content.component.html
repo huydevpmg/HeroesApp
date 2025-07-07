@@ -4,9 +4,11 @@
       <div class="chat-header">
         <div class="d-flex align-items-center">
           <div class="avatar">
-            <img
-              [src]="'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'"
-              [alt]="conversation.name">
+            <div class="conversation-avatar">
+              <div class="rounded-circle bg-secondary group-avatar">
+                <i class="bi bi-people-fill"></i>
+              </div>
+            </div>
             <ng-container *ngIf="(otherUserId$ | async) as otherUserId">
               <ng-container *ngIf="(onlineUsers$ | async) as onlineUsers">
                 <span class="status-badge" [class.online]="otherUserId && onlineUsers.includes(otherUserId)"
@@ -15,7 +17,7 @@
               </ng-container>
             </ng-container>
           </div>
-          <div class="ms-3">
+          <div class="ms-2 ">
             <h6 class="mb-0">{{ conversation.name }}</h6>
             <small class="text-muted" *ngIf="(typingUsers$ | async)?.length">
               {{ (typingUsers$ | async)?.length }} {{ (typingUsers$ | async)?.length === 1 ? 'person' : 'people' }}
@@ -48,7 +50,8 @@
           {{ error }}
         </div>
 
-        <ng-container *ngFor="let message of messagesWithAttachment$ | async; let isLast = last">
+        <ng-container
+          *ngFor="let message of messagesWithAttachment$ | async; let isLast = last; trackBy: trackByMessageId">
           <ng-container *ngIf="message.type === 'SYSTEM'; else normalMsg">
             <div class="system-message text-secondary text-center small py-2">
               {{ getSystemMessageText(message) }}
@@ -56,7 +59,8 @@
           </ng-container>
           <ng-template #normalMsg>
             <app-base-message [message]="message" [conversationId]="conversation._id!" [isLast]="isLast"
-              (edit)="onEditMessage($event)" (delete)="onDeleteMessage($event)">
+              [readReceipts]="isLast ? lastMessageReadReceipts : []" (edit)="onEditMessage($event)"
+              (delete)="onDeleteMessage($event)">
             </app-base-message>
           </ng-template>
         </ng-container>

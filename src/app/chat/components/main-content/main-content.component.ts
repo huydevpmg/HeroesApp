@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, combineLatest } from 'rxjs';
 import { map, distinctUntilChanged, filter } from 'rxjs/operators';
@@ -14,6 +14,8 @@ import { SocketService } from '../../services/socket/socket.service';
 import { selectAttachmentEntities } from '../../store/attachment/attachment.selectors';
 import { MessageService } from '../../services/message/message.service';
 import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
+import { MessageReadReceiptService } from '../../services/message-read-receipt/message-read-receipt.service';
+import { ReadReceiptSocketService } from '../../services/socket/read-receipt-socket.service';
 
 @Component({
   selector: 'app-main-content',
@@ -35,9 +37,17 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   private messagesSub?: Subscription;
   private socketMessageSub?: Subscription;
   private conversationSub?: Subscription;
+  private messagesAndAttachmentsSub?: Subscription;
   selectedFiles: File[] = [];
   previews: string[] = [];
   uploading = false;
+
+  // Read receipts optimization
+  conversationReadReceipts: { [messageId: string]: any[] } = {};
+  lastMessageReadReceipts: any[] = [];
+  private readReceiptsSub?: Subscription;
+  private readReceiptSocketSub?: Subscription;
+  private isLoadingReadReceipts = false;
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef<HTMLDivElement>;
 
@@ -45,7 +55,10 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
     private store: Store,
     private authService: AuthService,
     private socketService: SocketService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private messageReadReceiptService: MessageReadReceiptService,
+    private readReceiptSocket: ReadReceiptSocketService,
+    private cdr: ChangeDetectorRef
   ) {
     this.selectedConversation$ = this.store.select(ConversationSelectors.selectSelectedConversation).pipe(
       map(conv => conv ?? null)
@@ -77,6 +90,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(conversationId => {
         if (conversationId && conversationId !== this.selectedConversationId) {
           this.selectedConversationId = conversationId;
+          this.conversationReadReceipts = {};
           this.store.dispatch(MessageActions.loadMessages({ conversationId }));
           this.socketService.joinConversation(conversationId);
         }
@@ -86,12 +100,46 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
       this.store.dispatch(MessageActions.receiveMessage({ message }));
     });
 
-    combineLatest([this.messages$, this.store.select(selectAttachmentEntities)]).subscribe(([messages, entities]) => {
+    this.readReceiptSocketSub = this.readReceiptSocket.onReadReceiptUpdated().subscribe(event => {
+      if (event.messageId && this.conversationReadReceipts[event.messageId]) {
+        const newUser = event.user || { userId: event.userId };
+        const existingUsers = this.conversationReadReceipts[event.messageId];
+
+        const userExists = existingUsers.some(u =>
+          (u.userId || u._id) === (newUser.userId || newUser._id)
+        );
+
+        if (!userExists) {
+          this.conversationReadReceipts[event.messageId] = [...existingUsers, newUser];
+
+          // Update lastMessageReadReceipts if this is the last message
+          this.messages$.pipe().subscribe(messages => {
+            if (messages.length > 0) {
+              const lastMessage = messages[messages.length - 1];
+              if (lastMessage && lastMessage._id === event.messageId) {
+                this.lastMessageReadReceipts = this.conversationReadReceipts[event.messageId];
+                this.cdr.detectChanges();
+              }
+            }
+          }).unsubscribe();
+        }
+      }
+    });
+
+    // Load attachments and read receipts when messages change
+    this.messagesAndAttachmentsSub = combineLatest([
+      this.messages$,
+      this.store.select(selectAttachmentEntities)
+    ]).subscribe(([messages, entities]) => {
+      // Load attachments for messages that don't have them loaded yet
       messages.forEach(msg => {
         if (msg.attachmentId && !entities[msg.attachmentId]) {
           this.store.dispatch(AttachmentActions.loadAttachment({ attachmentId: msg.attachmentId! }));
         }
       });
+
+      // Load read receipts for the current messages
+      this.loadReadReceiptsForMessages(messages);
     });
   }
 
@@ -279,9 +327,75 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
     } catch { }
   }
 
+  private loadReadReceiptsForMessages(messages: any[]) {
+    if (!this.selectedConversationId || !messages.length) {
+      this.conversationReadReceipts = {};
+      this.lastMessageReadReceipts = [];
+      return;
+    }
+
+    const messageIds = messages
+      .filter(msg => msg._id)
+      .map(msg => msg._id);
+
+    if (messageIds.length === 0) {
+      this.conversationReadReceipts = {};
+      this.lastMessageReadReceipts = [];
+      return;
+    }
+
+    // Prevent duplicate API calls
+    if (this.isLoadingReadReceipts) {
+      return;
+    }
+
+    // Unsubscribe from previous subscription
+    this.readReceiptsSub?.unsubscribe();
+
+    this.isLoadingReadReceipts = true;
+
+    // Load all read receipts
+    this.readReceiptsSub = this.messageReadReceiptService
+      .getConversationReadReceipts(this.selectedConversationId, messageIds)
+      .subscribe({
+        next: (receiptsMap) => {
+          this.conversationReadReceipts = {};
+
+          // Transform the response to map messageId to user array
+          Object.keys(receiptsMap).forEach(messageId => {
+            this.conversationReadReceipts[messageId] = receiptsMap[messageId].map(receipt =>
+              receipt.user || { userId: receipt.userId }
+            );
+          });
+
+          // Update last message read receipts
+          const lastMessage = messages[messages.length - 1];
+          if (lastMessage && lastMessage._id) {
+            this.lastMessageReadReceipts = this.conversationReadReceipts[lastMessage._id] || [];
+          }
+
+          this.isLoadingReadReceipts = false;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error loading conversation read receipts:', error);
+          this.conversationReadReceipts = {};
+          this.lastMessageReadReceipts = [];
+          this.isLoadingReadReceipts = false;
+        }
+      });
+  }
+
+  trackByMessageId(index: number, message: any): string {
+    return message._id;
+  }
+
   ngOnDestroy() {
     this.messagesSub?.unsubscribe();
     this.socketMessageSub?.unsubscribe();
     this.conversationSub?.unsubscribe();
+    this.messagesAndAttachmentsSub?.unsubscribe();
+    this.readReceiptsSub?.unsubscribe();
+    this.readReceiptSocketSub?.unsubscribe();
   }
 }

@@ -24,10 +24,10 @@ export const SOCKET_EVENTS = {
   MESSAGE_REACTION: 'message_reaction',
   REMOVE_REACTION: 'remove_reaction',
 
-  // Status
+  // Presence / Status
   USER_STATUS_CHANGE: 'user_status_change',
 
-  // Group/Conversation management
+  // Group / Conversation management
   GROUP_CREATED: 'group_created',
   NEW_GROUP: 'new_group',
   PIN_CONVERSATION: 'pin_conversation',
@@ -35,9 +35,11 @@ export const SOCKET_EVENTS = {
   ADD_LABEL: 'add_label',
   REMOVE_LABEL: 'remove_label',
 
-  // Message status
+  // Message status / read receipts
   MARK_AS_READ: 'mark_as_read',
-
+  MESSAGE_READ: 'message_read',
+  READ_RECEIPT_UPDATED: 'read_receipt_updated',
+  BULK_MESSAGE_READ: 'bulk_message_read',
   // Attachments
   ATTACHMENT_CREATED: 'attachment_created',
   ATTACHMENT_DELETED: 'attachment_deleted',
@@ -48,55 +50,61 @@ export const SOCKET_EVENTS = {
   CONVERSATION_UPDATED: 'conversation_updated',
 
 
-} as const;
+};
 
-export type SocketEventName = keyof typeof SOCKET_EVENTS;
-export type SocketEventValue = typeof SOCKET_EVENTS[SocketEventName];
+// export type SocketEventName = keyof typeof SOCKET_EVENTS;
+// export type SocketEventValue = typeof SOCKET_EVENTS[SocketEventName];
 
-// Grouped events for easier management
-export const EVENT_GROUPS = {
-  CONNECTION: [
-    SOCKET_EVENTS.CONNECTION,
-    SOCKET_EVENTS.DISCONNECT,
-  ],
+// // Grouped events for easier management
+// export const EVENT_GROUPS = {
+//   CONNECTION: [
+//     SOCKET_EVENTS.CONNECTION,
+//     SOCKET_EVENTS.DISCONNECT,
+//   ],
 
-  MESSAGES: [
-    SOCKET_EVENTS.SEND_MESSAGE,
-    SOCKET_EVENTS.RECEIVE_MESSAGE,
-    SOCKET_EVENTS.EDIT_MESSAGE,
-    SOCKET_EVENTS.DELETE_MESSAGE,
-    SOCKET_EVENTS.MESSAGE_UPDATED,
-    SOCKET_EVENTS.MESSAGE_DELETED_GLOBAL,
-    SOCKET_EVENTS.MESSAGE_DELETED_PERSONAL,
-  ],
+//   MESSAGES: [
+//     SOCKET_EVENTS.SEND_MESSAGE,
+//     SOCKET_EVENTS.RECEIVE_MESSAGE,
+//     SOCKET_EVENTS.EDIT_MESSAGE,
+//     SOCKET_EVENTS.DELETE_MESSAGE,
+//     SOCKET_EVENTS.MESSAGE_UPDATED,
+//     SOCKET_EVENTS.MESSAGE_DELETED_GLOBAL,
+//     SOCKET_EVENTS.MESSAGE_DELETED_PERSONAL,
+//   ],
 
-  TYPING: [
-    SOCKET_EVENTS.TYPING,
-    SOCKET_EVENTS.USER_TYPING,
-  ],
+//   MESSAGE_STATUS: [
+//     SOCKET_EVENTS.MARK_AS_READ,
+//     SOCKET_EVENTS.MESSAGE_READ,
+//     SOCKET_EVENTS.READ_RECEIPT_UPDATED,
+//   ],
 
-  REACTIONS: [
-    SOCKET_EVENTS.MESSAGE_REACTION,
-    SOCKET_EVENTS.REMOVE_REACTION,
-  ],
+//   TYPING: [
+//     SOCKET_EVENTS.TYPING,
+//     SOCKET_EVENTS.USER_TYPING,
+//   ],
 
-  CONVERSATIONS: [
-    SOCKET_EVENTS.JOIN_ROOM,
-    SOCKET_EVENTS.CONNECT_CONVERSATION,
-    SOCKET_EVENTS.GROUP_CREATED,
-    SOCKET_EVENTS.NEW_GROUP,
-    SOCKET_EVENTS.PIN_CONVERSATION,
-    SOCKET_EVENTS.ARCHIVE_CONVERSATION,
-    SOCKET_EVENTS.ADD_LABEL,
-    SOCKET_EVENTS.REMOVE_LABEL,
-  ],
+//   REACTIONS: [
+//     SOCKET_EVENTS.MESSAGE_REACTION,
+//     SOCKET_EVENTS.REMOVE_REACTION,
+//   ],
 
-  ATTACHMENTS: [
-    SOCKET_EVENTS.ATTACHMENT_CREATED,
-    SOCKET_EVENTS.ATTACHMENT_DELETED,
-  ],
+//   CONVERSATIONS: [
+//     SOCKET_EVENTS.JOIN_ROOM,
+//     SOCKET_EVENTS.CONNECT_CONVERSATION,
+//     SOCKET_EVENTS.GROUP_CREATED,
+//     SOCKET_EVENTS.NEW_GROUP,
+//     SOCKET_EVENTS.PIN_CONVERSATION,
+//     SOCKET_EVENTS.ARCHIVE_CONVERSATION,
+//     SOCKET_EVENTS.ADD_LABEL,
+//     SOCKET_EVENTS.REMOVE_LABEL,
+//   ],
 
-  PRESENCE: [
-    SOCKET_EVENTS.USER_STATUS_CHANGE,
-  ],
-} as const;
+//   ATTACHMENTS: [
+//     SOCKET_EVENTS.ATTACHMENT_CREATED,
+//     SOCKET_EVENTS.ATTACHMENT_DELETED,
+//   ],
+
+//   PRESENCE: [
+//     SOCKET_EVENTS.USER_STATUS_CHANGE,
+//   ],
+// } as const;
