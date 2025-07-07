@@ -30,6 +30,7 @@ export class MessageSocketService {
   private setupMessageListeners(): void {
     // Message received
     this.socketCore.on(SOCKET_EVENTS.RECEIVE_MESSAGE, (message: Message) => {
+      console.log("Message received:", message);
       this.messageSubject.next(message);
       this.store.dispatch(ConversationActions.loadConversations());
     });

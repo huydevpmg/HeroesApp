@@ -80,6 +80,13 @@ export class BaseMessageComponent implements OnInit, OnChanges {
     }
   }
 
+  onImageError(event: any): void {
+    const target = event.target as HTMLImageElement;
+    if (target) {
+      target.src = 'https://i.pravatar.cc/150?img=1';
+    }
+  }
+
   private markAsRead() {
     if (this.currentUserId && this.conversationId && this.message._id) {
       const hasCurrentUserRead = this.readByUsers.some(u => this.getUserId(u) === this.currentUserId);
@@ -211,20 +218,20 @@ export class BaseMessageComponent implements OnInit, OnChanges {
     if (!users || !users.length || !this.currentUserId) {
       return [];
     }
-    
+
     // Filter out current user and deduplicate
     const uniqueUsers = users.filter((user, index, self) => {
       const currentId = this.getUserId(user);
-      
+
       // Skip current user
       if (currentId === this.currentUserId) {
         return false;
       }
-      
+
       // Deduplicate by user ID
       return index === self.findIndex(u => this.getUserId(u) === currentId);
     });
-    
+
     return uniqueUsers;
   }
 

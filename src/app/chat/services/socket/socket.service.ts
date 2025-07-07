@@ -178,7 +178,8 @@ export class SocketService {
 
   onMemberRemoved(): Observable<{ conversationId: string; removedUserId: string; conversation: Conversation; systemMessage: any }> {
     return this.conversationSocket.onMemberRemoved();
-    
+  }
+
   onLeaveGroup(): Observable<{ conversationId: string; userId: string }> {
     return this.conversationSocket.onLeaveGroup();
   }

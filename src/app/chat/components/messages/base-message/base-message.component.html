@@ -2,7 +2,8 @@
   [class.deleted]="isGloballyDeleted">
 
   <div class="message-avatar shadow" *ngIf="!isCurrentUser">
-    <img [src]="message.sender?.avatar" alt="Avatar">
+    <img [src]="message.sender?.avatar || 'https://i.pravatar.cc/150?img=1'" [alt]="message.sender?.fullName || 'User'"
+      (error)="onImageError($event)">
   </div>
 
   <ng-container *ngIf="!isGloballyDeleted; else deletedMsg">

@@ -273,7 +273,7 @@ export const conversationReducer = createReducer(
     ...state,
     loading: false,
     error,
-  }))
+  })),
 
   // Leave group
   on(ConversationActions.leaveGroupSuccess, (state, { conversationId }) =>

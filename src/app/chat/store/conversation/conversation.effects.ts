@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of, from } from 'rxjs';
-import { map, mergeMap, catchError, tap } from 'rxjs/operators';
+import { map, mergeMap, catchError } from 'rxjs/operators';
 
 import * as ConversationActions from './conversation.actions';
 import * as MessageActions from '../message/message.actions';
@@ -133,8 +133,10 @@ export class ConversationEffects {
   handleNewGroup$ = createEffect(() =>
     this.socketService.onGroupCreated().pipe(
       map((conversation) => ConversationActions.createConversationSuccess({ conversation }))
+    )
+  );
 
-    leaveGroup$ = createEffect(() =>
+  leaveGroup$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ConversationActions.leaveGroup),
       mergeMap(({ conversationId }) =>
