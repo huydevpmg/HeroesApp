@@ -7,6 +7,12 @@
   max-width: 100%;
 }
 
+.edited-label{
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #6c757d;
+}
+
 .sent .text {
   background-color: #0084ff;
   color: white;

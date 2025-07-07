@@ -19,6 +19,7 @@ export interface Message {
   updatedAt?: string;
   type?: 'USER' | 'SYSTEM';
   systemType?: string;
+  isEdited?: boolean;
   meta?: any;
 }
 

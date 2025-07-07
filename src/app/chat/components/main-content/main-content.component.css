@@ -728,3 +728,93 @@
   margin-right: 0;
   width: auto;
 }
+
+/* Edit Banner Styles */
+.edit-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-radius: 14px;
+  padding: 10px 18px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 12px rgba(0,132,255,0.08);
+  position: relative;
+  animation: fadeInEditBanner 0.25s;
+}
+
+.edit-banner .edit-icon {
+  color: #000000;
+  font-size: 1.3rem;
+  margin-right: 2px;
+}
+
+.edit-banner .edit-label {
+  font-weight: 600;
+  color: #000000;
+  font-size: 0.8rem;
+}
+
+.edit-banner .edit-message-preview {
+  color: #222;
+  background: #f1f3f7;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  max-width: 320px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.edit-banner .edit-cancel-btn {
+  margin-left: auto;
+  color: #dc3545;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.edit-banner .edit-cancel-btn:hover {
+  background: #ffeaea;
+  color: #b91c1c;
+}
+
+/* Dimming effect for edit mode */
+.chat-main.edit-mode .chat-messages,
+.chat-main.edit-mode .file-preview-container {
+  opacity: 0.35;
+  filter: blur(1.5px);
+  pointer-events: none;
+  transition: opacity 0.2s, filter 0.2s;
+}
+
+.chat-main.edit-mode .chat-header,
+.chat-main.edit-mode .chat-input {
+  opacity: 1 !important;
+  filter: none !important;
+  pointer-events: auto !important;
+  z-index: 10;
+}
+
+.edit-banner {
+  z-index: 20;
+}
+
+@media (max-width: 600px) {
+  .edit-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 8px;
+    gap: 8px;
+  }
+  .edit-banner .edit-message-preview {
+    max-width: 90vw;
+  }
+}

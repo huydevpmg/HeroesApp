@@ -30,6 +30,10 @@ export class MessageApiService {
     });
   }
 
+  editMessage(messageId: string, content: string): Observable<Message> {
+    return this.http.put<Message>(`${this.apiUrl}/${messageId}`, { content })
+  }
+
   updateMessageStatus(messageId: string, status: string): Observable<Message> {
     return this.http.put<Message>(`${this.apiUrl}/${messageId}/status`, { status });
   }

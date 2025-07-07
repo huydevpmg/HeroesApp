@@ -63,6 +63,21 @@ export const updateMessageStatusFailure = createAction(
   props<{ error: string }>()
 );
 
+export const editMessage = createAction(
+  '[Message] Edit Message',
+  props<{ messageId: string; content: string }>()
+)
+
+export const editMessageSuccess = createAction(
+  '[Message] Edit Message Success',
+  props<{ message: Message }>()
+);
+
+export const editMessageFailure = createAction(
+  '[Message] Edit Message Failure',
+  props<{ error: string }>()
+);
+
 // Update message
 export const updateMessageSuccess = createAction(
   '[Message] Update Message Success',

@@ -1,13 +1,15 @@
 <div class="message" *ngIf="shouldShowMessage" [class.sent]="isCurrentUser" [class.received]="!isCurrentUser"
   [class.deleted]="isGloballyDeleted">
 
-  <div class="message-avatar shadow" *ngIf="!isCurrentUser">
+  <div class="message-avatar shadow me-2" *ngIf="!isCurrentUser">
     <img [src]="message.sender?.avatar || 'https://i.pravatar.cc/150?img=1'" [alt]="message.sender?.fullName || 'User'"
       (error)="onImageError($event)">
   </div>
 
   <ng-container *ngIf="!isGloballyDeleted; else deletedMsg">
-    <div class="message-content">
+    <div class="message-content d-flex flex-column gap-0">
+      <span *ngIf="message.isEdit" class="edited-label" [class.me-2]="isCurrentUser" [class.ms-2]="!isCurrentUser">Edited</span>
+
       <!-- Text Message Only -->
       <div class="message-bubble text" *ngIf="message.content && !message.attachmentId">
         <p>{{ message.content }}</p>
@@ -67,6 +69,7 @@
         <span class="message-status" *ngIf="isCurrentUser && isLast && readByUsers.length === 0">
           {{ message.status }}
         </span>
+
         <span class="read-receipt-info" *ngIf="isCurrentUser && isLast && readByUsers.length > 0">
           <app-read-receipt [users]="readByUsers"></app-read-receipt>
         </span>
@@ -109,7 +112,7 @@
     </div>
   </ng-container>
 
-  <!-- Template cho globally deleted message-->
+  <!-- Template globally deleted message-->
   <ng-template #deletedMsg>
     <div class="deleted-message-bubble" [class.sent]="isCurrentUser" [class.received]="!isCurrentUser">
       <div class="deleted-message-content">

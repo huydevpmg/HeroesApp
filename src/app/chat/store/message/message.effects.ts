@@ -67,6 +67,18 @@ export class MessageEffects {
     )
   );
 
+  editMessage$ = createEffect(() => (
+    this.actions$.pipe(
+      ofType(MessageActions.editMessage),
+      mergeMap(({ messageId, content }) =>
+        this.messageApiService.editMessage(messageId, content).pipe(
+          map(message => MessageActions.editMessageSuccess({ message })),
+          catchError(error => of(MessageActions.editMessageFailure({ error: error.message })))
+        )
+      )
+    )
+  ))
+
   addReaction$ = createEffect(() =>
     this.actions$.pipe(
       ofType(MessageActions.addReaction),

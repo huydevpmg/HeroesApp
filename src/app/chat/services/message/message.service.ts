@@ -26,6 +26,10 @@ export class MessageService {
     this.store.dispatch(MessageActions.updateMessageStatus({ messageId, status }));
   }
 
+  editMessage(messageId: string, content: string) {
+    this.store.dispatch(MessageActions.editMessage({messageId, content}));
+  }
+
   deleteMessage(messageId: string, deleteType: DeleteType) {
     this.store.dispatch(MessageActions.deleteMessage({ messageId, deleteType }));
   }
@@ -37,4 +41,6 @@ export class MessageService {
   removeReaction(messageId: string) {
     this.store.dispatch(MessageActions.removeReaction({ messageId }));
   }
+
+
 }
