@@ -1,0 +1,7 @@
+<ng-container *ngIf="users && users.length">
+  <span *ngFor="let user of users" class="read-avatar-wrapper">
+    <img [src]="user.avatar || ('https://ui-avatars.com/api/?name=' + (user.fullName ))" class="read-avatar" width="20"
+      height="20" style="border-radius:50%;margin-right:2px;object-fit:cover;" data-bs-toggle="tooltip"
+      data-bs-placement="left" [attr.data-bs-title]="user.fullName" />
+  </span>
+</ng-container>

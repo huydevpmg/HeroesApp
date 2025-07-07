@@ -24,10 +24,10 @@ export const SOCKET_EVENTS = {
   MESSAGE_REACTION: 'message_reaction',
   REMOVE_REACTION: 'remove_reaction',
 
-  // Status
+  // Presence / Status
   USER_STATUS_CHANGE: 'user_status_change',
 
-  // Group/Conversation management
+  // Group / Conversation management
   GROUP_CREATED: 'group_created',
   NEW_GROUP: 'new_group',
   MEMBER_ADDED: 'member_added',
@@ -37,12 +37,20 @@ export const SOCKET_EVENTS = {
   ADD_LABEL: 'add_label',
   REMOVE_LABEL: 'remove_label',
 
-  // Message status
+  // Message status / read receipts
   MARK_AS_READ: 'mark_as_read',
+  MESSAGE_READ: 'message_read',
+  READ_RECEIPT_UPDATED: 'read_receipt_updated',
+  BULK_MESSAGE_READ: 'bulk_message_read',
 
   // Attachments
   ATTACHMENT_CREATED: 'attachment_created',
   ATTACHMENT_DELETED: 'attachment_deleted',
+
+  // User events (from develop)
+  LEAVE_GROUP: 'user_left_group',
+  LEAVE_GROUP_NOTIFY: 'user_left_group_notify',
+  CONVERSATION_UPDATED: 'conversation_updated',
 } as const;
 
 export type SocketEventName = keyof typeof SOCKET_EVENTS;
@@ -63,6 +71,13 @@ export const EVENT_GROUPS = {
     SOCKET_EVENTS.MESSAGE_UPDATED,
     SOCKET_EVENTS.MESSAGE_DELETED_GLOBAL,
     SOCKET_EVENTS.MESSAGE_DELETED_PERSONAL,
+  ],
+
+  MESSAGE_STATUS: [
+    SOCKET_EVENTS.MARK_AS_READ,
+    SOCKET_EVENTS.MESSAGE_READ,
+    SOCKET_EVENTS.READ_RECEIPT_UPDATED,
+    SOCKET_EVENTS.BULK_MESSAGE_READ,
   ],
 
   TYPING: [
@@ -86,6 +101,9 @@ export const EVENT_GROUPS = {
     SOCKET_EVENTS.ARCHIVE_CONVERSATION,
     SOCKET_EVENTS.ADD_LABEL,
     SOCKET_EVENTS.REMOVE_LABEL,
+    SOCKET_EVENTS.CONVERSATION_UPDATED,
+    SOCKET_EVENTS.LEAVE_GROUP,
+    SOCKET_EVENTS.LEAVE_GROUP_NOTIFY,
   ],
 
   ATTACHMENTS: [

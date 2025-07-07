@@ -109,6 +109,12 @@ export class ChatInfoComponent implements OnInit {
     console.log('View file:', file);
   }
 
+  onLeaveGroup(selectedConv: Conversation) {
+    if (selectedConv && selectedConv._id) {
+      this.conversationService.leaveGroup(selectedConv._id);
+    }
+  }
+
   private getSharedImages() {
     return this.getMockSharedImages();
   }

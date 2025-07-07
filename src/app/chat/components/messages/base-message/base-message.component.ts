@@ -4,22 +4,26 @@ import {
   Output,
   EventEmitter,
   OnInit,
+  OnChanges,
+  SimpleChanges,
   HostListener,
   ElementRef,
 } from '@angular/core';
 import { AuthService } from '../../../../auth/services/auth.service';
 import { Attachment } from '../../../../shared/enums/models/attachment.model';
 import { DeleteType } from '../../../../shared/enums/models/delete-type.enum';
+import { ReadReceiptSocketService } from '../../../services/socket/read-receipt-socket.service';
 
 @Component({
   selector: 'app-base-message',
   templateUrl: './base-message.component.html',
   styleUrls: ['./base-message.component.css'],
 })
-export class BaseMessageComponent implements OnInit {
+export class BaseMessageComponent implements OnInit, OnChanges {
   @Input() message!: any;
   @Input() conversationId!: string;
   @Input() isLast: boolean = false;
+  @Input() readReceipts: any[] = [];
 
   @Output() react = new EventEmitter<any>();
   @Output() reply = new EventEmitter<any>();
@@ -37,6 +41,8 @@ export class BaseMessageComponent implements OnInit {
   showDeleteModal = false;
   deleteOption: DeleteType = DeleteType.EVERYONE;
 
+  readByUsers: any[] = [];
+
   fileIconMap: { [key: string]: string } = {
     pdf: '📄',
     doc: '📝',
@@ -52,12 +58,40 @@ export class BaseMessageComponent implements OnInit {
 
   constructor(
     protected authService: AuthService,
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private readReceiptSocket: ReadReceiptSocketService
   ) { }
 
   ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUserId();
     this.isCurrentUser = this.message.senderId === this.currentUserId;
+
+    this.readByUsers = this.processReadByUsers(this.readReceipts);
+
+    if (!this.isCurrentUser) {
+      this.markAsRead();
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['readReceipts'] && this.currentUserId) {
+      const newReceipts = changes['readReceipts'].currentValue || [];
+      this.readByUsers = this.processReadByUsers(newReceipts);
+    }
+  }
+
+  private markAsRead() {
+    if (this.currentUserId && this.conversationId && this.message._id) {
+      const hasCurrentUserRead = this.readByUsers.some(u => this.getUserId(u) === this.currentUserId);
+
+      if (!hasCurrentUserRead) {
+        this.readReceiptSocket.markMessageAsReadBySocket(
+          this.message._id,
+          this.currentUserId,
+          this.conversationId
+        );
+      }
+    }
   }
 
   isImage(url: string): boolean {
@@ -171,5 +205,30 @@ export class BaseMessageComponent implements OnInit {
 
   getFileIconByExt(ext: string): string {
     return this.fileIconMap[ext] || '📎';
+  }
+
+  private processReadByUsers(users: any[]): any[] {
+    if (!users || !users.length || !this.currentUserId) {
+      return [];
+    }
+    
+    // Filter out current user and deduplicate
+    const uniqueUsers = users.filter((user, index, self) => {
+      const currentId = this.getUserId(user);
+      
+      // Skip current user
+      if (currentId === this.currentUserId) {
+        return false;
+      }
+      
+      // Deduplicate by user ID
+      return index === self.findIndex(u => this.getUserId(u) === currentId);
+    });
+    
+    return uniqueUsers;
+  }
+
+  private getUserId(user: any): string {
+    return (user as any).userId || (user as any)._id || '';
   }
 }

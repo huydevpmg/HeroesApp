@@ -149,7 +149,7 @@ export const conversationReducer = createReducer(
       )
   ),
 
-  // Select
+  // Select conversation
   on(ConversationActions.selectConversation, (state, { id }) => ({
     ...state,
     selectedConversationId: id,
@@ -274,4 +274,31 @@ export const conversationReducer = createReducer(
     loading: false,
     error,
   }))
+
+  // Leave group
+  on(ConversationActions.leaveGroupSuccess, (state, { conversationId }) =>
+    conversationAdapter.removeOne(conversationId, state)
+  ),
+  on(ConversationActions.leaveGroupFailure, (state, { error }) => ({
+    ...state,
+    error,
+  })),
+
+  on(ConversationActions.removeUserFromConversation, (state, { conversationId, userId }) => {
+    const conversation = state.entities[conversationId];
+    if (conversation && conversation.participants) {
+      const updatedParticipants = conversation.participants.filter((p: any) => p._id !== userId);
+      return conversationAdapter.updateOne(
+        {
+          id: conversationId,
+          changes: {
+            participants: updatedParticipants,
+            updatedAt: new Date().toISOString()
+          }
+        },
+        state
+      );
+    }
+    return state;
+  })
 );

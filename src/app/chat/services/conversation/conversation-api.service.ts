@@ -52,6 +52,10 @@ export class ConversationApiService {
     }).pipe(map((response: any) => response.data.conversation));
   }
 
+  leaveGroup(conversationId: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/leave/${conversationId}`, {});
+  }
+
   // deleteConversation(id: string): Observable<void> {
   //   return this.http.delete<void>(`${this.apiUrl}/${id}`);
   // }

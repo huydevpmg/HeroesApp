@@ -1,15 +1,10 @@
-<!-- Chỉ hiển thị khi shouldShowMessage = true -->
 <div class="message" *ngIf="shouldShowMessage" [class.sent]="isCurrentUser" [class.received]="!isCurrentUser"
   [class.deleted]="isGloballyDeleted">
 
-  <!-- Avatar for received messages - LUÔN HIỂN THỊ cho received messages -->
   <div class="message-avatar shadow" *ngIf="!isCurrentUser">
-    <img
-      src="https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg"
-      alt="Avatar">
+    <img [src]="message.sender?.avatar" alt="Avatar">
   </div>
 
-  <!-- Hiển thị nội dung message bình thường hoặc deleted message -->
   <ng-container *ngIf="!isGloballyDeleted; else deletedMsg">
     <div class="message-content">
       <!-- Text Message Only -->
@@ -68,8 +63,11 @@
       <!-- Message Info -->
       <div class="message-info">
         <span class="message-time">{{ message.createdAt | date:'shortTime' }}</span>
-        <span class="message-status" *ngIf="isCurrentUser && isLast">
+        <span class="message-status" *ngIf="isCurrentUser && isLast && readByUsers.length === 0">
           {{ message.status }}
+        </span>
+        <span class="read-receipt-info" *ngIf="isCurrentUser && isLast && readByUsers.length > 0">
+          <app-read-receipt [users]="readByUsers"></app-read-receipt>
         </span>
       </div>
 

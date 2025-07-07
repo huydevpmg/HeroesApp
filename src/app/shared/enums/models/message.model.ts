@@ -17,5 +17,8 @@ export interface Message {
   deletedForUserIds?: string[];
   createdAt?: string;
   updatedAt?: string;
+  type?: 'USER' | 'SYSTEM';
+  systemType?: string;
+  meta?: any;
 }
 
