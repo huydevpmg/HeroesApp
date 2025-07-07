@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
 
@@ -37,7 +38,18 @@ export class ConversationApiService {
   }
 
   getAllUsers(): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.authService}/api/profile`);
+    return this.http.get<any[]>(`${this.apiUrl}/users`);
+  }
+
+  addMembersToGroup(conversationId: string, memberIds: string[]): Observable<Conversation> {
+    return this.http.post<{ message: string, data: { conversation: Conversation, addedMembers: string[], systemMessage: any } }>(`${this.apiUrl}/${conversationId}/members`, { memberIds })
+      .pipe(map((response: any) => response.data.conversation));
+  }
+
+  removeMemberFromGroup(conversationId: string, userId: string): Observable<Conversation> {
+    return this.http.delete<{ message: string, data: { conversation: Conversation, removedUserId: string, systemMessage: any } }>(`${this.apiUrl}/${conversationId}/members`, {
+      body: { userId }
+    }).pipe(map((response: any) => response.data.conversation));
   }
 
   leaveGroup(conversationId: string): Observable<any> {

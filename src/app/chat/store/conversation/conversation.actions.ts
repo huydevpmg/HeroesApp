@@ -154,6 +154,38 @@ export const updateLastAttachmentName = createAction(
   props<{ conversationId: string; lastAttachmentName: string }>()
 );
 
+// Add Members to Group
+export const addMembersToGroup = createAction(
+  '[Conversation] Add Members to Group',
+  props<{ conversationId: string; memberIds: string[] }>()
+);
+
+export const addMembersToGroupSuccess = createAction(
+  '[Conversation] Add Members to Group Success',
+  props<{ conversation: Conversation }>()
+);
+
+export const addMembersToGroupFailure = createAction(
+  '[Conversation] Add Members to Group Failure',
+  props<{ error: string }>()
+);
+
+// Remove Member from Group
+export const removeMemberFromGroup = createAction(
+  '[Conversation] Remove Member from Group',
+  props<{ conversationId: string; userId: string }>()
+);
+
+export const removeMemberFromGroupSuccess = createAction(
+  '[Conversation] Remove Member from Group Success',
+  props<{ conversation: Conversation }>()
+);
+
+export const removeMemberFromGroupFailure = createAction(
+  '[Conversation] Remove Member from Group Failure',
+  props<{ error: string }>()
+);
+
 // Leave Group
 export const leaveGroup = createAction(
   '[Conversation] Leave Group',

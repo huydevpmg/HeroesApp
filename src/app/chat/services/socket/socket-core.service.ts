@@ -150,10 +150,8 @@ export class SocketCoreService {
     }
   }
 
-  // Helper method for other services to emit with auto-reconnect
   emit(event: string, data?: any, callback?: Function): void {
     if (!this.socket?.connected) {
-      console.log('Socket not connected, attempting to connect...');
       this.connect();
       setTimeout(() => {
         if (this.socket?.connected) {
@@ -162,7 +160,7 @@ export class SocketCoreService {
           console.warn('Failed to emit event, socket still not connected:', event);
           callback && callback({ success: false, message: 'Socket not connected' });
         }
-      }, 1000);
+      }, 4000);
     } else {
       this.socket.emit(event, data, callback);
     }

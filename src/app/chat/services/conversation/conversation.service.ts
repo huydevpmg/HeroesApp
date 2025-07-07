@@ -14,6 +14,7 @@ export class ConversationService {
   selectedConversation$ = this.store.pipe(select(ConversationSelectors.selectSelectedConversation));
   loading$ = this.store.pipe(select(ConversationSelectors.selectConversationLoading));
   error$ = this.store.pipe(select(ConversationSelectors.selectConversationError));
+  allUsers$ = this.store.pipe(select(ConversationSelectors.getAllUsers));
 
   private socketService = inject(SocketService);
 
@@ -56,6 +57,14 @@ export class ConversationService {
 
   getConversations() {
     this.store.dispatch(ConversationActions.loadConversations());
+  }
+
+  addMembersToGroup(conversationId: string, memberIds: string[]) {
+    this.store.dispatch(ConversationActions.addMembersToGroup({ conversationId, memberIds }));
+  }
+
+  removeMemberFromGroup(conversationId: string, userId: string) {
+    this.store.dispatch(ConversationActions.removeMemberFromGroup({ conversationId, userId }));
   }
 
   leaveGroup(conversationId: string) {
