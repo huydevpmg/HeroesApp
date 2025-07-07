@@ -30,7 +30,6 @@ export class MessageSocketService {
   private setupMessageListeners(): void {
     // Message received
     this.socketCore.on(SOCKET_EVENTS.RECEIVE_MESSAGE, (message: Message) => {
-      console.log("Message received:", message);
       this.messageSubject.next(message);
       this.store.dispatch(ConversationActions.loadConversations());
     });
@@ -46,7 +45,6 @@ export class MessageSocketService {
     });
 
     this.socketCore.on(SOCKET_EVENTS.MESSAGE_DELETED_GLOBAL, (data: { messageId: string; conversationId: string }) => {
-      console.log("haha");
       this.messageDeletedGlobalSubject.next(data);
     });
 
@@ -101,7 +99,7 @@ export class MessageSocketService {
         { messageId, content },
         (response: any) => {
           if (response.success) {
-            console.log('✅ Message edited successfully:', response);
+            // Message edited successfully
           } else {
             console.error('Failed to edit message:', response);
           }
@@ -119,7 +117,7 @@ export class MessageSocketService {
         { messageId, deleteType },
         (response: any) => {
           if (response.success) {
-            console.log('✅ Message deleted successfully:', response);
+            // Message deleted successfully
           } else {
             console.error('Failed to delete message:', response);
           }

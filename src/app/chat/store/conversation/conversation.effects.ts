@@ -141,6 +141,28 @@ export class ConversationEffects {
     )
   );
 
+  clearConversation$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ConversationActions.clearConversation),
+      mergeMap(({ conversationId }) =>
+        this.conversationApi.clearConversation(conversationId).pipe(
+          map((response: any) => ConversationActions.clearConversationSuccess({
+            conversationId,
+            clearAt: response.data.clearAt
+          })),
+          catchError(error => of(ConversationActions.clearConversationFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  clearConversationSuccess$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ConversationActions.clearConversationSuccess),
+      map(({ conversationId }) => MessageActions.loadMessages({ conversationId }))
+    )
+  );
+
   constructor(
     private actions$: Actions,
     private conversationApi: ConversationApiService

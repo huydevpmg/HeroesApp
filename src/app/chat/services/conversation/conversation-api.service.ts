@@ -56,6 +56,10 @@ export class ConversationApiService {
     return this.http.patch(`${this.apiUrl}/leave/${conversationId}`, {});
   }
 
+  clearConversation(conversationId: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${conversationId}/clear`, {});
+  }
+
   // deleteConversation(id: string): Observable<void> {
   //   return this.http.delete<void>(`${this.apiUrl}/${id}`);
   // }

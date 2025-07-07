@@ -204,3 +204,51 @@ export const removeUserFromConversation = createAction(
   '[Conversation] Remove User From Conversation',
   props<{ conversationId: string; userId: string }>()
 );
+
+// Clear Conversation
+export const clearConversation = createAction(
+  '[Conversation] Clear Conversation',
+  props<{ conversationId: string }>()
+);
+
+export const clearConversationSuccess = createAction(
+  '[Conversation] Clear Conversation Success',
+  props<{ conversationId: string; clearAt: Date }>()
+);
+
+export const clearConversationFailure = createAction(
+  '[Conversation] Clear Conversation Failure',
+  props<{ error: string }>()
+);
+
+// Archive/Unarchive Conversation
+export const toggleArchiveConversation = createAction(
+  '[Conversation] Toggle Archive Conversation',
+  props<{ conversationId: string }>()
+);
+
+export const toggleArchiveConversationSuccess = createAction(
+  '[Conversation] Toggle Archive Conversation Success',
+  props<{ conversationId: string }>()
+);
+
+export const toggleArchiveConversationFailure = createAction(
+  '[Conversation] Toggle Archive Conversation Failure',
+  props<{ error: string }>()
+);
+
+// Mark as Read
+export const markConversationAsRead = createAction(
+  '[Conversation] Mark Conversation As Read',
+  props<{ conversationId: string }>()
+);
+
+export const markConversationAsReadSuccess = createAction(
+  '[Conversation] Mark Conversation As Read Success',
+  props<{ conversationId: string }>()
+);
+
+export const markConversationAsReadFailure = createAction(
+  '[Conversation] Mark Conversation As Read Failure',
+  props<{ error: string }>()
+);

@@ -300,5 +300,16 @@ export const conversationReducer = createReducer(
       );
     }
     return state;
-  })
+  }),
+
+  // Clear conversation
+  on(ConversationActions.clearConversationSuccess, (state, { conversationId }) => {
+    // Clear conversation doesn't change the conversation list, just reloads messages
+    // Could optionally update clearAt timestamp in state if needed
+    return state;
+  }),
+  on(ConversationActions.clearConversationFailure, (state, { error }) => ({
+    ...state,
+    error,
+  })),
 );

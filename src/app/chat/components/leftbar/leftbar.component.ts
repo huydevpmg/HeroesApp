@@ -32,6 +32,8 @@ export class LeftbarComponent implements OnInit {
   groupName = '';
   searchUser = '';
 
+  selectedConversationId: string | null = null;
+
   constructor(
     private store: Store,
     private authService: AuthService,
@@ -47,13 +49,16 @@ export class LeftbarComponent implements OnInit {
     this.conversationsWithOtherUserId$ = this.conversations$.pipe(
       map((conversations) => {
         const myId = this.authService.getCurrentUserId();
-        return conversations.map((conversation) => ({
-          conversation,
-          otherUserId: !conversation.isGroup
-            ? conversation.participants.find((id: string) => id !== myId) ||
-            null
-            : null,
-        }));
+        return conversations
+          .filter((conversation: any) => {
+            return !conversation.isDeleted;
+          })
+          .map((conversation) => ({
+            conversation,
+            otherUserId: !conversation.isGroup
+              ? conversation.participants.find((id: string) => id !== myId) || null
+              : null,
+          }));
       })
     );
   }
@@ -75,6 +80,7 @@ export class LeftbarComponent implements OnInit {
   selectConversation(conversation: Conversation): void {
     if (conversation && conversation._id) {
       this.conversationService.selectConversation(conversation._id);
+      this.selectedConversationId = conversation._id;
     }
   }
 
@@ -144,5 +150,32 @@ export class LeftbarComponent implements OnInit {
       isOnline = onlineUsers.includes(userId);
     });
     return isOnline;
+  }
+
+  markAsRead(conversationId: string, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    // TODO: Implement mark as read functionality
+    console.log('Mark as read:', conversationId);
+  }
+
+  toggleArchive(conversationId: string, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    // TODO: Implement archive/unarchive functionality
+    console.log('Toggle archive:', conversationId);
+  }
+
+  addLabel(conversationId: string, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    // TODO: Implement add label functionality
+    console.log('Add label:', conversationId);
+  }
+
+  clearConversation(conversationId: string, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.conversationService.clearConversation(conversationId);
   }
 }

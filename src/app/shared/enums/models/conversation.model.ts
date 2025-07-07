@@ -11,6 +11,7 @@ export interface Conversation {
   createdAt?: string;
   updatedAt?: string;
   lastAttachmentName?: string;
+  isDeleted?: boolean; // Add this field
 }
 
 import { Message } from './message.model';

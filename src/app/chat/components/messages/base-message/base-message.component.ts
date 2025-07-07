@@ -8,6 +8,7 @@ import {
   SimpleChanges,
   HostListener,
   ElementRef,
+  AfterViewInit,
 } from '@angular/core';
 import { AuthService } from '../../../../auth/services/auth.service';
 import { Attachment } from '../../../../shared/enums/models/attachment.model';
@@ -19,7 +20,7 @@ import { ReadReceiptSocketService } from '../../../services/socket/read-receipt-
   templateUrl: './base-message.component.html',
   styleUrls: ['./base-message.component.css'],
 })
-export class BaseMessageComponent implements OnInit, OnChanges {
+export class BaseMessageComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() message!: any;
   @Input() conversationId!: string;
   @Input() isLast: boolean = false;
@@ -78,6 +79,13 @@ export class BaseMessageComponent implements OnInit, OnChanges {
       const newReceipts = changes['readReceipts'].currentValue || [];
       this.readByUsers = this.processReadByUsers(newReceipts);
     }
+  }
+
+  ngAfterViewInit(): void {
+    const tooltipTriggerList = this.elementRef.nativeElement.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach((tooltipEl: HTMLElement) => {
+      new (window as any).bootstrap.Tooltip(tooltipEl);
+    });
   }
 
   onImageError(event: any): void {

@@ -72,6 +72,12 @@ export class ConversationService {
     this.store.dispatch(ConversationActions.leaveGroup({ conversationId }));
   }
 
+  clearConversation(conversationId: string) {
+    this.store.dispatch(ConversationActions.clearConversation({ conversationId }));
+    this.store.dispatch(ConversationActions.loadConversations());
+
+  }
+
   private initializeSocketListeners() {
     // Listen for new groups created by others
     this.socketService.onGroupCreated().subscribe((conversation: Conversation) => {
@@ -84,7 +90,7 @@ export class ConversationService {
       this.store.dispatch(MessageActions.loadMessages({ conversationId }));
     });
 
-    // Listen for member removed events  
+    // Listen for member removed events
     this.socketService.onMemberRemoved().subscribe(({ conversationId }) => {
       this.store.dispatch(ConversationActions.loadConversations());
       this.store.dispatch(MessageActions.loadMessages({ conversationId }));

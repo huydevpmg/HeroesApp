@@ -27,7 +27,7 @@ export class SocketCoreService {
   private initializeSocket(): void {
     // Cleanup existing socket connection first
     if (this.socket) {
-      console.log('🧹 Cleaning up existing socket connection');
+      console.log('Cleaning up existing socket connection');
       this.socket.removeAllListeners();
       this.socket.disconnect();
     }
@@ -39,7 +39,7 @@ export class SocketCoreService {
         return;
       }
 
-      console.log('🔌 Initializing new socket connection');
+      console.log('Initializing new socket connection');
       this.socket = io(environment.socketUrl, {
         withCredentials: true,
         transports: ['websocket'],
