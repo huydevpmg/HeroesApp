@@ -8,7 +8,30 @@
 
   <ng-container *ngIf="!isGloballyDeleted; else deletedMsg">
     <div class="message-content d-flex flex-column gap-0">
-      <span *ngIf="message.isEdit" class="edited-label" [class.me-2]="isCurrentUser" [class.ms-2]="!isCurrentUser">Edited</span>
+      <span *ngIf="message.isEdit" class="edited-label" [class.me-2]="isCurrentUser"
+        [class.ms-2]="!isCurrentUser">Edited</span>
+
+      <!-- Parent Message (Reply) -->
+      <div class="parent-message" *ngIf="message.parentMessage">
+        <div class="parent-message-label">
+          Replying to
+          <span class="parent-message-author">
+            {{
+            message.parentMessage.sender?._id === currentUserId
+            ? (message.senderId === currentUserId ? 'yourself' : 'you')
+            : getFirstNameInitial(message.parentMessage.sender?.fullName || 'Unknown')
+            }}
+          </span>
+        </div>
+        <div class="parent-message-text">
+          <ng-container *ngIf="!message.parentMessage.isDeleteGlobal; else parentDeletedMsg">
+            {{ message.parentMessage.content || 'Attachment' }}
+          </ng-container>
+          <ng-template #parentDeletedMsg>
+            <span class="text-muted fst-italic">Message was deleted</span>
+          </ng-template>
+        </div>
+      </div>
 
       <!-- Text Message Only -->
       <div class="message-bubble text" *ngIf="message.content && !message.attachmentId" data-bs-toggle="tooltip"
@@ -99,6 +122,11 @@
         </button>
         <ul class="dropdown-menu" [class.show]="showDropdown">
           <li>
+            <a class="dropdown-item" href="#" (click)="onReply(); $event.preventDefault()">
+              <i class="bi bi-reply me-2"></i>Reply
+            </a>
+          </li>
+          <li>
             <a class="dropdown-item" href="#" (click)="onEdit(); $event.preventDefault()">
               <i class="bi bi-pencil me-2"></i>Edit
             </a>
@@ -115,12 +143,12 @@
 
   <!-- Template globally deleted message-->
   <ng-template #deletedMsg>
-    <div class="deleted-message-bubble" [class.sent]="isCurrentUser" [class.received]="!isCurrentUser">
+    <div class="deleted-message-bubble" [class.sent]="isCurrentUser" [class.received]="!isCurrentUser"
+      data-bs-toggle="tooltip"
+      [attr.data-bs-placement]="isCurrentUser ? 'left' : 'right'"
+      [attr.title]="message.createdAt | date:'medium'">
       <div class="deleted-message-content">
         <span class="deleted-text">Message was deleted</span>
-      </div>
-      <div class="message-info deleted-info">
-        <span class="message-time">{{ message.createdAt | date:'shortTime' }}</span>
       </div>
     </div>
   </ng-template>

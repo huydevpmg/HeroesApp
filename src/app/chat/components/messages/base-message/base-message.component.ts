@@ -61,7 +61,7 @@ export class BaseMessageComponent implements OnInit, OnChanges, AfterViewInit {
     protected authService: AuthService,
     private elementRef: ElementRef,
     private readReceiptSocket: ReadReceiptSocketService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUserId();
@@ -82,7 +82,9 @@ export class BaseMessageComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    const tooltipTriggerList = this.elementRef.nativeElement.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipTriggerList = this.elementRef.nativeElement.querySelectorAll(
+      '[data-bs-toggle="tooltip"]'
+    );
     tooltipTriggerList.forEach((tooltipEl: HTMLElement) => {
       new (window as any).bootstrap.Tooltip(tooltipEl);
     });
@@ -97,7 +99,9 @@ export class BaseMessageComponent implements OnInit, OnChanges, AfterViewInit {
 
   private markAsRead() {
     if (this.currentUserId && this.conversationId && this.message._id) {
-      const hasCurrentUserRead = this.readByUsers.some(u => this.getUserId(u) === this.currentUserId);
+      const hasCurrentUserRead = this.readByUsers.some(
+        (u) => this.getUserId(u) === this.currentUserId
+      );
 
       if (!hasCurrentUserRead) {
         this.readReceiptSocket.markMessageAsReadBySocket(
@@ -237,7 +241,7 @@ export class BaseMessageComponent implements OnInit, OnChanges, AfterViewInit {
       }
 
       // Deduplicate by user ID
-      return index === self.findIndex(u => this.getUserId(u) === currentId);
+      return index === self.findIndex((u) => this.getUserId(u) === currentId);
     });
 
     return uniqueUsers;
@@ -245,5 +249,12 @@ export class BaseMessageComponent implements OnInit, OnChanges, AfterViewInit {
 
   private getUserId(user: any): string {
     return (user as any).userId || (user as any)._id || '';
+  }
+
+  getFirstNameInitial(name: string): string {
+    if (!name) {
+      return '';
+    }
+    return name?.trim().split(' ')[0];
   }
 }

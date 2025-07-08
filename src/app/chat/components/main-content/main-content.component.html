@@ -58,18 +58,15 @@
             </div>
           </ng-container>
           <ng-template #normalMsg>
-            <app-base-message
-            [message]="message" [conversationId]="conversation._id!"
-            [isLast]="isLast"
-            [readReceipts]="isLast ? lastMessageReadReceipts : []"
-            (edit)="onEditMessage($event)"
-            (delete)="onDeleteMessage($event)">
+            <app-base-message [message]="message" [conversationId]="conversation._id!" [isLast]="isLast"
+              [readReceipts]="isLast ? lastMessageReadReceipts : []" (edit)="onEditMessage($event)"
+              (reply)="onReplyMessage($event)" (delete)="onDeleteMessage($event)">
             </app-base-message>
           </ng-template>
         </ng-container>
       </div>
 
-      <div class="chat-input" [class.edit-mode]="editMode">
+      <div class="chat-input" [class.edit-mode]="editMode" [class.reply-mode]="replyMode">
         <!-- Edit Banner -->
         <div class="edit-banner" *ngIf="editMode && editingMessage">
           <i class="bi bi-pencil-square edit-icon" style="font-size: 0.8rem !important;"></i>
@@ -78,6 +75,27 @@
           <button class="edit-cancel-btn" (click)="cancelEdit()">
             <i class="bi bi-x-lg"></i>
             Cancel
+          </button>
+        </div>
+
+        <!-- Reply Banner -->
+        <div class="reply-banner" *ngIf="replyMode && replyingToMessage">
+          <i class="bi bi-reply reply-icon"></i>
+          <div class="reply-content">
+            <span class="reply-label">
+              Replying to:
+              <span class="parent-message-author">
+                {{
+                  replyingToMessage.senderId === myId
+                    ? 'yourself'
+                    : getFirstNameInitial(replyingToMessage.senderName || 'Unknown')
+                }}
+              </span>
+            </span>
+            <div class="reply-message-preview">{{ replyingToMessage.content }}</div>
+          </div>
+          <button class="reply-cancel-btn" (click)="cancelReply()">
+            <i class="bi bi-x-lg"></i>
           </button>
         </div>
 

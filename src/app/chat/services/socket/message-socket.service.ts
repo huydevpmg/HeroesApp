@@ -6,7 +6,7 @@ import { SOCKET_EVENTS } from './socket-events.constants';
 import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
 import { Store } from '@ngrx/store';
 import * as ConversationActions from '../../store/conversation/conversation.actions';
-
+import * as MessageActions from '../../store/message/message.actions';
 @Injectable({
   providedIn: 'root'
 })
@@ -32,6 +32,7 @@ export class MessageSocketService {
     this.socketCore.on(SOCKET_EVENTS.RECEIVE_MESSAGE, (message: Message) => {
       this.messageSubject.next(message);
       this.store.dispatch(ConversationActions.loadConversations());
+      this.store.dispatch(MessageActions.receiveMessage({ message }));
     });
 
     // Typing indicators
@@ -44,8 +45,16 @@ export class MessageSocketService {
       this.messageUpdatedSubject.next(message);
     });
 
-    this.socketCore.on(SOCKET_EVENTS.MESSAGE_DELETED_GLOBAL, (data: { messageId: string; conversationId: string }) => {
-      this.messageDeletedGlobalSubject.next(data);
+    this.socketCore.on(SOCKET_EVENTS.MESSAGE_DELETED_GLOBAL, (data: {
+      messageId: string;
+      conversationId: string;
+      affectedReplies?: string[];
+    }) => {
+      this.store.dispatch(MessageActions.deleteMessageSuccess({
+        messageId: data.messageId,
+        deleteType: DeleteType.EVERYONE,
+        affectedReplies: data.affectedReplies || []
+      }));
     });
 
     // Message deleted personally
@@ -160,7 +169,11 @@ export class MessageSocketService {
     return this.messageUpdatedSubject.asObservable();
   }
 
-  onMessageDeletedGlobal(): Observable<{ messageId: string; conversationId: string }> {
+  onMessageDeletedGlobal(): Observable<{
+    messageId: string;
+    conversationId: string;
+    affectedReplies?: string[];
+  }> {
     return this.messageDeletedGlobalSubject.asObservable();
   }
 

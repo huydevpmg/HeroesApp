@@ -24,6 +24,7 @@ import { MessageService } from '../../services/message/message.service';
 import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
 import { MessageReadReceiptService } from '../../services/message-read-receipt/message-read-receipt.service';
 import { ReadReceiptSocketService } from '../../services/socket/read-receipt-socket.service';
+import { ReplyingToMessage } from '../../../shared/enums/models/reply-msg.model';
 
 @Component({
   selector: 'app-main-content',
@@ -54,6 +55,10 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
 
   editMode: boolean = false;
   editingMessage: Message | null = null;
+
+  // Reply state
+  replyMode: boolean = false;
+  replyingToMessage: ReplyingToMessage | null = null;
 
   // Read receipts optimization
   conversationReadReceipts: { [messageId: string]: any[] } = {};
@@ -321,6 +326,10 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
               MessageActions.sendMessage({
                 conversationId: this.selectedConversationId,
                 content: trimmedContent,
+                parentMessageId:
+                  this.replyMode && this.replyingToMessage
+                    ? this.replyingToMessage._id
+                    : undefined,
               })
             );
           }
@@ -369,6 +378,11 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
       this.selectedFiles = [];
       this.previews = [];
       this.uploading = false;
+
+      // Clear reply mode after sending
+      if (this.replyMode) {
+        this.cancelReply();
+      }
     }
   }
 
@@ -386,6 +400,22 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
     this.editMode = false;
     this.editingMessage = null;
     this.messageInput.nativeElement.value = '';
+    this.cdr.detectChanges();
+  }
+
+  // Reply methods
+  onReplyMessage(message: any) {
+    this.replyMode = true;
+    this.replyingToMessage = {
+      ...message,
+      senderName: message.sender?.fullName || message.senderName || 'Unknown'
+    };
+    this.messageInput?.nativeElement.focus();
+  }
+
+  cancelReply() {
+    this.replyMode = false;
+    this.replyingToMessage = null;
     this.cdr.detectChanges();
   }
 
@@ -503,5 +533,12 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
     this.messagesAndAttachmentsSub?.unsubscribe();
     this.readReceiptsSub?.unsubscribe();
     this.readReceiptSocketSub?.unsubscribe();
+  }
+
+  getFirstNameInitial(name: string): string {
+    if (!name) {
+      return '';
+    }
+    return name?.trim().split(' ')[0];
   }
 }
