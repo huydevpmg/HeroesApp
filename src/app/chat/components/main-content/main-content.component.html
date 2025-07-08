@@ -1,5 +1,5 @@
 <div class="chat-container">
-  <div class="chat-main" [class.expanded]="!showRightbar">
+  <div class="chat-main" [class.expanded]="!showRightbar" [class.edit-mode]="editMode">
     <ng-container *ngIf="selectedConversation$ | async as conversation; else noConversation">
       <div class="chat-header">
         <div class="d-flex align-items-center">
@@ -58,15 +58,30 @@
             </div>
           </ng-container>
           <ng-template #normalMsg>
-            <app-base-message [message]="message" [conversationId]="conversation._id!" [isLast]="isLast"
-              [readReceipts]="isLast ? lastMessageReadReceipts : []" (edit)="onEditMessage($event)"
-              (delete)="onDeleteMessage($event)">
+            <app-base-message
+            [message]="message" [conversationId]="conversation._id!"
+            [isLast]="isLast"
+            [readReceipts]="isLast ? lastMessageReadReceipts : []"
+            (edit)="onEditMessage($event)"
+            (delete)="onDeleteMessage($event)">
             </app-base-message>
           </ng-template>
         </ng-container>
       </div>
 
-      <div class="chat-input">
+      <div class="chat-input" [class.edit-mode]="editMode">
+        <!-- Edit Banner -->
+        <div class="edit-banner" *ngIf="editMode && editingMessage">
+          <i class="bi bi-pencil-square edit-icon" style="font-size: 0.8rem !important;"></i>
+          <span class="edit-label">Editing message:</span>
+          <div class="edit-message-preview">{{ editingMessage.content }}</div>
+          <button class="edit-cancel-btn" (click)="cancelEdit()">
+            <i class="bi bi-x-lg"></i>
+            Cancel
+          </button>
+        </div>
+
+        <!-- File Preview Section -->
         <div class="file-preview-container" *ngIf="selectedFiles.length">
           <div class="file-preview-header">
             <span class="file-count">{{ selectedFiles.length }} file(s) selected</span>
