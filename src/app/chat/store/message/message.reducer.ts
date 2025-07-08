@@ -1,4 +1,3 @@
-import { Message } from './../../../shared/enums/models/message.model';
 import { createReducer, on } from '@ngrx/store';
 import * as MessageActions from './message.actions';
 import { messageAdapter, initialMessageState } from './message.state';

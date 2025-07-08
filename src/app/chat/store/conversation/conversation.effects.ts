@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of, from } from 'rxjs';
-import { map, mergeMap, catchError } from 'rxjs/operators';
+import { map, mergeMap, catchError, tap } from 'rxjs/operators';
 
 import * as ConversationActions from './conversation.actions';
 import * as MessageActions from '../message/message.actions';
 import { ConversationApiService } from '../../services/conversation/conversation-api.service';
+import { UserConversationApiService } from '../../services/userConversation/userconversation-api.service';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
 
 @Injectable()
@@ -13,26 +14,40 @@ export class ConversationEffects {
   loadConversations$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ConversationActions.loadConversations),
+      tap(() => console.log('[Effect] Dispatch loadConversations')),
       mergeMap(() =>
         this.conversationApi.getConversations().pipe(
-          map((conversations: Conversation[]) => ConversationActions.loadConversationsSuccess({ conversations })),
-          catchError(error => of(ConversationActions.loadConversationsFailure({ error: error.message })))
+          tap(conversations => console.log('[API] Fetched conversations:', conversations)),
+          map((conversations: Conversation[]) =>
+            ConversationActions.loadConversationsSuccess({ conversations })
+          ),
+          catchError(error => {
+            console.error('[API] Error fetching conversations:', error);
+            return of(ConversationActions.loadConversationsFailure({ error: error.message }));
+          })
         )
       )
     )
   );
 
-  loadConversation$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(ConversationActions.loadConversation),
-      mergeMap(({ id }) =>
-        this.conversationApi.getConversationById(id).pipe(
-          map((conversation: Conversation) => ConversationActions.loadConversationSuccess({ conversation })),
-          catchError(error => of(ConversationActions.loadConversationFailure({ error: error.message })))
-        )
-      )
-    )
-  );
+  // loadConversation$ = createEffect(() =>
+  //   this.actions$.pipe(
+  //     ofType(ConversationActions.loadConversation),
+  //     tap(({ id }) => console.log('[Effect] Load conversation with ID:', id)),
+  //     mergeMap(({ id }) =>
+  //       this.conversationApi.getConversationById(id).pipe(
+  //         tap(conversation => console.log('[API] Fetched conversation:', conversation)),
+  //         map((conversation: Conversation) =>
+  //           ConversationActions.loadConversationSuccess({ conversation })
+  //         ),
+  //         catchError(error => {
+  //           console.error('[API] Error fetching conversation:', error);
+  //           return of(ConversationActions.loadConversationFailure({ error: error.message }));
+  //         })
+  //       )
+  //     )
+  //   )
+  // );
 
   findOrCreate1on1Conversation$ = createEffect(() =>
     this.actions$.pipe(
@@ -163,8 +178,27 @@ export class ConversationEffects {
     )
   );
 
+  toggleArchive$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(ConversationActions.toggleArchive),
+      mergeMap(({ userConversationId }) =>
+        this.userConversationApi.toggleArchive(userConversationId).pipe(
+          mergeMap((userConversation) => [
+            ConversationActions.toggleArchiveSuccess({
+              userConversationId,
+              isArchived: userConversation.isArchived || false
+            }),
+            ConversationActions.loadConversations()
+          ]),
+          catchError(error => of(ConversationActions.toggleArchiveFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
   constructor(
     private actions$: Actions,
-    private conversationApi: ConversationApiService
+    private conversationApi: ConversationApiService,
+    private userConversationApi: UserConversationApiService
   ) { }
 }

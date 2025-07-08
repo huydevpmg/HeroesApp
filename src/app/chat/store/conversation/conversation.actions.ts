@@ -252,3 +252,19 @@ export const markConversationAsReadFailure = createAction(
   '[Conversation] Mark Conversation As Read Failure',
   props<{ error: string }>()
 );
+
+// Toggle Archive (UserConversation)
+export const toggleArchive = createAction(
+  '[Conversation] Toggle Archive',
+  props<{ userConversationId: string }>()
+);
+
+export const toggleArchiveSuccess = createAction(
+  '[Conversation] Toggle Archive Success',
+  props<{ userConversationId: string; isArchived: boolean }>()
+);
+
+export const toggleArchiveFailure = createAction(
+  '[Conversation] Toggle Archive Failure',
+  props<{ error: string }>()
+);

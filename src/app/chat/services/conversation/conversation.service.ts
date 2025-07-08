@@ -75,7 +75,11 @@ export class ConversationService {
   clearConversation(conversationId: string) {
     this.store.dispatch(ConversationActions.clearConversation({ conversationId }));
     this.store.dispatch(ConversationActions.loadConversations());
+  }
 
+  toggleArchive(userConversationId: string) {
+    console.log('ConversationService toggleArchive called with:', userConversationId);
+    this.store.dispatch(ConversationActions.toggleArchive({ userConversationId }));
   }
 
   private initializeSocketListeners() {
@@ -102,7 +106,7 @@ export class ConversationService {
     });
 
     // Listen for conversation updates
-    this.socketService.onConversationUpdated().subscribe(({ conversationId, type }) => {
+    this.socketService.onConversationUpdated().subscribe(() => {
       // Reload conversations to get latest data
       this.store.dispatch(ConversationActions.loadConversations());
     });

@@ -303,13 +303,32 @@ export const conversationReducer = createReducer(
   }),
 
   // Clear conversation
-  on(ConversationActions.clearConversationSuccess, (state, { conversationId }) => {
+  on(ConversationActions.clearConversationSuccess, (state) => {
     // Clear conversation doesn't change the conversation list, just reloads messages
     // Could optionally update clearAt timestamp in state if needed
     return state;
   }),
   on(ConversationActions.clearConversationFailure, (state, { error }) => ({
     ...state,
+    error,
+  })),
+
+  // Toggle Archive
+  on(ConversationActions.toggleArchive, (state) => ({
+    ...state,
+    loading: true,
+    error: null,
+  })),
+  on(ConversationActions.toggleArchiveSuccess, (state) => {
+    return {
+      ...state,
+      loading: false,
+      error: null,
+    };
+  }),
+  on(ConversationActions.toggleArchiveFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
     error,
   })),
 );
