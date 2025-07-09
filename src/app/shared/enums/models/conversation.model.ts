@@ -1,5 +1,6 @@
 export interface Conversation {
   _id?: string;
+  userConversationId?: string;
   name?: string;
   participants: string[];
   isGroup?: boolean;
@@ -11,7 +12,8 @@ export interface Conversation {
   createdAt?: string;
   updatedAt?: string;
   lastAttachmentName?: string;
-  isDeleted?: boolean; // Add this field
+  isDeleted?: boolean;
+  isArchived?: boolean;
 }
 
 import { Message } from './message.model';

@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Store, select } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
+import { map, take } from 'rxjs/operators';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
 import * as ConversationActions from '../../store/conversation/conversation.actions';
 import * as ConversationSelectors from '../../store/conversation/conversation.selectors';
 import { AuthService } from '../../../auth/services/auth.service';
-import { map, take } from 'rxjs/operators';
 import { SocketService } from '../../services/socket/socket.service';
 import { ConversationService } from '../../services/conversation/conversation.service';
 
@@ -19,6 +19,14 @@ export class LeftbarComponent implements OnInit {
   conversationsWithOtherUserId$: Observable<
     { conversation: Conversation; otherUserId: string | null }[]
   >;
+
+  private activeTabSubject = new BehaviorSubject<'main' | 'archive'>('main');
+  activeTab$ = this.activeTabSubject.asObservable();
+
+  filteredConversationsWithOtherUserId$!: Observable<
+    { conversation: Conversation; otherUserId: string | null }[]
+  >;
+
   users$: Observable<any[]> = this.store.pipe(
     select(ConversationSelectors.getAllUsers)
   );
@@ -46,13 +54,12 @@ export class LeftbarComponent implements OnInit {
     this.onlineUsers$ = this.socketService
       .onOnlineUserIds()
       .pipe(map((set) => Array.from(set)));
+
     this.conversationsWithOtherUserId$ = this.conversations$.pipe(
       map((conversations) => {
         const myId = this.authService.getCurrentUserId();
         return conversations
-          .filter((conversation: any) => {
-            return !conversation.isDeleted;
-          })
+          .filter((conversation: any) => !conversation.isDeleted)
           .map((conversation) => ({
             conversation,
             otherUserId: !conversation.isGroup
@@ -60,6 +67,19 @@ export class LeftbarComponent implements OnInit {
               : null,
           }));
       })
+    );
+
+    this.filteredConversationsWithOtherUserId$ = combineLatest([
+      this.conversationsWithOtherUserId$,
+      this.activeTab$
+    ]).pipe(
+      map(([convs, activeTab]) =>
+        convs.filter(item =>
+          activeTab === 'main'
+            ? !item.conversation.isArchived
+            : item.conversation.isArchived
+        )
+      )
     );
   }
 
@@ -84,24 +104,36 @@ export class LeftbarComponent implements OnInit {
     }
   }
 
+  setTab(tab: 'main' | 'archive') {
+    this.activeTabSubject.next(tab);
+  }
+
+  toggleFilter(): void {
+    console.log('Filter functionality will be implemented here');
+  }
+
   openCreateGroupModal() {
     this.showCreateGroupModal = true;
   }
+
   closeCreateGroupModal() {
     this.showCreateGroupModal = false;
     this.groupName = '';
     this.searchUser = '';
     this.users.forEach((u) => (u.selected = false));
   }
+
   filteredUsers() {
     const q = this.searchUser.trim().toLowerCase();
     return !q
       ? this.users
       : this.users.filter((u) => u.fullName.toLowerCase().includes(q));
   }
+
   selectedUserIds() {
     return this.users.filter((u) => u.selected).map((u) => u._id);
   }
+
   isCreatingGroup = false;
 
   createGroup() {
@@ -155,21 +187,23 @@ export class LeftbarComponent implements OnInit {
   markAsRead(conversationId: string, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    // TODO: Implement mark as read functionality
     console.log('Mark as read:', conversationId);
   }
 
-  toggleArchive(conversationId: string, event: Event): void {
+  toggleArchive(userConversationId: string, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    // TODO: Implement archive/unarchive functionality
-    console.log('Toggle archive:', conversationId);
+
+    if (userConversationId) {
+      this.conversationService.toggleArchive(userConversationId);
+    } else {
+      console.error('userConversationId is required for archive action');
+    }
   }
 
   addLabel(conversationId: string, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    // TODO: Implement add label functionality
     console.log('Add label:', conversationId);
   }
 

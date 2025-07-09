@@ -1,20 +1,44 @@
 <div class="conversation-list">
   <div class="chat-sidebar">
-    <div class="search-box mb-3">
+    <div class="search-box">
       <div class="input-group d-flex gap-2">
         <input type="text" class="form-control bg-light border border-2 rounded-5" placeholder="Search" />
-        <button class="btn btn-xl btn-dark rounded-circle" (click)="openCreateGroupModal()">
+        <button class="btn btn-dark rounded-circle d-flex align-items-center justify-content-center btn-add"
+          style="width: 50px; height: 50px;"
+          (click)="openCreateGroupModal()">
           <i class="bi bi-pencil-square"></i>
         </button>
       </div>
+      </div>
+
+    <!-- Enhanced Tabs Navbar -->
+    <div class="nav-tabs-container">
+      <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" [class.active]="(activeTab$ | async) === 'main'" (click)="setTab('main')">
+            <i class="bi bi-chat-dots"></i>
+            <span>Main</span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" [class.active]="(activeTab$ | async) === 'archive'" (click)="setTab('archive')">
+            <i class="bi bi-archive"></i>
+            <span>Archive</span>
+          </button>
+        </li>
+      </ul>
+      <button class="filter-btn" title="Filter conversations" (click)="toggleFilter()">
+        <i class="bi bi-funnel"></i>
+      </button>
     </div>
+
 
     <div *ngIf="error$ | async as error" class="alert alert-danger m-3">
       {{ error }}
     </div>
-
-    <div *ngFor="let item of conversationsWithOtherUserId$ | async; trackBy: trackByConversationId"
-      class="conversation-item position-relative" [class.active]="selectedConversationId === item.conversation._id">
+<div *ngFor="let item of filteredConversationsWithOtherUserId$ | async; trackBy: trackByConversationId"
+    class="conversation-item position-relative"
+    [class.active]="selectedConversationId === item.conversation._id">
       <!-- Main conversation content (clickable) -->
       <div class="conversation-content" (click)="selectConversation(item.conversation)">
         <div class="avatar position-relative">
@@ -62,9 +86,9 @@
                     </a>
                   </li>
                   <li>
-                    <a class="dropdown-item" href="#" (click)="toggleArchive(item.conversation._id!, $event)">
+                    <a class="dropdown-item" href="#" (click)="toggleArchive(item.conversation.userConversationId!, $event)">
                       <i class="bi bi-archive me-2"></i>
-                      Archive
+                      {{ item.conversation.isArchived ? 'Unarchive' : 'Archive' }}
                     </a>
                   </li>
                   <li>
@@ -81,7 +105,7 @@
                         clearConversation(item.conversation._id!, $event)
                       ">
                       <i class="bi bi-trash me-2"></i>
-                      delete
+                      Delete
                     </a>
                   </li>
                 </ul>
