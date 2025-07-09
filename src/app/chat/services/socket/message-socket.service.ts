@@ -7,6 +7,8 @@ import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
 import { Store } from '@ngrx/store';
 import * as ConversationActions from '../../store/conversation/conversation.actions';
 import * as MessageActions from '../../store/message/message.actions';
+import { selectSelectedConversationId } from '../../store/conversation/conversation.selectors';
+import { take } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root'
 })
@@ -30,9 +32,14 @@ export class MessageSocketService {
   private setupMessageListeners(): void {
     // Message received
     this.socketCore.on(SOCKET_EVENTS.RECEIVE_MESSAGE, (message: Message) => {
+      console.log('Message received:', message);
       this.messageSubject.next(message);
       this.store.dispatch(ConversationActions.loadConversations());
-      this.store.dispatch(MessageActions.receiveMessage({ message }));
+      this.store.select(selectSelectedConversationId).pipe(take(1)).subscribe(selectedId => {
+        if (selectedId === message.conversationId) {
+          this.store.dispatch(MessageActions.receiveMessage({ message }));
+        }
+      });
     });
 
     // Typing indicators
@@ -50,6 +57,7 @@ export class MessageSocketService {
       conversationId: string;
       affectedReplies?: string[];
     }) => {
+      this.store.dispatch(ConversationActions.loadConversations());
       this.store.dispatch(MessageActions.deleteMessageSuccess({
         messageId: data.messageId,
         deleteType: DeleteType.EVERYONE,

@@ -7,6 +7,7 @@ export interface Message {
   _id?: string;
   content: string;
   senderId: string;
+  senderName: string;
   conversationId: string;
   status?: 'SENT' | 'DELIVERED' | 'READ';
   parentMessage?: string;

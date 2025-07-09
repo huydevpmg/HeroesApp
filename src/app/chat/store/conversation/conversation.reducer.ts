@@ -128,7 +128,10 @@ export const conversationReducer = createReducer(
         {
           id: conversationId,
           changes: {
-            lastMessage: message,
+            lastMessage: {
+              ...message,
+              senderName: message.senderName || message.sender?.fullName || message.sender?.username || '',
+            },
             updatedAt: new Date().toISOString()
           }
         },

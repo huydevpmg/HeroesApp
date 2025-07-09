@@ -41,6 +41,7 @@ export class LeftbarComponent implements OnInit {
   searchUser = '';
 
   selectedConversationId: string | null = null;
+  currentUserId: string | null = null;
 
   constructor(
     private store: Store,
@@ -84,6 +85,7 @@ export class LeftbarComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.currentUserId = this.authService.getCurrentUserId();
     this.conversationService.loadConversations();
     this.conversationService.getAllUsers();
     this.users$.subscribe((users) => {

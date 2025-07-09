@@ -114,15 +114,9 @@
           </div>
           <div class="last-message">
             <p class="mb-0 text-truncate">
-              <ng-container *ngIf="
-                  item.conversation.lastMessage?.content?.trim();
-                  else showAttachmentName
-                ">
-                <span *ngIf="
-                    !item.conversation.lastMessage?.isDeleteGlobal;
-                    else showDeletedMessage
-                  ">
-                  {{ item.conversation.lastMessage?.content }}
+              <ng-container *ngIf="item.conversation.lastMessage?.content?.trim() && item.conversation.lastMessage?.senderId && item.conversation.lastMessage?.senderName; else showAttachmentName">
+                <span *ngIf="!item.conversation.lastMessage?.isDeleteGlobal; else showDeletedMessage">
+                  <b>{{ item.conversation.lastMessage!.senderId === currentUserId ? 'You' : item.conversation.lastMessage!.senderName }}: </b>{{ item.conversation.lastMessage!.content }}
                 </span>
                 <ng-template #showDeletedMessage>
                   <span class="text-muted fst-italic">

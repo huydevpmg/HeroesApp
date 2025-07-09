@@ -448,9 +448,8 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       case 'GROUP_RENAME':
-        return `Group was renamed${
-          message.meta?.newName ? ' to ' + message.meta.newName : ''
-        }`;
+        return `Group was renamed${message.meta?.newName ? ' to ' + message.meta.newName : ''
+          }`;
 
       default:
         return 'System event';
@@ -461,7 +460,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.messagesContainer.nativeElement.scrollTop =
         this.messagesContainer.nativeElement.scrollHeight;
-    } catch {}
+    } catch { }
   }
 
   private loadReadReceiptsForMessages(messages: any[]) {

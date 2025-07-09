@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Attachment } from '../../../shared/enums/models/message.model';
 import { AttachmentApiService } from './attachment-api.service';
+import { Attachment } from '../../../shared/enums/models/attachment.model';
 
 @Injectable({
   providedIn: 'root'
