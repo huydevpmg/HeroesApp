@@ -23,13 +23,46 @@ export const messageReducer = createReducer(
     messageAdapter.updateOne({ id: message._id!, changes: message }, state)
   ),
 
-  on(MessageActions.deleteMessageSuccess, (state, { messageId, deleteType }) => {
-    if (deleteType === DeleteType.EVERYONE) {
-      return messageAdapter.updateOne({ id: messageId, changes: { isDeleteGlobal: true } }, state);
-    } else {
+
+  on(MessageActions.deleteMessageSuccess, (state, { messageId, deleteType, affectedReplies }) => {
+    if (deleteType === DeleteType.JUSTME) {
       return messageAdapter.removeOne(messageId, state);
     }
+
+    let newState = messageAdapter.updateOne(
+      {
+        id: messageId,
+        changes: { isDeleteGlobal: true }
+      },
+      state
+    );
+
+    if (!affectedReplies || affectedReplies.length === 0) {
+      return newState;
+    }
+
+    const replyUpdates = affectedReplies
+      .map(replyId => {
+        const reply = newState.entities[replyId];
+        const parent = reply?.parentMessage;
+
+        return {
+          id: replyId,
+          changes: {
+            parentMessage: {
+              ...(typeof parent === 'object' && parent !== null ? parent : {}),
+              isDeleteGlobal: true
+            }
+          }
+        };
+      })
+      .filter(Boolean) as { id: string; changes: any }[];
+
+    return replyUpdates.length > 0
+      ? messageAdapter.updateMany(replyUpdates, newState)
+      : newState;
   }),
+
 
   on(MessageActions.deleteMessageFailure, (state, { error }) => ({ ...state, error })),
 

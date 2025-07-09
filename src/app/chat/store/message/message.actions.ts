@@ -24,6 +24,7 @@ export const sendMessage = createAction(
     content: string;
     attachmentId?: string;
     fileName?: string;
+    parentMessageId?: string;
   }>()
 );
 export const sendMessageSuccess = createAction(
@@ -40,9 +41,14 @@ export const deleteMessage = createAction(
   '[Message] Delete Message',
   props<{ messageId: string; deleteType: DeleteType }>()
 );
+
 export const deleteMessageSuccess = createAction(
   '[Message] Delete Message Success',
-  props<{ messageId: string; deleteType: DeleteType }>()
+  props<{
+    messageId: string;
+    deleteType: DeleteType;
+    affectedReplies?: string[];
+  }>()
 );
 export const deleteMessageFailure = createAction(
   '[Message] Delete Message Failure',
@@ -66,7 +72,7 @@ export const updateMessageStatusFailure = createAction(
 export const editMessage = createAction(
   '[Message] Edit Message',
   props<{ messageId: string; content: string }>()
-)
+);
 
 export const editMessageSuccess = createAction(
   '[Message] Edit Message Success',

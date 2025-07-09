@@ -56,12 +56,13 @@ export class MessageApiService {
     return of({} as Message); // Temporary stub to satisfy type
   }
 
-  sendMessage(conversationId: string, content: string, attachmentId?: string): Observable<Message> {
+  sendMessage(conversationId: string, content: string, attachmentId?: string, parentMessageId?: string): Observable<Message> {
     const senderId = this.authService.getCurrentUserId() || '';
     const message: Partial<Message> = {
       conversationId,
       content,
       attachmentId,
+      parentMessage: parentMessageId,
       senderId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

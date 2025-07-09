@@ -660,3 +660,65 @@
   width: auto;
 }
 
+/* Parent Message (Reply) - Modern Black & White Tone */
+.parent-message {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  background: #f7f7f7;
+  border-left: 3px solid #222;
+  max-width: 320px;
+  font-size: 0.97rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+
+.parent-message-label {
+  font-size: 0.85rem;
+  color: #222;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  margin-bottom: 1px;
+}
+
+.parent-message-author {
+  font-weight: 700;
+  color: #111;
+  margin-left: 3px;
+  font-size: 0.88em;
+  background: #eaeaea;
+  border-radius: 4px;
+  padding: 1px 7px;
+  display: inline-block;
+}
+
+.parent-message-text {
+  color: #444;
+  font-style: italic;
+  font-size: 0.97em;
+  border-radius: 4px;
+  padding: 3px 8px;
+  margin-top: 2px;
+  word-break: break-word;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+/* Dark mode support (optional, if you have a dark mode class on body) */
+body.dark .parent-message {
+  background: #232323;
+  border-left-color: #fff;
+}
+body.dark .parent-message-label {
+  color: #eee;
+}
+body.dark .parent-message-author {
+  color: #fff;
+  background: #333;
+}
+body.dark .parent-message-text {
+  color: #ccc;
+  background: #181818;
+}
+
