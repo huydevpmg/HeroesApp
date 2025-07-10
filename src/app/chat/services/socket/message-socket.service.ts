@@ -34,7 +34,7 @@ export class MessageSocketService {
     this.socketCore.on(SOCKET_EVENTS.RECEIVE_MESSAGE, (message: Message) => {
       console.log('Message received:', message);
       this.messageSubject.next(message);
-      this.store.dispatch(ConversationActions.loadConversations());
+      this.store.dispatch(ConversationActions.loadConversations({ page: 1, limit: 20 }));
       this.store.select(selectSelectedConversationId).pipe(take(1)).subscribe(selectedId => {
         if (selectedId === message.conversationId) {
           this.store.dispatch(MessageActions.receiveMessage({ message }));
@@ -57,7 +57,7 @@ export class MessageSocketService {
       conversationId: string;
       affectedReplies?: string[];
     }) => {
-      this.store.dispatch(ConversationActions.loadConversations());
+      this.store.dispatch(ConversationActions.loadConversations({ page: 1, limit: 20 }));
       this.store.dispatch(MessageActions.deleteMessageSuccess({
         messageId: data.messageId,
         deleteType: DeleteType.EVERYONE,

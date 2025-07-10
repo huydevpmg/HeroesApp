@@ -13,9 +13,9 @@ export class MessageEffects {
   loadMessages$ = createEffect(() =>
     this.actions$.pipe(
       ofType(MessageActions.loadMessages),
-      mergeMap(({ conversationId }) =>
-        this.messageApiService.getMessages(conversationId).pipe(
-          map(messages => MessageActions.loadMessagesSuccess({ messages })),
+      mergeMap(({ conversationId, page = 1, limit = 20 }) =>
+        this.messageApiService.getMessages(conversationId, page, limit).pipe(
+          map(result => MessageActions.loadMessagesSuccess({ messages: result.messages, total: result.total, page: result.page, totalPages: result.totalPages })),
           catchError(error => of(MessageActions.loadMessagesFailure({ error: error.message })))
         )
       )
@@ -144,7 +144,7 @@ export class MessageEffects {
     this.socketService.onMessageDeletedGlobal().pipe(
       map(({ messageId }) => [
         MessageActions.deleteMessageSuccess({ messageId, deleteType: DeleteType.EVERYONE }),
-        ConversationActions.loadConversations() // Reload conversations để cập nhật lastMessage
+        ConversationActions.loadConversations({ page: 1, limit: 20 }) // Reload conversations để cập nhật lastMessage
       ]),
       mergeMap(actions => from(actions))
     )
@@ -155,7 +155,7 @@ export class MessageEffects {
     this.socketService.onMessageDeletedPersonal().pipe(
       map(({ messageId }) => [
         MessageActions.deleteMessageSuccess({ messageId, deleteType: DeleteType.JUSTME }),
-        ConversationActions.loadConversations()
+        ConversationActions.loadConversations({ page: 1, limit: 20 })
       ]),
       mergeMap(actions => from(actions))
     )

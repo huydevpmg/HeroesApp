@@ -25,6 +25,7 @@ import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
 import { MessageReadReceiptService } from '../../services/message-read-receipt/message-read-receipt.service';
 import { ReadReceiptSocketService } from '../../services/socket/read-receipt-socket.service';
 import { ReplyingToMessage } from '../../../shared/enums/models/reply-msg.model';
+import { selectMessagesPage, selectMessagesTotalPages } from '../../store/message/message.selectors';
 
 @Component({
   selector: 'app-main-content',
@@ -43,7 +44,11 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   typingUsers$: Observable<{ userId: string; timestamp: number }[]>;
   onlineUsers$: Observable<string[]>;
   otherUserId$: Observable<string | null>;
-  selectedConversationId: string = '';
+  page = 1;
+  totalPages = 1;
+  loading = false;
+  limit = 20;
+  selectedConversationId: string = "";
 
   private messagesSub?: Subscription;
   private socketMessageSub?: Subscription;
@@ -67,8 +72,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   private readReceiptSocketSub?: Subscription;
   private isLoadingReadReceipts = false;
 
-  @ViewChild('messagesContainer')
-  private messagesContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('messagesContainer') messagesContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLInputElement>;
 
   constructor(
@@ -183,6 +187,20 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
       // Load read receipts for the current messages
       this.loadReadReceiptsForMessages(messages);
     });
+
+    combineLatest([
+      this.store.select(selectMessagesPage),
+      this.store.select(selectMessagesTotalPages),
+      this.loading$,
+    ]).subscribe(([page, totalPages, loading]) => {
+      this.page = typeof page === 'number' ? page : 1;
+      this.totalPages = typeof totalPages === 'number' ? totalPages : 1;
+      this.loading = loading;
+    });
+
+    this.selectedConversation$?.subscribe(
+      (convo) => (this.selectedConversationId = convo?._id || "")
+    );
   }
 
   ngAfterViewInit() {
@@ -448,8 +466,9 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       case 'GROUP_RENAME':
-        return `Group was renamed${message.meta?.newName ? ' to ' + message.meta.newName : ''
-          }`;
+        return `Group was renamed${
+          message.meta?.newName ? ' to ' + message.meta.newName : ''
+        }`;
 
       default:
         return 'System event';
@@ -460,7 +479,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.messagesContainer.nativeElement.scrollTop =
         this.messagesContainer.nativeElement.scrollHeight;
-    } catch { }
+    } catch {}
   }
 
   private loadReadReceiptsForMessages(messages: any[]) {
@@ -539,5 +558,24 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
       return '';
     }
     return name?.trim().split(' ')[0];
+  }
+
+  onMessagesScroll() {
+    const container = this.messagesContainer?.nativeElement;
+    if (!container) { return; }
+    const threshold = 200; // px from top
+    if (container.scrollTop < threshold && !this.loading && this.page < this.totalPages) {
+      this.loadMoreMessages();
+    }
+  }
+
+  loadMoreMessages() {
+    if (typeof this.selectedConversationId === 'string') {
+      this.store.dispatch(MessageActions.loadMessages({
+        conversationId: this.selectedConversationId,
+        page: this.page + 1,
+        limit: this.limit
+      }));
+    }
   }
 }

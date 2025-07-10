@@ -14,14 +14,31 @@ export const conversationReducer = createReducer(
     loading: true,
     error: null,
   })),
-  on(ConversationActions.loadConversationsSuccess, (state, { conversations }) => {
-    // Sort conversations by updatedAt desc before setting them
+  on(ConversationActions.loadConversationsSuccess, (state, { conversations, total, page, totalPages }) => {
     const sorted = [...conversations].sort((a, b) => new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime());
-    return conversationAdapter.setAll(sorted, {
-      ...state,
-      loading: false,
-      error: null,
-    });
+    const ids = state.ids as string[];
+    if (page === 1) {
+      return conversationAdapter.setAll(sorted, {
+        ...state,
+        loading: false,
+        error: null,
+        total,
+        page,
+        totalPages,
+      });
+    } else {
+      return conversationAdapter.addMany(
+        sorted.filter(c => !!c._id && !ids.includes(c._id as string)),
+        {
+          ...state,
+          loading: false,
+          error: null,
+          total,
+          page,
+          totalPages,
+        }
+      );
+    }
   }),
   on(ConversationActions.loadConversationsFailure, (state, { error }) => ({
     ...state,
@@ -41,7 +58,6 @@ export const conversationReducer = createReducer(
       loading: false,
       error: null,
     });
-    // Sắp xếp lại conversations theo thời gian cập nhật
     const all = conversationAdapter.getSelectors().selectAll(newState);
     const sorted = [...all].sort((a, b) => new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime());
     return conversationAdapter.setAll(sorted, newState);

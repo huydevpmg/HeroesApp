@@ -44,6 +44,21 @@ export const selectMessagesWithAttachment = createSelector(
     }))
 );
 
+export const selectMessagesPage = createSelector(
+  selectMessageState,
+  state => state.page
+);
+
+export const selectMessagesTotalPages = createSelector(
+  selectMessageState,
+  state => state.totalPages
+);
+
+export const selectMessagesTotal = createSelector(
+  selectMessageState,
+  state => state.total
+);
+
 // // Select deleted message ids (if you want to track deleted for animation/undo)
 // export const selectDeletedMessageIds = createSelector(
 //   selectAllMessages,

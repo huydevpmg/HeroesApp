@@ -3,12 +3,13 @@ import { Conversation } from '../../../shared/enums/models/conversation.model';
 
 // Load Conversations
 export const loadConversations = createAction(
-  '[Conversation] Load Conversations'
+  '[Conversation] Load Conversations',
+  props<{ page?: number; limit?: number }>()
 );
 
 export const loadConversationsSuccess = createAction(
   '[Conversation] Load Conversations Success',
-  props<{ conversations: Conversation[] }>()
+  props<{ conversations: Conversation[]; total: number; page: number; totalPages: number }>()
 );
 
 export const loadConversationsFailure = createAction(

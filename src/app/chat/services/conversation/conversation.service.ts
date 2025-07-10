@@ -24,8 +24,8 @@ export class ConversationService {
   }
 
   // Load conversations
-  loadConversations() {
-    this.store.dispatch(ConversationActions.loadConversations());
+  loadConversations(page: number = 1, limit: number = 20) {
+    this.store.dispatch(ConversationActions.loadConversations({ page, limit }));
   }
 
   selectConversation(id: string) {
@@ -56,8 +56,8 @@ export class ConversationService {
     this.store.dispatch(ConversationActions.loadConversation({ id }));
   }
 
-  getConversations() {
-    this.store.dispatch(ConversationActions.loadConversations());
+  getConversations(page: number = 1, limit: number = 20) {
+    this.store.dispatch(ConversationActions.loadConversations({ page, limit }));
   }
 
   addMembersToGroup(conversationId: string, memberIds: string[]) {
@@ -74,7 +74,7 @@ export class ConversationService {
 
   clearConversation(conversationId: string) {
     this.store.dispatch(ConversationActions.clearConversation({ conversationId }));
-    this.store.dispatch(ConversationActions.loadConversations());
+    this.store.dispatch(ConversationActions.loadConversations({ page: 1, limit: 20 }));
   }
 
   toggleArchive(userConversationId: string) {
@@ -86,17 +86,17 @@ export class ConversationService {
     // Listen for new groups created by others
     this.socketService.onGroupCreated().subscribe((conversation: Conversation) => {
       this.store.dispatch(ConversationActions.createConversationSuccess({ conversation }));
-      this.store.dispatch(ConversationActions.loadConversations());
+      this.store.dispatch(ConversationActions.loadConversations({ page: 1, limit: 20 }));
     });
 
     this.socketService.onMemberAdded().subscribe(({ conversationId }) => {
-      this.store.dispatch(ConversationActions.loadConversations());
+      this.store.dispatch(ConversationActions.loadConversations({ page: 1, limit: 20 }));
       this.store.dispatch(MessageActions.loadMessages({ conversationId }));
     });
 
     // Listen for member removed events
     this.socketService.onMemberRemoved().subscribe(({ conversationId }) => {
-      this.store.dispatch(ConversationActions.loadConversations());
+      this.store.dispatch(ConversationActions.loadConversations({ page: 1, limit: 20 }));
       this.store.dispatch(MessageActions.loadMessages({ conversationId }));
     });
 
@@ -108,7 +108,7 @@ export class ConversationService {
     // Listen for conversation updates
     this.socketService.onConversationUpdated().subscribe(() => {
       // Reload conversations to get latest data
-      this.store.dispatch(ConversationActions.loadConversations());
+      this.store.dispatch(ConversationActions.loadConversations({ page: 1, limit: 20 }));
     });
   }
 }

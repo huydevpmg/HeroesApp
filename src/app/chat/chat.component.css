@@ -1,12 +1,21 @@
 .chat-container {
   display: grid;
-  grid-template-columns: 350px 1fr ;
+  grid-template-columns: 350px 1fr;
   margin-top: 5px;
-  height: calc(82vh);
+  height: 82vh;
   background-color: #f8f9fa;
   border-radius: 10px;
-  overflow: auto;
+  overflow: hidden;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.conversation-list,
+.chat-sidebar {
+  height: 100%;
+}
+
+.conversation-list-scroll {
+  overflow-y: auto;
 }
 
 @media (max-width: 992px) {

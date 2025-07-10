@@ -15,11 +15,16 @@ export class ConversationEffects {
     this.actions$.pipe(
       ofType(ConversationActions.loadConversations),
       tap(() => console.log('[Effect] Dispatch loadConversations')),
-      mergeMap(() =>
-        this.conversationApi.getConversations().pipe(
-          tap(conversations => console.log('[API] Fetched conversations:', conversations)),
-          map((conversations: Conversation[]) =>
-            ConversationActions.loadConversationsSuccess({ conversations })
+      mergeMap(({ page = 1, limit = 20 }) =>
+        this.conversationApi.getConversations(page, limit).pipe(
+          tap(result => console.log('[API] Fetched conversations:', result)),
+          map(result =>
+            ConversationActions.loadConversationsSuccess({
+              conversations: result.conversations,
+              total: result.total,
+              page: result.page,
+              totalPages: result.totalPages
+            })
           ),
           catchError(error => {
             console.error('[API] Error fetching conversations:', error);
@@ -119,7 +124,7 @@ export class ConversationEffects {
         this.conversationApi.addMembersToGroup(conversationId, memberIds).pipe(
           mergeMap((conversation: Conversation) => [
             ConversationActions.addMembersToGroupSuccess({ conversation }),
-            ConversationActions.loadConversations(),
+            ConversationActions.loadConversations({ page: 1, limit: 20 }),
             MessageActions.loadMessages({ conversationId })
           ]),
           catchError(error => of(ConversationActions.addMembersToGroupFailure({ error: error.message })))
@@ -135,7 +140,7 @@ export class ConversationEffects {
         this.conversationApi.removeMemberFromGroup(conversationId, userId).pipe(
           mergeMap((conversation: Conversation) => [
             ConversationActions.removeMemberFromGroupSuccess({ conversation }),
-            ConversationActions.loadConversations(),
+            ConversationActions.loadConversations({ page: 1, limit: 20 }),
             MessageActions.loadMessages({ conversationId }) // Reload messages để hiển thị system message
           ]),
           catchError(error => of(ConversationActions.removeMemberFromGroupFailure({ error: error.message })))
@@ -188,7 +193,7 @@ export class ConversationEffects {
               userConversationId,
               isArchived: userConversation.isArchived || false
             }),
-            ConversationActions.loadConversations()
+            ConversationActions.loadConversations({ page: 1, limit: 20 })
           ]),
           catchError(error => of(ConversationActions.toggleArchiveFailure({ error: error.message })))
         )

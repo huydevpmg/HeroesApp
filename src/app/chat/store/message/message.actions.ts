@@ -5,11 +5,11 @@ import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
 // Load messages
 export const loadMessages = createAction(
   '[Message] Load Messages',
-  props<{ conversationId: string }>()
+  props<{ conversationId: string; page?: number; limit?: number }>()
 );
 export const loadMessagesSuccess = createAction(
   '[Message] Load Messages Success',
-  props<{ messages: Message[] }>()
+  props<{ messages: Message[]; total: number; page: number; totalPages: number }>()
 );
 export const loadMessagesFailure = createAction(
   '[Message] Load Messages Failure',

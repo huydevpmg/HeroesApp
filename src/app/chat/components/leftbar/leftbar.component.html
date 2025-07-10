@@ -1,142 +1,149 @@
 <div class="conversation-list">
-  <div class="chat-sidebar">
-    <div class="search-box">
+  <div class="chat-sidebar d-flex flex-column" style="height: 100vh;">
+    <!-- Search + Add Button -->
+    <div class="search-box p-3">
       <div class="input-group d-flex gap-2">
-        <input type="text" class="form-control bg-light border border-2 rounded-5" placeholder="Search" />
+        <input type="text" class="form-control bg-light border-2 rounded-5" placeholder="Search" />
         <button class="btn btn-dark rounded-circle d-flex align-items-center justify-content-center btn-add"
-          style="width: 50px; height: 50px;"
-          (click)="openCreateGroupModal()">
+          style="width: 50px; height: 50px;" (click)="openCreateGroupModal()">
           <i class="bi bi-pencil-square"></i>
         </button>
       </div>
-      </div>
+    </div>
 
-    <!-- Enhanced Tabs Navbar -->
-    <div class="nav-tabs-container">
-      <ul class="nav nav-tabs" role="tablist">
+    <!-- Tabs + Filter -->
+    <div class="nav-tabs-container d-flex align-items-center px-3">
+      <ul class="nav nav-tabs flex-grow-1" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link" [class.active]="(activeTab$ | async) === 'main'" (click)="setTab('main')">
-            <i class="bi bi-chat-dots"></i>
-            <span>Main</span>
+            <i class="bi bi-chat-dots"></i> <span>Main</span>
           </button>
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" [class.active]="(activeTab$ | async) === 'archive'" (click)="setTab('archive')">
-            <i class="bi bi-archive"></i>
-            <span>Archive</span>
+            <i class="bi bi-archive"></i> <span>Archive</span>
           </button>
         </li>
       </ul>
-      <button class="filter-btn" title="Filter conversations" (click)="toggleFilter()">
+      <button class="filter-btn ms-2" title="Filter conversations" (click)="toggleFilter()">
         <i class="bi bi-funnel"></i>
       </button>
     </div>
 
-
+    <!-- Error -->
     <div *ngIf="error$ | async as error" class="alert alert-danger m-3">
       {{ error }}
     </div>
-<div *ngFor="let item of filteredConversationsWithOtherUserId$ | async; trackBy: trackByConversationId"
-    class="conversation-item position-relative"
-    [class.active]="selectedConversationId === item.conversation._id">
-      <!-- Main conversation content (clickable) -->
-      <div class="conversation-content" (click)="selectConversation(item.conversation)">
-        <div class="avatar position-relative">
-          <div *ngIf="item.conversation.isGroup" class="group-avatar">
-            <i class="bi bi-people-fill"></i>
-          </div>
-          <img *ngIf="!item.conversation.isGroup" [src]="
-              'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'
-            " [alt]="item.conversation.name" class="rounded-circle" />
-          <ng-container *ngIf="onlineUsers$ | async as onlineUsers">
-            <span class="status-badge" *ngIf="!item.conversation.isGroup" [class.online]="
-                item.otherUserId !== null &&
-                onlineUsers.includes(item.otherUserId)
-              " [class.offline]="
-                item.otherUserId === null ||
-                !onlineUsers.includes(item.otherUserId)
-              ">
-            </span>
-          </ng-container>
-        </div>
 
-        <div class="conversation-info">
-          <div class="name-time">
-            <p class="conversation-name mb-0">
+    <!-- Scrollable Conversation List -->
+    <div #conversationListContainer class="conversation-list-scroll flex-grow-1 overflow-auto"
+         style="min-height: 0;">
+      <div *ngFor="let item of filteredConversationsWithOtherUserId$ | async; trackBy: trackByConversationId"
+        class="conversation-item position-relative" [class.active]="selectedConversationId === item.conversation._id">
+
+        <!-- Conversation Item -->
+        <div class="conversation-content" (click)="selectConversation(item.conversation)">
+          <!-- Avatar -->
+          <div class="avatar position-relative">
+            <div *ngIf="item.conversation.isGroup" class="group-avatar">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <img *ngIf="!item.conversation.isGroup"
+              [src]="'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'"
+              [alt]="item.conversation.name" class="rounded-circle" />
+            <ng-container *ngIf="onlineUsers$ | async as onlineUsers">
+              <span class="status-badge" *ngIf="!item.conversation.isGroup"
+                [class.online]="item.otherUserId && onlineUsers.includes(item.otherUserId)"
+                [class.offline]="!item.otherUserId || !onlineUsers.includes(item.otherUserId)">
+              </span>
+            </ng-container>
+          </div>
+
+            <!-- Info -->
+            <div class="conversation-info">
+            <div class="name-time d-flex align-items-center justify-content-between">
+              <p class="conversation-name mb-0">
               {{ item.conversation.name }}
               <i *ngIf="item.conversation.isGroup" class="bi bi-people text-muted ms-1" style="font-size: 12px"></i>
-            </p>
-            <!-- Time & Dropdown -->
-            <div class="time-actions-container">
+              </p>
+              <div class="time-actions-container d-flex align-items-center" style="gap: 8px;">
               <small class="time-ago" [appTimeAgo]="item.conversation.updatedAt ?? ''"></small>
-              <div class="dropdown-container">
+              <div class="dropdown-container ms-2">
                 <button class="btn btn-sm btn-ghost dropdown-toggle" type="button"
-                  [id]="'dropdown-' + item.conversation._id"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                  (click)="$event.stopPropagation()">
-                  <i class="bi bi-three-dots fs-5"></i>
+                [id]="'dropdown-' + item.conversation._id" data-bs-toggle="dropdown" aria-expanded="false"
+                (click)="$event.stopPropagation()">
+                <i class="bi bi-three-dots fs-5"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end"
-                  [attr.aria-labelledby]="'dropdown-' + item.conversation._id">
-                  <li>
-                    <a class="dropdown-item" href="#" (click)="markAsRead(item.conversation._id!, $event)">
-                      <i class="bi bi-check2-all me-2"></i>
-                      Mark as Read
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#" (click)="toggleArchive(item.conversation.userConversationId!, $event)">
-                      <i class="bi bi-archive me-2"></i>
-                      {{ item.conversation.isArchived ? 'Unarchive' : 'Archive' }}
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#" (click)="addLabel(item.conversation._id!, $event)">
-                      <i class="bi bi-tag me-2"></i>
-                      Add Label
-                    </a>
-                  </li>
-                  <li>
-                    <hr class="dropdown-divider" />
-                  </li>
-                  <li>
-                    <a class="dropdown-item text-danger" href="#" (click)="
-                        clearConversation(item.conversation._id!, $event)
-                      ">
-                      <i class="bi bi-trash me-2"></i>
-                      Delete
-                    </a>
-                  </li>
-                </ul>
+                [attr.aria-labelledby]="'dropdown-' + item.conversation._id">
+                <li>
+                  <a class="dropdown-item" href="#" (click)="markAsRead(item.conversation._id!, $event)">
+                  <i class="bi bi-check2-all me-2"></i> Mark as Read
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#"
+                    (click)="toggleArchive(item.conversation.userConversationId!, $event)">
+                    <i class="bi bi-archive me-2"></i>
+                    {{ item.conversation.isArchived ? 'Unarchive' : 'Archive' }}
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#" (click)="addLabel(item.conversation._id!, $event)">
+                    <i class="bi bi-tag me-2"></i> Add Label
+                  </a>
+                </li>
+                    <li>
+                      <hr class="dropdown-divider" />
+                    </li>
+                    <li>
+                      <a class="dropdown-item text-danger" href="#"
+                        (click)="clearConversation(item.conversation._id!, $event)">
+                        <i class="bi bi-trash me-2"></i> Delete
+                      </a>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="last-message">
-            <p class="mb-0 text-truncate">
-              <ng-container *ngIf="item.conversation.lastMessage?.content?.trim() && item.conversation.lastMessage?.senderId && item.conversation.lastMessage?.senderName; else showAttachmentName">
-                <span *ngIf="!item.conversation.lastMessage?.isDeleteGlobal; else showDeletedMessage">
-                  <b>{{ item.conversation.lastMessage!.senderId === currentUserId ? 'You' : item.conversation.lastMessage!.senderName }}: </b>{{ item.conversation.lastMessage!.content }}
-                </span>
-                <ng-template #showDeletedMessage>
-                  <span class="text-muted fst-italic">
-                    Message was deleted
+
+            <!-- Last message -->
+            <div class="last-message">
+              <p class="mb-0 text-truncate">
+                <ng-container
+                  *ngIf="item.conversation.lastMessage?.content?.trim() && item.conversation.lastMessage?.senderId && item.conversation.lastMessage?.senderName; else showAttachmentName">
+                  <span *ngIf="!item.conversation.lastMessage?.isDeleteGlobal; else showDeletedMessage">
+                    <b>{{ item.conversation.lastMessage?.senderId === currentUserId ? 'You' :
+                      item.conversation.lastMessage?.senderName }}: </b>{{ item.conversation.lastMessage?.content }}
                   </span>
+                  <ng-template #showDeletedMessage>
+                    <span class="text-muted fst-italic">Message was deleted</span>
+                  </ng-template>
+                </ng-container>
+                <ng-template #showAttachmentName>
+                  <span *ngIf="item.conversation.lastAttachmentName">{{ item.conversation.lastAttachmentName }}</span>
+                  <span *ngIf="!item.conversation.lastAttachmentName">No messages yet</span>
                 </ng-template>
-              </ng-container>
-              <ng-template #showAttachmentName>
-                <span *ngIf="item.conversation.lastAttachmentName">{{
-                  item.conversation.lastAttachmentName
-                  }}</span>
-                <span *ngIf="!item.conversation.lastAttachmentName">No messages yet</span>
-              </ng-template>
-            </p>
-            <span *ngIf="item.conversation.unreadCount" class="badge bg-primary rounded-pill">
-              {{ item.conversation.unreadCount }}
-            </span>
+              </p>
+              <span *ngIf="item.conversation.unreadCount" class="badge bg-primary rounded-pill">
+                {{ item.conversation.unreadCount }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Pagination -->
+      <ng-container *ngIf="page$ | async as page">
+        <ng-container *ngIf="totalPages$ | async as totalPages">
+          <div class="text-center py-2" *ngIf="page < totalPages">
+            <span class="text-muted small">Loading more conversations...</span>
+          </div>
+          <div class="text-center py-2" *ngIf="page >= totalPages">
+            <span class="text-muted small">No more conversations</span>
+          </div>
+        </ng-container>
+      </ng-container>
     </div>
   </div>
 

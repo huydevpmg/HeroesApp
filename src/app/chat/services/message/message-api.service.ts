@@ -24,9 +24,9 @@ export class MessageApiService {
     );
   }
 
-  getMessages(conversationId: string): Observable<Message[]> {
-    return this.http.get<Message[]>(`${this.apiUrl}`, {
-      params: { conversationId },
+  getMessages(conversationId: string, page: number = 1, limit: number = 20): Observable<{ messages: Message[], total: number, page: number, totalPages: number }> {
+    return this.http.get<{ messages: Message[], total: number, page: number, totalPages: number }>(`${this.apiUrl}`, {
+      params: { conversationId, page, limit }
     });
   }
 

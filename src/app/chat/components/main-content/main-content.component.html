@@ -1,7 +1,8 @@
 <div class="chat-container">
-  <div class="chat-main" [class.expanded]="!showRightbar" [class.edit-mode]="editMode">
+  <div class="chat-main d-flex flex-column" [class.expanded]="!showRightbar" [class.edit-mode]="editMode"
+    style="height: 100vh; overflow: hidden;">
     <ng-container *ngIf="selectedConversation$ | async as conversation; else noConversation">
-      <div class="chat-header">
+      <div class="chat-header flex-shrink-0">
         <div class="d-flex align-items-center">
           <div class="avatar">
             <div class="conversation-avatar">
@@ -39,7 +40,7 @@
         </div>
       </div>
 
-      <div class="chat-messages" #messagesContainer>
+      <div class="chat-messages flex-grow-1 overflow-auto" #messagesContainer (scroll)="onMessagesScroll()">
         <div *ngIf="loading$ | async" class="text-center p-3">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
@@ -66,7 +67,7 @@
         </ng-container>
       </div>
 
-      <div class="chat-input" [class.edit-mode]="editMode" [class.reply-mode]="replyMode">
+      <div class="chat-input flex-shrink-0" [class.edit-mode]="editMode" [class.reply-mode]="replyMode">
         <!-- Edit Banner -->
         <div class="edit-banner" *ngIf="editMode && editingMessage">
           <i class="bi bi-pencil-square edit-icon" style="font-size: 0.8rem !important;"></i>
@@ -86,9 +87,9 @@
               Replying to:
               <span class="parent-message-author">
                 {{
-                  replyingToMessage.senderId === myId
-                    ? 'yourself'
-                    : getFirstNameInitial(replyingToMessage.senderName || 'Unknown')
+                replyingToMessage.senderId === myId
+                ? 'yourself'
+                : getFirstNameInitial(replyingToMessage.senderName || 'Unknown')
                 }}
               </span>
             </span>
@@ -166,14 +167,14 @@
     </ng-container>
 
     <ng-template #noConversation>
-      <div class="d-flex flex-column align-items-center justify-content-center h-100 w-100" style="min-height:400px;">
+      <div class="d-flex flex-column align-items-center justify-content-center h-100 w-100" style="min-height: 400px;">
         <img src="https://cdn-icons-png.flaticon.com/512/3095/3095583.png" alt="Select conversation"
-          style="width:120px;height:120px;opacity:0.5;">
+          style="width: 120px; height: 120px; opacity: 0.5;" />
         <div class="mt-3 fs-4 text-muted">Select a conversation to chat</div>
       </div>
     </ng-template>
   </div>
 
-  <app-chat-info *ngIf="selectedConversation$ | async" [isVisible]="showRightbar"
-    (close)="toggleRightbar()"></app-chat-info>
+  <app-chat-info *ngIf="selectedConversation$ | async" [isVisible]="showRightbar" (close)="toggleRightbar()">
+    </app-chat-info>
 </div>

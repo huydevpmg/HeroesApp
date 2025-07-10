@@ -6,9 +6,17 @@ import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
 export const messageReducer = createReducer(
   initialMessageState,
   on(MessageActions.loadMessages, state => ({ ...state, loading: true, error: null })),
-  on(MessageActions.loadMessagesSuccess, (state, { messages }) =>
-    messageAdapter.setAll(messages, { ...state, loading: false })
-  ),
+  on(MessageActions.loadMessagesSuccess, (state, { messages, total, page, totalPages }) => {
+    if (page === 1) {
+      return messageAdapter.setAll(messages, { ...state, loading: false, total, page, totalPages });
+    } else {
+      const ids = state.ids as string[];
+      return messageAdapter.addMany(
+        messages.filter(m => !!m._id && !ids.includes(m._id as string)),
+        { ...state, loading: false, total, page, totalPages }
+      );
+    }
+  }),
   on(MessageActions.loadMessagesFailure, (state, { error }) => ({ ...state, loading: false, error })),
 
   on(MessageActions.sendMessageSuccess, (state, { message }) =>

@@ -6,6 +6,9 @@ import { Message } from '../../../shared/enums/models/message.model';
 export interface MessageState extends EntityState<Message> {
   loading: boolean;
   error: string | null;
+  page: number;
+  total: number;
+  totalPages: number;
 }
 
 export const messageAdapter: EntityAdapter<Message> = createEntityAdapter<Message>({
@@ -15,4 +18,7 @@ export const messageAdapter: EntityAdapter<Message> = createEntityAdapter<Messag
 export const initialMessageState: MessageState = messageAdapter.getInitialState({
   loading: false,
   error: null,
+  page: 1,
+  total: 0,
+  totalPages: 1,
 });

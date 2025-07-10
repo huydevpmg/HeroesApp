@@ -72,3 +72,19 @@ export const getAllUsers = createSelector(
   selectConversationState,
   s => s.users
 );
+
+// Paging
+export const selectConversationPage = createSelector(
+  selectConversationState,
+  s => s.page
+);
+
+export const selectConversationTotalPages = createSelector(
+  selectConversationState,
+  s => s.totalPages
+);
+
+export const selectConversationTotalCount = createSelector(
+  selectConversationState,
+  s => s.total
+);

@@ -21,8 +21,8 @@ export class ConversationApiService {
     return this.http.post<Conversation>(`${this.apiUrl}/`, data);
   }
 
-  getConversations(): Observable<Conversation[]> {
-    return this.http.get<Conversation[]>(`${this.apiUrl}`)
+  getConversations(page: number = 1, limit: number = 20): Observable<{ conversations: Conversation[], total: number, page: number, totalPages: number }> {
+    return this.http.get<{ conversations: Conversation[], total: number, page: number, totalPages: number }>(`${this.apiUrl}?page=${page}&limit=${limit}`);
   }
 
   getConversationById(id: string): Observable<Conversation> {

@@ -24,6 +24,10 @@ export interface ConversationState extends EntityState<Conversation> {
 
   typingUsers: TypingUser[];
   onlineUsers: string[];
+
+  page: number;
+  total: number;
+  totalPages: number;
 }
 
 export const conversationAdapter: EntityAdapter<Conversation> =
@@ -43,4 +47,8 @@ export const initialConversationState: ConversationState =
 
     typingUsers: [],
     onlineUsers: [],
+
+    page: 1,
+    total: 0,
+    totalPages: 1,
   });

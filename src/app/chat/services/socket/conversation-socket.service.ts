@@ -72,7 +72,7 @@ export class ConversationSocketService {
         conversationId: data.conversationId,
         userId: data.userId
       }));
-      this.store.dispatch(ConversationActions.loadConversations());
+      this.store.dispatch(ConversationActions.loadConversations({ page: 1, limit: 20 }));
     });
 
     // Conversation pinned
@@ -99,7 +99,7 @@ export class ConversationSocketService {
     this.socketCore.on(SOCKET_EVENTS.MEMBER_ADDED, (data: { conversationId: string; addedMembers: string[]; conversation: Conversation; systemMessage: any }) => {
       this.memberAddedSubject.next(data);
       this.store.dispatch(ConversationActions.addMembersToGroupSuccess({ conversation: data.conversation }));
-      this.store.dispatch(ConversationActions.loadConversations());
+      this.store.dispatch(ConversationActions.loadConversations({ page: 1, limit: 20 }));
 
       // If current user is one of the added members, auto-join the conversation
       const currentUserId = this.authService.getCurrentUserId();
