@@ -29,3 +29,8 @@ export const selectAttachmentError = createSelector(
   selectAttachmentState,
   state => state.error
 );
+
+export const selectAttachmentsByConversation = (conversationId: string) => createSelector(
+  selectAllAttachments,
+  (attachments) => attachments.filter(att => att.conversationId === conversationId)
+);

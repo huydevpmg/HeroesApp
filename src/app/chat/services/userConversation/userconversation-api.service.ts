@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
 import { UserConversation } from '../../../shared/enums/models/user-conversation.model';

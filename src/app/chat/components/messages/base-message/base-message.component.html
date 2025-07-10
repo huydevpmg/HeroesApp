@@ -154,26 +154,11 @@
   </ng-template>
 
   <!-- Modal preview attachment -->
-  <div class="modal fade show" tabindex="-1"
-    [ngStyle]="{display: previewAttachment ? 'block' : 'none', background: 'rgba(0,0,0,0.5)'}" *ngIf="previewAttachment"
-    style="z-index: 2000;" (click)="closePreview()">
-    <div class="modal-dialog modal-dialog-centered modal-lg" (click)="$event.stopPropagation()">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Preview</h5>
-          <button type="button" class="btn-close" aria-label="Close" (click)="closePreview()"></button>
-        </div>
-        <div class="modal-body text-center">
-          <ng-container *ngIf="previewAttachment.type.startsWith('image/')">
-            <img [src]="previewAttachment.url" [alt]="previewAttachment.name" class="img-fluid rounded">
-          </ng-container>
-          <ng-container *ngIf="previewAttachment.type.startsWith('video/')">
-            <video [src]="previewAttachment.url" controls class="w-100 rounded" style="max-height:60vh;"></video>
-          </ng-container>
-        </div>
-      </div>
-    </div>
-  </div>
+  <app-preview-attachment
+    [previewAttachment]="previewAttachment"
+    (close)="closePreview()"
+    *ngIf="previewAttachment"
+  ></app-preview-attachment>
 
   <!-- Modal delete message -->
   <div class="modal fade show" tabindex="-1"

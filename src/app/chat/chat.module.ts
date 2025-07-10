@@ -19,6 +19,7 @@ import { BaseMessageComponent } from './components/messages/base-message/base-me
 import { attachmentReducer } from './store/attachment/attachment.reducer';
 import { AttachmentEffects } from './store/attachment/attachment.effects';
 import { ReadReceiptComponent } from './components/messages/read-receipt/read-receipt.component';
+import { PreviewAttachmentComponent } from './components/messages/preview-attachment/preview-attachment.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { ReadReceiptComponent } from './components/messages/read-receipt/read-re
     ChatInfoComponent,
     BaseMessageComponent,
     ReadReceiptComponent,
+    PreviewAttachmentComponent,
   ],
   imports: [
     CommonModule,

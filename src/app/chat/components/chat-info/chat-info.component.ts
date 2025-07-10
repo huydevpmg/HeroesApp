@@ -4,6 +4,8 @@ import { map, Observable, combineLatest, take, switchMap, of } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
 import { SocketService } from '../../services/socket/socket.service';
 import { ConversationService } from '../../services/conversation/conversation.service';
+import { Attachment } from '../../../shared/enums/models/attachment.model';
+import { formatFileSize, formatDate, getFileIconByType } from '../../../shared/helpers/attachment.helper';
 @Component({
   selector: 'app-chat-info',
   templateUrl: './chat-info.component.html',
@@ -12,6 +14,8 @@ import { ConversationService } from '../../services/conversation/conversation.se
 export class ChatInfoComponent implements OnInit {
   @Input() isVisible = true;
   @Output() close = new EventEmitter<void>();
+
+  @Input() attachments$: Observable<Attachment[]> = of([]);
 
   selectedConversation$: Observable<Conversation | null | undefined>;
   loading$: Observable<boolean>;
@@ -26,6 +30,11 @@ export class ChatInfoComponent implements OnInit {
   allUsers$: Observable<any[]>;
   selectedUsersToAdd: string[] = [];
   isRemovingMember = false;
+  selectedPreviewAttachment: Attachment | null = null;
+
+  formatFileSize = formatFileSize;
+  formatDate = formatDate;
+  getFileIconByType = getFileIconByType;
 
   constructor(
     private authService: AuthService,
@@ -69,7 +78,6 @@ export class ChatInfoComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.conversationService.loadConversations();
     this.conversationService.getAllUsers();
   }
 
@@ -93,8 +101,8 @@ export class ChatInfoComponent implements OnInit {
     console.log('Send message to:', member);
   }
 
-  viewImage(image: any) {
-    console.log('View image:', image);
+  viewImage(image: Attachment) {
+    this.selectedPreviewAttachment = image;
   }
 
   viewAllImages() {
@@ -105,8 +113,13 @@ export class ChatInfoComponent implements OnInit {
     console.log('Download file:', file);
   }
 
-  viewFile(file: any) {
-    console.log('View file:', file);
+  viewFile(file: Attachment) {
+    // Mở file bằng window.open hoặc download
+    if (file.url) {
+      window.open(file.url, '_blank');
+    } else {
+      console.log('File URL not found:', file);
+    }
   }
 
   onLeaveGroup(selectedConv: Conversation) {
@@ -115,60 +128,12 @@ export class ChatInfoComponent implements OnInit {
     }
   }
 
-  private getSharedImages() {
-    return this.getMockSharedImages();
+  getSharedImages(attachments: Attachment[] = []): Attachment[] {
+    return (attachments || []).filter(att => att.type && att.type.startsWith('image/'));
   }
 
-  private getSharedFiles() {
-    return this.getMockSharedFiles();
-  }
-
-  private getMockSharedImages() {
-    return [
-      {
-        id: 1,
-        name: 'design-mockup.png',
-        url: 'https://picsum.photos/300/300?random=1'
-      },
-      {
-        id: 2,
-        name: 'wireframe.jpg',
-        url: 'https://picsum.photos/300/300?random=2'
-      },
-      {
-        id: 3,
-        name: 'screenshot.png',
-        url: 'https://picsum.photos/300/300?random=3'
-      },
-      {
-        id: 4,
-        name: 'prototype.png',
-        url: 'https://picsum.photos/300/300?random=4'
-      }
-    ];
-  }
-
-  private getMockSharedFiles() {
-    return [
-      {
-        id: 1,
-        name: 'Project Requirements.pdf',
-        type: 'pdf',
-        size: '2.5 MB',
-        icon: 'bi-file-earmark-pdf-fill',
-        color: '#dc3545',
-        uploadDate: '2 days ago'
-      },
-      {
-        id: 2,
-        name: 'Design Assets.zip',
-        type: 'zip',
-        size: '15.8 MB',
-        icon: 'bi-file-earmark-zip-fill',
-        color: '#fd7e14',
-        uploadDate: '3 days ago'
-      }
-    ];
+  getSharedFiles(attachments: Attachment[] = []): Attachment[] {
+    return (attachments || []).filter(att => !att.type?.startsWith('image/'));
   }
 
   // Member management methods

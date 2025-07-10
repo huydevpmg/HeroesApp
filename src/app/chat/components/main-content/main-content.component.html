@@ -175,6 +175,10 @@
     </ng-template>
   </div>
 
-  <app-chat-info *ngIf="selectedConversation$ | async" [isVisible]="showRightbar" (close)="toggleRightbar()">
-    </app-chat-info>
+  <app-chat-info
+    *ngIf="selectedConversation$ | async"
+    [isVisible]="showRightbar"
+    [attachments$]="attachments$"
+    (close)="toggleRightbar()">
+  </app-chat-info>
 </div>

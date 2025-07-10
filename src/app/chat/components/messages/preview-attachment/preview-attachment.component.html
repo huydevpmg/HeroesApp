@@ -1,0 +1,21 @@
+<div class="modal fade show" tabindex="-1" [ngStyle]="{
+    display: previewAttachment ? 'block' : 'none',
+    background: 'rgba(0, 0, 0, 0.5)'
+  }" *ngIf="previewAttachment" style="z-index: 2000" (click)="closePreview()">
+  <div class="modal-dialog modal-dialog-centered modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-content">
+      <!-- Body -->
+      <div class="modal-body text-center p-2">
+        <ng-container *ngIf="previewAttachment.type.startsWith('image/')">
+          <img [src]="previewAttachment.url" [alt]="previewAttachment.name" class="img-fluid rounded shadow-sm"
+            style="max-height: 70vh; object-fit: contain" />
+        </ng-container>
+
+        <ng-container *ngIf="previewAttachment.type.startsWith('video/')">
+          <video [src]="previewAttachment.url" controls class="w-100 rounded shadow-sm"
+            style="max-height: 70vh; object-fit: contain"></video>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>

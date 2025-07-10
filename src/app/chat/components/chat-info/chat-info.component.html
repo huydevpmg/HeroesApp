@@ -74,58 +74,58 @@
           </div>
         </div>
 
-        <!-- Shared Images -->
-        <div class="info-section">
-          <div class="d-flex justify-content-between align-items-center mb-3 mx-1">
-            <h6 class="section-title mb-0">Shared Images</h6>
-            <small class="text-muted">{{ chatInfo.sharedImages.length }} files</small>
-          </div>
-          <div class="shared-images-grid">
-            <div class="image-grid-item" *ngFor="let image of chatInfo.sharedImages; let i = index"
-              [class.show-more]="i === 8 && chatInfo.sharedImages.length > 9"
-              (click)="i === 8 && chatInfo.sharedImages.length > 9 ? viewAllImages() : viewImage(image)">
-
-              <img [src]="image.url" [alt]="image.name" class="grid-image">
-
-              <div class="more-overlay" *ngIf="i === 8 && chatInfo.sharedImages.length > 9">
-                <span class="more-text">+{{ chatInfo.sharedImages.length - 9 }}</span>
-              </div>
-
-              <div class="image-hover-overlay" *ngIf="!(i === 8 && chatInfo.sharedImages.length > 9)">
-                <i class="bi bi-eye text-white"></i>
+        <ng-container *ngIf="attachments$ | async as attachments">
+          <!-- Shared Images -->
+          <div class="info-section">
+            <div class="d-flex justify-content-between align-items-center mb-3 mx-1">
+              <h6 class="section-title mb-0">Shared Images</h6>
+              <small class="text-muted">{{ getSharedImages(attachments).length }} files</small>
+            </div>
+            <div class="shared-images-grid">
+              <div class="image-grid-item" *ngFor="let image of getSharedImages(attachments); let i = index"
+                [class.show-more]="i === 8 && getSharedImages(attachments).length > 9"
+                (click)="i === 8 && getSharedImages(attachments).length > 9 ? viewAllImages() : viewImage(image)">
+                <img [src]="image.url" [alt]="image.name" class="grid-image" />
+                <div class="more-overlay" *ngIf="i === 8 && getSharedImages(attachments).length > 9">
+                  <span class="more-text">+{{ getSharedImages(attachments).length - 9 }}</span>
+                </div>
+                <div class="image-hover-overlay" *ngIf="!(i === 8 && getSharedImages(attachments).length > 9)">
+                  <i class="bi bi-eye text-white"></i>
+                </div>
               </div>
             </div>
+            <button class="btn btn-outline-dark rounded-3 btn-sm w-100 mt-3" (click)="viewAllImages()"
+              *ngIf="getSharedImages(attachments).length > 9">
+              <i class="bi bi-images me-2"></i>
+              View All Images
+            </button>
           </div>
 
-          <!-- View All Button -->
-          <button class="btn btn-outline-dark rounded-3 btn-sm w-100 mt-3" (click)="viewAllImages()"
-            *ngIf="chatInfo.sharedImages.length > 9">
-            <i class="bi bi-images me-2"></i>
-            View All Images
-          </button>
-        </div>
-
-        <!-- Shared Files -->
-        <div class="info-section">
-          <div class="d-flex justify-content-between align-items-center mb-3 mx-1">
-            <h6 class="section-title mb-0">Shared Files</h6>
-            <small class="text-muted">{{ chatInfo.sharedFiles.length }} files</small>
-          </div>
-          <div class="shared-files">
-            <div class="file-item d-flex align-items-center p-2 mb-1 rounded" *ngFor="let file of chatInfo.sharedFiles">
-              <div class="file-icon me-3">
-                <i class="bi" [ngClass]="file.icon" [style.color]="file.color"></i>
-              </div>
-              <div class="file-info flex-grow-1">
-                <p class="file-name mb-1">{{ file.name }}</p>
-                <div class="d-flex justify-content-between">
-                  <small class="file-properties">{{ file.size }}</small>
-                  <small class="file-properties">{{ file.uploadDate }}</small>
+          <!-- Shared Files -->
+          <div class="info-section">
+            <div class="d-flex justify-content-between align-items-center mb-3 mx-1">
+              <h6 class="section-title mb-0">Shared Files</h6>
+              <small class="text-muted">{{ getSharedFiles(attachments).length }} files</small>
+            </div>
+            <div class="shared-files">
+              <div class="file-item d-flex align-items-center p-2 mb-1 rounded"
+                *ngFor="let file of getSharedFiles(attachments)"
+                (click)="file.type && file.type.startsWith('image/') ? viewImage(file) : viewFile(file)"
+                style="cursor: pointer;">
+                <div class="file-icon me-3">
+                  <i class="bi" [ngClass]="getFileIconByType(file.type || file.name).icon" [style.color]="getFileIconByType(file.type || file.name).color"></i>
+                </div>
+                <div class="file-info flex-grow-1">
+                  <p class="file-name mb-1">{{ file.name }}</p>
+                  <div class="d-flex justify-content-between">
+                    <small class="file-properties">{{ formatFileSize(file.size) }}</small>
+                    <small class="file-properties">{{ formatDate(file.createdAt) }}</small>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+          </ng-container>
       </ng-container>
 
       <!-- Leave group button -->
@@ -280,4 +280,11 @@
     </div>
   </div>
   <div class="modal-backdrop fade show" *ngIf="showRemoveMemberModal"></div>
+
+  <!-- Preview Attachment Component -->
+  <app-preview-attachment
+    [previewAttachment]="selectedPreviewAttachment"
+    (close)="selectedPreviewAttachment = null"
+    *ngIf="selectedPreviewAttachment"
+  ></app-preview-attachment>
 </div>

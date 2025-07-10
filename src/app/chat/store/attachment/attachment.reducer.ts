@@ -6,7 +6,9 @@ export const attachmentReducer = createReducer(
   initialAttachmentState,
   on(AttachmentActions.uploadAttachment, (state) => ({ ...state, loading: true, error: null })),
   on(AttachmentActions.uploadAttachmentSuccess, (state, { attachment }) =>
-    attachmentAdapter.upsertOne(attachment, { ...state, loading: false })
+    attachment && attachment._id
+      ? attachmentAdapter.upsertOne(attachment, { ...state, loading: false })
+      : { ...state, loading: false }
   ),
   on(AttachmentActions.uploadAttachmentFailure, (state, { error }) => ({ ...state, loading: false, error })),
 

@@ -119,12 +119,11 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
 
   onScroll(): void {
     const container = this.conversationListContainer.nativeElement;
-    const threshold = 200; // px from bottom
+    const threshold = 200;
     const atBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
     if (this.loading) { return; }
     this.totalPages$.pipe(take(1)).subscribe(totalPages => {
       this.page$.pipe(take(1)).subscribe(page => {
-        // Load liên tục cho đến khi không còn page hoặc không còn atBottom
         let nextPage = page;
         while (atBottom && nextPage < totalPages && !this.loading) {
           nextPage++;

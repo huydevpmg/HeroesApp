@@ -2,7 +2,6 @@
 export * from './conversation/conversation.actions';
 export * from './conversation/conversation.effects';
 export * from './conversation/conversation.reducer';
-export * from './conversation/conversation.selectors';
 export * from './conversation/conversation.state';
 
 // Message

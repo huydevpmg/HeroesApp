@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription, combineLatest } from 'rxjs';
-import { map, distinctUntilChanged, filter } from 'rxjs/operators';
+import { map, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
 import { Message } from '../../../shared/enums/models/message.model';
 import * as ConversationSelectors from '../../store/conversation/conversation.selectors';
@@ -19,13 +19,14 @@ import * as AttachmentActions from '../../store/attachment/attachment.actions';
 import { selectMessagesWithAttachment } from '../../store/message/message.selectors';
 import { AuthService } from '../../../auth/services/auth.service';
 import { SocketService } from '../../services/socket/socket.service';
-import { selectAttachmentEntities } from '../../store/attachment/attachment.selectors';
+import { selectAttachmentEntities, selectAttachmentsByConversation } from '../../store/attachment/attachment.selectors';
 import { MessageService } from '../../services/message/message.service';
 import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
 import { MessageReadReceiptService } from '../../services/message-read-receipt/message-read-receipt.service';
 import { ReadReceiptSocketService } from '../../services/socket/read-receipt-socket.service';
 import { ReplyingToMessage } from '../../../shared/enums/models/reply-msg.model';
 import { selectMessagesPage, selectMessagesTotalPages } from '../../store/message/message.selectors';
+import { Attachment } from '../../../shared/enums/models/attachment.model';
 
 @Component({
   selector: 'app-main-content',
@@ -44,6 +45,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
   typingUsers$: Observable<{ userId: string; timestamp: number }[]>;
   onlineUsers$: Observable<string[]>;
   otherUserId$: Observable<string | null>;
+  attachments$: Observable<Attachment[]>;
   page = 1;
   totalPages = 1;
   loading = false;
@@ -109,8 +111,14 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
     this.messagesWithAttachment$ = this.store.select(
       selectMessagesWithAttachment
     );
+    this.attachments$ = this.selectedConversation$.pipe(
+      map(convo => convo?._id),
+      filter(Boolean),
+      switchMap(conversationId => {
+        return this.store.select(selectAttachmentsByConversation(conversationId!));
+      }),
+    );
   }
-
   ngOnInit(): void {
     this.conversationSub = this.selectedConversation$
       .pipe(
@@ -466,9 +474,8 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       case 'GROUP_RENAME':
-        return `Group was renamed${
-          message.meta?.newName ? ' to ' + message.meta.newName : ''
-        }`;
+        return `Group was renamed${message.meta?.newName ? ' to ' + message.meta.newName : ''
+          }`;
 
       default:
         return 'System event';
@@ -479,7 +486,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.messagesContainer.nativeElement.scrollTop =
         this.messagesContainer.nativeElement.scrollHeight;
-    } catch {}
+    } catch { }
   }
 
   private loadReadReceiptsForMessages(messages: any[]) {
