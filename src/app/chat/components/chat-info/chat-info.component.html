@@ -224,7 +224,7 @@
                 *ngFor="let user of getAvailableUsers() | async" [class.selected]="isUserSelected(user)"
                 (click)="toggleUserSelection(user)" style="cursor: pointer;">
                 <div class="form-check me-2">
-                  <input class="form-check-input" type="checkbox" [checked]="isUserSelected(user)" readonly>
+                  <input class="form-check-input" type="checkbox" [checked]="isUserSelected(user)">
                 </div>
                 <div class="user-avatar me-2">
                   <img

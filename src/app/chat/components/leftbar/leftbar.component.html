@@ -1,11 +1,11 @@
 <div class="conversation-list">
-  <div class="chat-sidebar d-flex flex-column" style="height: 100vh;">
+  <div class="chat-sidebar d-flex flex-column" style="height: 82vh">
     <!-- Search + Add Button -->
     <div class="search-box p-3">
       <div class="input-group d-flex gap-2">
         <input type="text" class="form-control bg-light border-2 rounded-5" placeholder="Search" />
         <button class="btn btn-dark rounded-circle d-flex align-items-center justify-content-center btn-add"
-          style="width: 50px; height: 50px;" (click)="openCreateGroupModal()">
+          style="width: 50px; height: 50px" (click)="openCreateGroupModal()">
           <i class="bi bi-pencil-square"></i>
         </button>
       </div>
@@ -30,105 +30,89 @@
       </button>
     </div>
 
-    <!-- Error -->
-    <div *ngIf="error$ | async as error" class="alert alert-danger m-3">
-      {{ error }}
-    </div>
-
     <!-- Scrollable Conversation List -->
-    <div #conversationListContainer class="conversation-list-scroll flex-grow-1 overflow-auto"
-         style="min-height: 0;">
+    <div #conversationListContainer class="conversation-list-scroll flex-grow-1 overflow-auto" style="min-height: 0">
       <div *ngFor="let item of filteredConversationsWithOtherUserId$ | async; trackBy: trackByConversationId"
-        class="conversation-item position-relative" [class.active]="selectedConversationId === item.conversation._id">
-
-        <!-- Conversation Item -->
-        <div class="conversation-content" (click)="selectConversation(item.conversation)">
-          <!-- Avatar -->
-          <div class="avatar position-relative">
-            <div *ngIf="item.conversation.isGroup" class="group-avatar">
-              <i class="bi bi-people-fill"></i>
-            </div>
-            <img *ngIf="!item.conversation.isGroup"
-              [src]="'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'"
-              [alt]="item.conversation.name" class="rounded-circle" />
-            <ng-container *ngIf="onlineUsers$ | async as onlineUsers">
-              <span class="status-badge" *ngIf="!item.conversation.isGroup"
-                [class.online]="item.otherUserId && onlineUsers.includes(item.otherUserId)"
-                [class.offline]="!item.otherUserId || !onlineUsers.includes(item.otherUserId)">
-              </span>
-            </ng-container>
+        class="conversation-item d-flex align-items-start position-relative"
+        [class.active]="selectedConversationId === item.conversation._id"
+        (click)="selectConversation(item.conversation)" (mouseenter)="onHoverConversation(item.conversation._id || '')"
+        (mouseleave)="onLeaveConversation(item.conversation._id!)">
+        <!-- Avatar -->
+        <div class="avatar position-relative me-2">
+          <div *ngIf="item.conversation.isGroup" class="group-avatar">
+            <i class="bi bi-people-fill" style="font-size: 30px;"></i>
           </div>
+          <img *ngIf="!item.conversation.isGroup"
+            [src]="'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'"
+            [alt]="item.conversation.name" class="rounded-circle" />
+          <ng-container *ngIf="onlineUsers$ | async as onlineUsers">
+            <span class="status-badge" *ngIf="!item.conversation.isGroup"
+              [class.online]="item.otherUserId && onlineUsers.includes(item.otherUserId)"
+              [class.offline]="!item.otherUserId || !onlineUsers.includes(item.otherUserId)"></span>
+          </ng-container>
+        </div>
 
-            <!-- Info -->
-            <div class="conversation-info">
-            <div class="name-time d-flex align-items-center justify-content-between">
-              <p class="conversation-name mb-0">
+        <!-- Info Block -->
+        <div class="conversation-info d-flex flex-column justify-content-between flex-grow-1">
+          <div class="name-time d-flex justify-content-between align-items-center">
+            <p class="conversation-name mb-0">
               {{ item.conversation.name }}
               <i *ngIf="item.conversation.isGroup" class="bi bi-people text-muted ms-1" style="font-size: 12px"></i>
-              </p>
-              <div class="time-actions-container d-flex align-items-center" style="gap: 8px;">
-              <small class="time-ago" [appTimeAgo]="item.conversation.updatedAt ?? ''"></small>
-              <div class="dropdown-container ms-2">
-                <button class="btn btn-sm btn-ghost dropdown-toggle" type="button"
-                [id]="'dropdown-' + item.conversation._id" data-bs-toggle="dropdown" aria-expanded="false"
-                (click)="$event.stopPropagation()">
-                <i class="bi bi-three-dots fs-5"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end"
-                [attr.aria-labelledby]="'dropdown-' + item.conversation._id">
-                <li>
-                  <a class="dropdown-item" href="#" (click)="markAsRead(item.conversation._id!, $event)">
-                  <i class="bi bi-check2-all me-2"></i> Mark as Read
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="#"
-                    (click)="toggleArchive(item.conversation.userConversationId!, $event)">
-                    <i class="bi bi-archive me-2"></i>
-                    {{ item.conversation.isArchived ? 'Unarchive' : 'Archive' }}
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="#" (click)="addLabel(item.conversation._id!, $event)">
-                    <i class="bi bi-tag me-2"></i> Add Label
-                  </a>
-                </li>
-                    <li>
-                      <hr class="dropdown-divider" />
-                    </li>
-                    <li>
-                      <a class="dropdown-item text-danger" href="#"
-                        (click)="clearConversation(item.conversation._id!, $event)">
-                        <i class="bi bi-trash me-2"></i> Delete
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+            </p>
+            <div class="d-flex align-items-center gap-2">
+              <app-dropdown-label *ngIf="isDropdownVisible(item.conversation._id || '')"
+                [userConversationId]="item.conversation.userConversationId || ''"
+                [conversationId]="item.conversation._id || ''" [labels]="labels"
+                [selectedLabelId]="item.conversation.labels?.[0]?._id!" [isArchived]="!!item.conversation.isArchived"
+                (selectLabel)="onSelectLabel($event)" (manageLabels)="onManageLabels()"
+                (markRead)="onMarkRead(item.conversation)" (archive)="onArchive(item.conversation)"
+                (clear)="onClearConversation(item.conversation)"
+                (openStateChange)="onDropdownOpenStateChange($event, item.conversation._id || '')">
+              </app-dropdown-label>
+              <small class="time-ago" [appTimeAgo]="item.conversation.updatedAt ?? ''"
+                *ngIf="!isDropdownVisible(item.conversation._id || '')"></small>
             </div>
+          </div>
 
-            <!-- Last message -->
-            <div class="last-message">
-              <p class="mb-0 text-truncate">
-                <ng-container
-                  *ngIf="item.conversation.lastMessage?.content?.trim() && item.conversation.lastMessage?.senderId && item.conversation.lastMessage?.senderName; else showAttachmentName">
-                  <span *ngIf="!item.conversation.lastMessage?.isDeleteGlobal; else showDeletedMessage">
-                    <b>{{ item.conversation.lastMessage?.senderId === currentUserId ? 'You' :
-                      item.conversation.lastMessage?.senderName }}: </b>{{ item.conversation.lastMessage?.content }}
-                  </span>
-                  <ng-template #showDeletedMessage>
-                    <span class="text-muted fst-italic">Message was deleted</span>
-                  </ng-template>
+          <!-- Last message -->
+          <div class="last-message d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center flex-grow-1 text-truncate">
+              <ng-container
+                *ngIf="item.conversation.lastMessage?.content?.trim() && item.conversation.lastMessage?.senderId && item.conversation.lastMessage?.senderName; else showAttachmentName">
+                <ng-container *ngIf="item.conversation.labels?.length! > 0">
+                  <svg width="16" height="12" viewBox="0 0 80 60"
+                    style="vertical-align: middle; margin-right: 6px; flex-shrink: 0;">
+                    <g transform="translate(8, 4) scale(1.25)">
+                      <path [attr.fill]="item.conversation.labels?.[0]?.color" d="M0 0H32L48 20L32 40H0V0Z" />
+                    </g>
+                  </svg>
                 </ng-container>
-                <ng-template #showAttachmentName>
-                  <span *ngIf="item.conversation.lastAttachmentName">{{ item.conversation.lastAttachmentName }}</span>
-                  <span *ngIf="!item.conversation.lastAttachmentName">No messages yet</span>
+                <span *ngIf="!item.conversation.lastMessage?.isDeleteGlobal; else showDeletedMessage"
+                  class="text-truncate" style="font-size: 15px;">
+                  <b>{{ item.conversation.lastMessage?.senderId === currentUserId ? 'You' :
+                    item.conversation.lastMessage?.senderName }}:</b> {{ item.conversation.lastMessage?.content }}
+                </span>
+                <ng-template #showDeletedMessage>
+                  <span class="text-muted fst-italic">Message was deleted</span>
                 </ng-template>
-              </p>
-              <span *ngIf="item.conversation.unreadCount" class="badge bg-primary rounded-pill">
-                {{ item.conversation.unreadCount }}
-              </span>
+              </ng-container>
+              <ng-template #showAttachmentName>
+                <ng-container *ngIf="item.conversation.labels?.length! > 0">
+                  <svg width="16" height="12" viewBox="0 0 80 60"
+                    style="vertical-align: middle; margin-right: 6px; flex-shrink: 0;">
+                    <g transform="translate(8, 4) scale(1.25)">
+                      <path [attr.fill]="item.conversation.labels?.[0]?.color" d="M0 0H32L48 20L32 40H0V0Z" />
+                    </g>
+                  </svg>
+                </ng-container>
+                <span *ngIf="item.conversation.lastAttachmentName" style="font-size: 15px">{{
+                  item.conversation.lastAttachmentName }}</span>
+                <span *ngIf="!item.conversation.lastAttachmentName" style="font-size: 15px;">No messages yet</span>
+              </ng-template>
             </div>
+            <span *ngIf="item.conversation.unreadCount" class="badge bg-primary rounded-pill">
+              {{ item.conversation.unreadCount }}
+            </span>
           </div>
         </div>
       </div>
@@ -143,8 +127,6 @@
       </ng-container>
     </div>
   </div>
-
-  <!-- Simple Clean Modal -->
   <div class="modal-overlay" [class.show]="showCreateGroupModal" (click)="closeCreateGroupModal()">
     <div class="modal-container" (click)="$event.stopPropagation()">
       <div class="modal-header-clean">
@@ -204,8 +186,8 @@
                 <span *ngIf="user.selected" class="pill-clean">
                   <div class="pill-avatar">
                     <img [src]="
-                        'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'
-                      " [alt]="user.name" />
+                          'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'
+                        " [alt]="user.name" />
                   </div>
                   <span class="pill-name">{{ user.fullName }}</span>
                   <div class="pill-remove-clean" (click)="user.selected = false">
@@ -228,8 +210,8 @@
                 </div>
                 <div class="user-avatar">
                   <img [src]="
-                      'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'
-                    " [alt]="user.fullName" />
+                        'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'
+                      " [alt]="user.fullName" />
                   <div class="user-status" [class.online]="isUserOnline(user._id)"></div>
                 </div>
                 <div class="user-info">
@@ -267,4 +249,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal Label Management -->
+  <app-label-management *ngIf="showManageLabelModal" (close)="showManageLabelModal = false"
+    (labelUpdated)="fetchLabels()" [labels]="labels">
+  </app-label-management>
 </div>

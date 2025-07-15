@@ -1,0 +1,60 @@
+<div class="dropdown-label" style="position: relative">
+  <button class="btn btn-sm dropdown-toggle dropdown-label-btn no-after-dot" type="button"
+    [id]="'dropdown-' + conversationId" [class.visible]="isOpenDropdown" (click)="toggleDropdown($event)">
+    <i class="bi bi-three-dots fs-5"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end" *ngIf="isOpenDropdown">
+    <li>
+      <a class="dropdown-item" href="#" (click)="markAsRead($event)">
+        <i class="bi bi-check2-all me-2"></i> Mark as Read
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item" href="#" (click)="toggleArchive($event)">
+        <i class="bi bi-archive me-2"></i>
+        {{ isArchived ? 'Unarchive' : 'Archive' }}
+      </a>
+    </li>
+    <li>
+      <div class="subdropdown">
+        <a class="dropdown-item d-flex justify-content-between align-items-center" href="#"
+          (click)="openSubDropdown($event)">
+          <span><i class="bi bi-tag me-2"></i> Add Label</span>
+          <i class="bi bi-chevron-right ms-4"></i>
+        </a>
+        <ul class="dropdown-menu subdropdown-menu" *ngIf="isOpenSubDropdown">
+          <li *ngFor="let label of labels">
+            <a class="dropdown-item d-flex align-items-center gap-2" (click)="selectLabelHandler(label._id!, $event)">
+              <span class="label-color-dot">
+                <svg width="30" height="30" viewBox="4 4 24 24">
+                  <path d="M4 4H20L28 12L20 20H4V4Z" [attr.fill]="label.color" />
+                </svg>
+              </span>
+              <span>{{label.name}}</span>
+              <span *ngIf="selectedLabelId === label._id" class="ms-2">
+                <i class="bi bi-check-lg text-success"></i>
+              </span>
+            </a>
+          </li>
+          <li>
+            <hr class="dropdown-divider" />
+          </li>
+          <li>
+            <a class="dropdown-item text-center text-secondary" style="font-weight:500;cursor:pointer;"
+              (click)="onManageLabels($event)">
+              Manage Labels
+            </a>
+          </li>
+        </ul>
+      </div>
+    </li>
+    <li>
+      <hr class="dropdown-divider" />
+    </li>
+    <li>
+      <a class="dropdown-item text-danger" href="#" (click)="clearConversation($event)">
+        <i class="bi bi-trash me-2"></i> Delete
+      </a>
+    </li>
+  </ul>
+</div>

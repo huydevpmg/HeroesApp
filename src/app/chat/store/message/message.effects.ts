@@ -144,7 +144,7 @@ export class MessageEffects {
     this.socketService.onMessageDeletedGlobal().pipe(
       map(({ messageId }) => [
         MessageActions.deleteMessageSuccess({ messageId, deleteType: DeleteType.EVERYONE }),
-        ConversationActions.loadConversations({ page: 1, limit: 20 }) // Reload conversations để cập nhật lastMessage
+        ConversationActions.loadConversations({ page: 1, limit: 20 })
       ]),
       mergeMap(actions => from(actions))
     )

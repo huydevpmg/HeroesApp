@@ -1,14 +1,13 @@
 .chat-container {
-  display: grid;
-  grid-template-columns: 350px 1fr;
-  margin-top: 5px;
-  height: 82vh;
+  max-height: 82vh;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
   background-color: #f8f9fa;
   border-radius: 10px;
-  overflow: hidden;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-
+/*
 .conversation-list,
 .chat-sidebar {
   height: 100%;
@@ -28,4 +27,4 @@
   .chat-container {
     grid-template-columns: 1fr;
   }
-}
+} */

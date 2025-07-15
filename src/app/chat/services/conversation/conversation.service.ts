@@ -1,16 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
+import { UserConversation } from '../../../shared/enums/models/user-conversation.model';
 import * as ConversationActions from '../../store/conversation/conversation.actions';
 import * as MessageActions from '../../store/message/message.actions';
 import * as ConversationSelectors from '../../store/conversation/conversation.selectors';
 import { SocketService } from '../socket/socket.service';
+import { UserConversationApiService } from '../userConversation/userconversation-api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConversationService {
-  // Expose observable state for component to subscribe
   conversations$ = this.store.pipe(select(ConversationSelectors.selectAllConversations));
   selectedConversation$ = this.store.pipe(select(ConversationSelectors.selectSelectedConversation));
   loading$ = this.store.pipe(select(ConversationSelectors.selectConversationLoading));
@@ -18,6 +19,7 @@ export class ConversationService {
   allUsers$ = this.store.pipe(select(ConversationSelectors.getAllUsers));
 
   private socketService = inject(SocketService);
+  private userConversationApi = inject(UserConversationApiService);
 
   constructor(private store: Store) {
     this.initializeSocketListeners();
@@ -78,8 +80,27 @@ export class ConversationService {
   }
 
   toggleArchive(userConversationId: string) {
-    console.log('ConversationService toggleArchive called with:', userConversationId);
     this.store.dispatch(ConversationActions.toggleArchive({ userConversationId }));
+  }
+
+  addLabel(userConversationId: string, label: string) {
+    return this.userConversationApi.addLabel(userConversationId, label);
+  }
+
+  removeLabel(userConversationId: string, label: string) {
+    return this.userConversationApi.removeLabel(userConversationId, label);
+  }
+
+  markAsRead(userConversationId: string, messageId: string) {
+    return this.userConversationApi.markAsRead(userConversationId, messageId);
+  }
+
+  togglePin(userConversationId: string) {
+    return this.userConversationApi.togglePin(userConversationId);
+  }
+
+  updateUserConversation(userConversationId: string, updateData: Partial<UserConversation>) {
+    return this.userConversationApi.updateUserConversation(userConversationId, updateData);
   }
 
   private initializeSocketListeners() {
@@ -107,7 +128,6 @@ export class ConversationService {
 
     // Listen for conversation updates
     this.socketService.onConversationUpdated().subscribe(() => {
-      // Reload conversations to get latest data
       this.store.dispatch(ConversationActions.loadConversations({ page: 1, limit: 20 }));
     });
   }

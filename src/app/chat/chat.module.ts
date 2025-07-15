@@ -20,6 +20,8 @@ import { attachmentReducer } from './store/attachment/attachment.reducer';
 import { AttachmentEffects } from './store/attachment/attachment.effects';
 import { ReadReceiptComponent } from './components/messages/read-receipt/read-receipt.component';
 import { PreviewAttachmentComponent } from './components/messages/preview-attachment/preview-attachment.component';
+import { DropdownLabelComponent } from './components/dropdown-label/dropdown-label.component';
+import { LabelManagementComponent } from './components/label-management/label-management.component';
 
 @NgModule({
   declarations: [
@@ -31,6 +33,8 @@ import { PreviewAttachmentComponent } from './components/messages/preview-attach
     BaseMessageComponent,
     ReadReceiptComponent,
     PreviewAttachmentComponent,
+    DropdownLabelComponent,
+    LabelManagementComponent,
   ],
   imports: [
     CommonModule,

@@ -1,6 +1,5 @@
 <div class="chat-container">
-  <div class="chat-main d-flex flex-column" [class.expanded]="!showRightbar" [class.edit-mode]="editMode"
-    style="height: 100vh; overflow: hidden;">
+  <div class="chat-main d-flex flex-column" [class.expanded]="!showRightbar" [class.edit-mode]="editMode">
     <ng-container *ngIf="selectedConversation$ | async as conversation; else noConversation">
       <div class="chat-header flex-shrink-0">
         <div class="d-flex align-items-center">

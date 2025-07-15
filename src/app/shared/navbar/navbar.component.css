@@ -16,7 +16,6 @@
   box-shadow: var(--navbar-shadow);
   transition: all 0.3s ease;
   position: relative;
-  z-index: 1050;
   padding: var(--navbar-padding);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(0, 0, 0, 0.05);

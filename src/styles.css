@@ -9,7 +9,6 @@
 
 * {
   font-family: "Montserrat", sans-serif;
-  font-optical-sizing: auto;
 }
 
 
@@ -20,7 +19,7 @@ h1 {
 }
 
 h2 {
-  font-family: 'Open Sans', sans-serif;
+  /* font-family: 'Open Sans', sans-serif; */
   font-size: 2.2rem;
   font-weight: 700;
   color: #2c3e50;
@@ -29,7 +28,6 @@ h2 {
 
 h3 {
   color: #444;
-  font-family: 'Tagesschrift', sans-serif;
   font-weight: lighter;
 }
 body {
@@ -37,22 +35,9 @@ body {
 }
 body, input[type="text"], button {
   color: #333;
-  font-family: Cambria, Georgia, serif;
+  font-family: "Montserrat", sans-serif;
 }
-button {
-  background-color: #eee;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  color: white;
-  font-size: 1.2rem;
-  padding: 1rem;
 
-}
-button:hover {
-  background-color: black;
-  color: white;
-}
 button:disabled {
   background-color: #eee;
   color: #aaa;
@@ -65,14 +50,9 @@ button:not(.btn) {
   border-radius: 4px;
   cursor: pointer;
   color: black;
-  font-size: 1.2rem;
   padding: 1rem;
 }
 
-button:not(.btn):hover {
-  background-color: black;
-  color: white;
-}
 
 button:not(.btn):disabled {
   background-color: #eee;
@@ -83,8 +63,7 @@ button:not(.btn):disabled {
 input,
 textarea,
 select {
-  font-family: 'Roboto', 'Segoe UI', Arial, sans-serif !important;
-  font-size: 16px;
+  font-family: "Montserrat", sans-serif;
   font-weight: 400;
 }
 

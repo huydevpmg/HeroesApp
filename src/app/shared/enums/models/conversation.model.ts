@@ -14,6 +14,8 @@ export interface Conversation {
   lastAttachmentName?: string;
   isDeleted?: boolean;
   isArchived?: boolean;
+  labels?: Label[];
 }
 
 import { Message } from './message.model';
+import { Label } from './label.model';

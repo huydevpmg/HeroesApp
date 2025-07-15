@@ -1,0 +1,5 @@
+<svg width="80" height="60" viewBox="0 0 80 60" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(8, 4) scale(1.25)">
+    <path d="M0 0H32L48 20L32 40H0V0Z" fill="#ff0000"/>
+  </g>
+</svg>
