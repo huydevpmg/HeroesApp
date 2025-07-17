@@ -39,4 +39,10 @@ export class MessageReadReceiptApiService {
     return this.http.post<any>(`${this.baseUrl}/conversations/${conversationId}/read`, { messageIds })
       .pipe(map((response: any) => response.data));
   }
+
+  // Mark all messages as read for current user in a conversation
+  markAllMessagesAsRead(conversationId: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/conversations/${conversationId}/read-all`, {})
+      .pipe(map((response: any) => response.data));
+  }
 }

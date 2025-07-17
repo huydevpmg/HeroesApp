@@ -25,9 +25,8 @@
           </button>
         </li>
       </ul>
-      <button class="filter-btn ms-2" title="Filter conversations" (click)="toggleFilter()">
-        <i class="bi bi-funnel"></i>
-      </button>
+      <app-filter-dropdown [labels]="labels" (filterChange)="onFilterChange($event)">
+      </app-filter-dropdown>
     </div>
 
     <!-- Scrollable Conversation List -->
@@ -55,22 +54,19 @@
         <!-- Info Block -->
         <div class="conversation-info d-flex flex-column justify-content-between flex-grow-1">
           <div class="name-time d-flex justify-content-between align-items-center">
-            <p class="conversation-name mb-0">
+            <p class="conversation-name mb-0 fw-bold" style="font-size: 15px;">
               {{ item.conversation.name }}
               <i *ngIf="item.conversation.isGroup" class="bi bi-people text-muted ms-1" style="font-size: 12px"></i>
             </p>
-            <div class="d-flex align-items-center gap-2">
-              <app-dropdown-label *ngIf="isDropdownVisible(item.conversation._id || '')"
-                [userConversationId]="item.conversation.userConversationId || ''"
+            <div class="dropdown-label d-flex align-items-center gap-2"
+              *ngIf="hoveredConversationId === item.conversation._id || dropdownOpenConversationId === item.conversation._id">
+              <app-dropdown-label [userConversationId]="item.conversation.userConversationId || ''"
                 [conversationId]="item.conversation._id || ''" [labels]="labels"
                 [selectedLabelId]="item.conversation.labels?.[0]?._id!" [isArchived]="!!item.conversation.isArchived"
-                (selectLabel)="onSelectLabel($event)" (manageLabels)="onManageLabels()"
-                (markRead)="onMarkRead(item.conversation)" (archive)="onArchive(item.conversation)"
-                (clear)="onClearConversation(item.conversation)"
-                (openStateChange)="onDropdownOpenStateChange($event, item.conversation._id || '')">
+                (selectLabel)="onSelectLabel($event)" (manageLabels)="onManageLabels()" (markRead)="onMarkRead(item.conversation)"
+                (archive)="onArchive(item.conversation)" (clear)="onClearConversation(item.conversation)"
+                (openStateChange)="onDropdownOpenStateChange($event, item.conversation._id!)">
               </app-dropdown-label>
-              <small class="time-ago" [appTimeAgo]="item.conversation.updatedAt ?? ''"
-                *ngIf="!isDropdownVisible(item.conversation._id || '')"></small>
             </div>
           </div>
 
@@ -88,10 +84,12 @@
                   </svg>
                 </ng-container>
                 <span *ngIf="!item.conversation.lastMessage?.isDeleteGlobal; else showDeletedMessage"
-                  class="text-truncate" style="font-size: 15px;">
-                  <b>{{ item.conversation.lastMessage?.senderId === currentUserId ? 'You' :
-                    item.conversation.lastMessage?.senderName }}:</b> {{ item.conversation.lastMessage?.content }}
+                  class="text-truncate fw-bold" style="font-size: 15px;">
+                  {{ item.conversation.lastMessage?.senderId === currentUserId ? 'You' :
+                  item.conversation.lastMessage?.senderName }}: {{ item.conversation.lastMessage?.content }}
                 </span>
+                <span> · </span>
+                <small class="text-truncate" [appTimeAgo]="item.conversation.updatedAt ?? ''" style="font-size: 15px; margin-left: 10px;"> </small>
                 <ng-template #showDeletedMessage>
                   <span class="text-muted fst-italic">Message was deleted</span>
                 </ng-template>
@@ -110,7 +108,8 @@
                 <span *ngIf="!item.conversation.lastAttachmentName" style="font-size: 15px;">No messages yet</span>
               </ng-template>
             </div>
-            <span *ngIf="item.conversation.unreadCount" class="badge rounded-pill d-flex align-items-center justify-content-center"
+            <span *ngIf="item.conversation.unreadCount"
+              class="badge rounded-pill d-flex align-items-center justify-content-center"
               style="font-size: 10px; background-color: red; padding: 0; min-width: 20px; height: 20px; border-radius: 50%;">
               {{ item.conversation.unreadCount }}
             </span>
@@ -186,8 +185,9 @@
               <div *ngFor="let user of users" class="user-pill-clean" [class.selected]="user.selected">
                 <span *ngIf="user.selected" class="pill-clean">
                   <div class="pill-avatar">
-                    <img [src]="user.avatar || 'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'"
-                        [alt]="user.fullName" />
+                    <img
+                      [src]="user.avatar || 'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'"
+                      [alt]="user.fullName" />
                   </div>
                   <span class="pill-name">{{ user.fullName }}</span>
                   <div class="pill-remove-clean" (click)="user.selected = false">

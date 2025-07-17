@@ -74,6 +74,7 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
   hoveredConversationId: string | null = null;
   dropdownOpenConversationId: string | null = null;
 
+
   @ViewChild('conversationListContainer')
   conversationListContainer!: ElementRef<HTMLDivElement>;
 
@@ -203,8 +204,38 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
     this.activeTabSubject.next(tab);
   }
 
-  toggleFilter(): void {
-    console.log('Filter functionality will be implemented here');
+  showFilterDropdown = false;
+  toggleFilter() {
+    this.showFilterDropdown = !this.showFilterDropdown;
+  }
+  filter: { status: string, labels: string[] } = { status: 'all', labels: [] };
+
+  onFilterChange(event: { status: string, labels: string[] }) {
+    this.filter = event;
+    this.filteredConversationsWithOtherUserId$ = combineLatest([
+      this.conversationsWithOtherUserId$,
+      this.activeTab$,
+    ]).pipe(
+      map(([convs, activeTab]) =>
+        convs.filter((item) => {
+          // Lọc theo tab
+          const tabMatch = activeTab === 'main'
+            ? !item.conversation.isArchived
+            : item.conversation.isArchived;
+          // Lọc theo unreadCount
+          let unreadMatch = true;
+          if (this.filter.status === 'unread') {
+            unreadMatch = item.conversation.unreadCount! > 0;
+          } else if (this.filter.status === 'read') {
+            unreadMatch = !item.conversation.unreadCount || item.conversation.unreadCount === 0;
+          }
+          // Lọc theo label
+          const labelMatch = this.filter.labels.length === 0
+            || item.conversation.labels?.some(label => this.filter.labels.includes(label._id!));
+          return tabMatch && unreadMatch && labelMatch;
+        })
+      )
+    );
   }
 
   openCreateGroupModal() {
@@ -294,10 +325,11 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
   }
 
   onLeaveConversation(conversationId: string) {
-    if (this.dropdownOpenConversationId !== conversationId) {
-      this.hoveredConversationId = null;
-    }
+
+    if (this.dropdownOpenConversationId === conversationId) {return};
+    this.hoveredConversationId = null;
   }
+
 
   onDropdownOpen(conversationId: string) {
     this.dropdownOpenConversationId = conversationId;
@@ -340,23 +372,11 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
 
   onMarkRead(conversation: any) {
     if (!conversation || !conversation._id) { return; }
-    this.messageService.loadMessages(conversation._id);
-    this.messageService.messages$.pipe(take(1)).subscribe((messages: any[]) => {
-      const unreadIds = (messages || [])
-        .filter((msg: any) =>
-          msg.conversationId === conversation._id &&
-          msg.senderId !== this.currentUserId &&
-          !msg.readReceipts?.some((r: any) => r.userId === this.currentUserId)
-        )
-        .map((msg: any) => msg._id);
-      if (unreadIds.length > 0) {
-        this.messageReadReceiptService
-          .markMultipleMessagesAsRead(conversation._id, unreadIds)
-          .subscribe(() => {
-            this.store.dispatch(ConversationActions.loadConversations({ page: this.page, limit: this.limit }));
-          });
-      }
-    });
+    this.messageReadReceiptService
+      .markAllMessagesAsRead(conversation._id)
+      .subscribe(() => {
+        this.store.dispatch(ConversationActions.loadConversations({ page: this.page, limit: this.limit }));
+      });
   }
 
   onArchive(conversation: any) {
@@ -378,8 +398,10 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
       })
     );
   }
-
   onDropdownOpenStateChange(isOpen: boolean, conversationId: string) {
-    this.onDropdownToggled(conversationId, isOpen);
+    this.dropdownOpenConversationId = isOpen ? conversationId : null;
+    if (!isOpen) {
+      this.hoveredConversationId = null;
+    }
   }
 }

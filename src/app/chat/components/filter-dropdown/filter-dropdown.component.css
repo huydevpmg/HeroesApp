@@ -1,0 +1,49 @@
+.filter-btn {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #6c757d;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+}
+
+.dropend:hover > .subdropdown-menu {
+  display: block;
+}
+
+.subdropdown-menu {
+  display: none;
+  min-width: 200px;
+  position: absolute;
+  left: 100%;
+  top: 0;
+  z-index: 1050;
+}
+
+.filter-btn:hover {
+  background: rgba(255, 255, 255, 0.95);
+  color: #495057;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.filter-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.filter-btn i {
+  font-size: 16px;
+  transition: transform 0.3s ease;
+}
+
+.form-check-label{
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}

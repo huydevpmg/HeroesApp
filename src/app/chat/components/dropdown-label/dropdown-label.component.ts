@@ -1,5 +1,6 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { Label } from '../../../shared/enums/models/label.model';
+import { NgbDropdown } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-dropdown-label',
@@ -21,25 +22,12 @@ export class DropdownLabelComponent {
   @Output() clear = new EventEmitter<void>();
   @Output() openStateChange = new EventEmitter<boolean>();
 
-  isOpenDropdown = false;
-  isOpenSubDropdown = false;
-
-  toggleDropdown(event: Event) {
-    event.stopPropagation();
-    this.isOpenDropdown = !this.isOpenDropdown;
-    this.isOpenSubDropdown = false;
-  }
+  @ViewChild(NgbDropdown) dropdown!: NgbDropdown;
 
   closeDropdown() {
-    this.isOpenDropdown = false;
-    this.isOpenSubDropdown = false;
-    this.openStateChange.emit(false);
-  }
-
-  openSubDropdown(event: Event) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.isOpenSubDropdown = !this.isOpenSubDropdown;
+    if (this.dropdown) {
+      this.dropdown.close();
+    }
   }
 
   selectLabelHandler(labelId: string, event: Event) {
@@ -68,15 +56,26 @@ export class DropdownLabelComponent {
   }
 
   toggleArchive(event: Event) {
-    event.stopPropagation();
     event.preventDefault();
+    event.stopPropagation();
     this.archive.emit();
     this.closeDropdown();
   }
 
   clearConversation(event: Event) {
     event.preventDefault();
+    event.stopPropagation();
     this.clear.emit();
     this.closeDropdown();
   }
+  onSubDropdownClick(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  onOpenChange(isOpen: boolean) {
+    this.openStateChange.emit(isOpen);
+  }
 }
+
+

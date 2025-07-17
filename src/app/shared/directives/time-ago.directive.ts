@@ -1,51 +1,45 @@
-import { Directive, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { formatDistanceToNow } from 'date-fns'; // date-fns library
+import { Directive, ElementRef, Input, OnChanges } from '@angular/core';
+import { formatDistanceToNowStrict } from 'date-fns';
 
 @Directive({
-  selector: '[appTimeAgo]'
+  selector: '[appTimeAgo]',
 })
 export class TimeAgoDirective implements OnChanges {
-
   @Input('appTimeAgo') date!: string | Date;
 
-  constructor(private el: ElementRef) { }
+  constructor(private el: ElementRef) {}
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['date']) {
-      const formattedTime = this.getTimeAgo(this.date);
-      this.el.nativeElement.innerText = formattedTime;
+  ngOnChanges(): void {
+    if (this.date) {
+      this.el.nativeElement.innerText = this.getShortTimeAgo(
+        new Date(this.date)
+      );
     }
   }
 
-  private getTimeAgo(date: string | Date): string {
-    const inputDate = new Date(date);
-    if (isNaN(inputDate.getTime())) {
+  private getShortTimeAgo(date: Date): string {
+    if (isNaN(date.getTime())) {
       return '';
     }
-    const distance = formatDistanceToNow(inputDate, { addSuffix: false });
-    return this.formatShortDistance(distance);
-  }
 
-  private formatShortDistance(distance: string): string {
-    const unitsMap: Record<string, string> = {
-      seconds: 's',
-      minutes: 'm',
-      hours: 'hrs',
-      days: 'd',
-      weeks: 'w',
-      months: 'mo',
-      years: 'y'
-    };
+    const [value, unit] = formatDistanceToNowStrict(date).split(' ');
 
-    let formattedDistance = distance;
+    const shortUnit =
+      {
+        second: 's',
+        seconds: 's',
+        minute: 'm',
+        minutes: 'm',
+        hour: 'h',
+        hours: 'h',
+        day: 'd',
+        days: 'd',
+        month: 'mo',
+        months: 'mo',
+        year: 'y',
+        years: 'y',
+      }[unit] || '';
 
-    Object.entries(unitsMap).forEach(([word, shortUnit]) => {
-      const regex = new RegExp(`\\b${word}\\b`, 'g');
-      formattedDistance = formattedDistance.replace(regex, shortUnit);
-    });
-
-    formattedDistance = formattedDistance.replace(/about|in/g, '').trim();
-
-    return formattedDistance;
+    return `${value}${shortUnit}`;
   }
 }

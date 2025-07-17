@@ -87,36 +87,6 @@
   transform: scale(1.1);
 }
 
-.filter-btn {
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  padding: 10px 12px;
-  color: #6c757d;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  height: 44px;
-}
-
-.filter-btn:hover {
-  background: rgba(255, 255, 255, 0.95);
-  color: #495057;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.filter-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.filter-btn i {
-  font-size: 16px;
-  transition: transform 0.3s ease;
-}
 /* Nav Bar tab convo */
 
 .search-box {
@@ -167,16 +137,13 @@
 }
 
 .time-ago {
-  position: absolute;
-  font-weight: bold;
-  right: 0;
-  font-size: 12px;
   color: #6c757d;
   white-space: nowrap;
   transition: opacity 0.2s ease;
   opacity: 1;
   visibility: visible;
 }
+
 .avatar {
   position: relative;
   margin-right: 12px;
@@ -239,19 +206,17 @@
 }
 
 .name-time {
-
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
-  position: relative;
   min-height: 40px;
+  position: relative;
 }
 
 .conversation-name {
-  font-weight: 500;
+  font-weight: 700;
   color: #343a40;
-  font-size: 1rem;
+  font-size: 15px;
   white-space: nowrap;
   text-overflow: ellipsis;
   flex: 1;
@@ -266,15 +231,22 @@
   overflow: hidden;
 }
 
-.last-message p {
-  color: #6c757d;
-  font-size: 0.85rem;
-  flex-grow: 1;
+.last-message .text-truncate {
+  font-weight: 700;
+  font-size: 15px;
+  color: #212529;
   margin-right: 8px;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
+}
+
+.last-message small.text-truncate {
+  font-size: 15px;
+  font-weight: 400;
+  color: #6c757d;
+  margin-left: 10px;
+  vertical-align: middle;
 }
 
 /* Clean Simple Modal Styles */

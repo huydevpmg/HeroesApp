@@ -25,4 +25,9 @@ export class MessageReadReceiptService {
   markMultipleMessagesAsRead(conversationId: string, messageIds: string[]): Observable<any> {
     return this.api.markMultipleMessagesAsRead(conversationId, messageIds);
   }
+
+  // Mark all messages as read for current user in a conversation
+  markAllMessagesAsRead(conversationId: string): Observable<any> {
+    return this.api.markAllMessagesAsRead(conversationId);
+  }
 }
