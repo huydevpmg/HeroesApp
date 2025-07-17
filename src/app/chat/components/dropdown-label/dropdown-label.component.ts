@@ -62,6 +62,7 @@ export class DropdownLabelComponent {
 
   markAsRead(event: Event) {
     event.preventDefault();
+    event.stopPropagation();
     this.markRead.emit();
     this.closeDropdown();
   }

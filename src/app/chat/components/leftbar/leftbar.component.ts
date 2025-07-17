@@ -1,4 +1,11 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { MessageReadReceiptService } from './../../services/message-read-receipt/message-read-receipt.service';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+} from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
@@ -11,7 +18,12 @@ import { SocketService } from '../../services/socket/socket.service';
 import { ConversationService } from '../../services/conversation/conversation.service';
 import { LabelService } from '../../services/labels/label.service';
 import { UserConversationService } from '../../services/userConversation/user-conversation.service';
-import { selectConversationPage, selectConversationTotalPages, selectConversationTotalCount } from '../../store/conversation/conversation.selectors';
+import {
+  selectConversationPage,
+  selectConversationTotalPages,
+  selectConversationTotalCount,
+} from '../../store/conversation/conversation.selectors';
+import { MessageService } from '../../services/message/message.service';
 
 @Component({
   selector: 'app-leftbar',
@@ -28,7 +40,9 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
   filteredConversationsWithOtherUserId$!: Observable<
     { conversation: Conversation; otherUserId: string | null }[]
   >;
-  users$: Observable<any[]> = this.store.pipe(select(ConversationSelectors.getAllUsers));
+  users$: Observable<any[]> = this.store.pipe(
+    select(ConversationSelectors.getAllUsers)
+  );
   users: any[] = [];
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
@@ -45,12 +59,23 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
   limit = 9;
   labels: Label[] = [];
   showManageLabelModal = false;
-  colors: string[] = ['#FFD600', '#FF6F61', '#4CAF50', '#2196F3', '#9C27B0', '#FF9800', '#E91E63', '#00B8D9', '#FFAB00'];
+  colors: string[] = [
+    '#FFD600',
+    '#FF6F61',
+    '#4CAF50',
+    '#2196F3',
+    '#9C27B0',
+    '#FF9800',
+    '#E91E63',
+    '#00B8D9',
+    '#FFAB00',
+  ];
 
   hoveredConversationId: string | null = null;
   dropdownOpenConversationId: string | null = null;
 
-  @ViewChild('conversationListContainer') conversationListContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('conversationListContainer')
+  conversationListContainer!: ElementRef<HTMLDivElement>;
 
   constructor(
     private store: Store,
@@ -58,12 +83,17 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
     private socketService: SocketService,
     private conversationService: ConversationService,
     private labelService: LabelService,
-    private userConversationService: UserConversationService
+    private userConversationService: UserConversationService,
+    private messageReadReceiptService: MessageReadReceiptService,
+        private messageService: MessageService,
+
   ) {
     this.conversations$ = this.conversationService.conversations$;
     this.loading$ = this.conversationService.loading$;
     this.error$ = this.conversationService.error$;
-    this.onlineUsers$ = this.socketService.onOnlineUserIds().pipe(map((set) => Array.from(set)));
+    this.onlineUsers$ = this.socketService
+      .onOnlineUserIds()
+      .pipe(map((set) => Array.from(set)));
     this.conversationsWithOtherUserId$ = this.conversations$.pipe(
       map((conversations) => {
         const myId = this.authService.getCurrentUserId();
@@ -72,7 +102,8 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
           .map((conversation) => ({
             conversation,
             otherUserId: !conversation.isGroup
-              ? conversation.participants.find((id: string) => id !== myId) || null
+              ? conversation.participants.find((id: string) => id !== myId) ||
+                null
               : null,
           }));
       })
@@ -83,7 +114,9 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
     ]).pipe(
       map(([convs, activeTab]) =>
         convs.filter((item) =>
-          activeTab === 'main' ? !item.conversation.isArchived : item.conversation.isArchived
+          activeTab === 'main'
+            ? !item.conversation.isArchived
+            : item.conversation.isArchived
         )
       )
     );
@@ -112,7 +145,10 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     if (this.conversationListContainer) {
-      this.conversationListContainer.nativeElement.addEventListener('scroll', this.onScroll.bind(this));
+      this.conversationListContainer.nativeElement.addEventListener(
+        'scroll',
+        this.onScroll.bind(this)
+      );
     }
   }
 
@@ -131,11 +167,12 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
     }
   }
 
-
   onScroll(): void {
     const container = this.conversationListContainer.nativeElement;
     const threshold = 200;
-    const atBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
+    const atBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      threshold;
     if (this.loading) {
       return;
     }
@@ -243,7 +280,12 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
   fetchLabels() {
     this.labelService.getLabels().subscribe((labels) => {
       this.labels = labels;
-      this.store.dispatch(ConversationActions.loadConversations({ page: this.page, limit: this.limit }));
+      this.store.dispatch(
+        ConversationActions.loadConversations({
+          page: this.page,
+          limit: this.limit,
+        })
+      );
     });
   }
 
@@ -273,12 +315,22 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
     );
   }
 
-  onSelectLabel(event: { userConversationId: string, label: string, conversationId: string }) {
-    this.userConversationService.addLabel(event.userConversationId, event.label, event.conversationId)
+  onSelectLabel(event: {
+    userConversationId: string;
+    label: string;
+    conversationId: string;
+  }) {
+    this.userConversationService
+      .addLabel(event.userConversationId, event.label, event.conversationId)
       .subscribe({
         next: () => {
-          this.store.dispatch(ConversationActions.loadConversations({ page: this.page, limit: this.limit }));
-        }
+          this.store.dispatch(
+            ConversationActions.loadConversations({
+              page: this.page,
+              limit: this.limit,
+            })
+          );
+        },
       });
   }
 
@@ -287,11 +339,32 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
   }
 
   onMarkRead(conversation: any) {
-    console.log('Mark as read:', conversation);
+    if (!conversation || !conversation._id) { return; }
+    this.messageService.loadMessages(conversation._id);
+    this.messageService.messages$.pipe(take(1)).subscribe((messages: any[]) => {
+      const unreadIds = (messages || [])
+        .filter((msg: any) =>
+          msg.conversationId === conversation._id &&
+          msg.senderId !== this.currentUserId &&
+          !msg.readReceipts?.some((r: any) => r.userId === this.currentUserId)
+        )
+        .map((msg: any) => msg._id);
+      if (unreadIds.length > 0) {
+        this.messageReadReceiptService
+          .markMultipleMessagesAsRead(conversation._id, unreadIds)
+          .subscribe(() => {
+            this.store.dispatch(ConversationActions.loadConversations({ page: this.page, limit: this.limit }));
+          });
+      }
+    });
   }
 
   onArchive(conversation: any) {
-    this.store.dispatch(ConversationActions.toggleArchive({ userConversationId: conversation.userConversationId }));
+    this.store.dispatch(
+      ConversationActions.toggleArchive({
+        userConversationId: conversation.userConversationId,
+      })
+    );
     if (this.selectedConversationId === conversation._id) {
       this.conversationService.selectConversation('');
       this.selectedConversationId = null;
@@ -299,7 +372,11 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
   }
 
   onClearConversation(conversation: any) {
-    this.store.dispatch(ConversationActions.clearConversation({ conversationId: conversation._id }))
+    this.store.dispatch(
+      ConversationActions.clearConversation({
+        conversationId: conversation._id,
+      })
+    );
   }
 
   onDropdownOpenStateChange(isOpen: boolean, conversationId: string) {

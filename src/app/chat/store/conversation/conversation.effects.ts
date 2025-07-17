@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of, from } from 'rxjs';
-import { map, mergeMap, catchError, tap } from 'rxjs/operators';
+import { map, mergeMap, catchError } from 'rxjs/operators';
 
 import * as ConversationActions from './conversation.actions';
 import * as MessageActions from '../message/message.actions';
@@ -14,10 +14,8 @@ export class ConversationEffects {
   loadConversations$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ConversationActions.loadConversations),
-      tap(() => console.log('[Effect] Dispatch loadConversations')),
       mergeMap(({ page = 1, limit = 20 }) =>
         this.conversationApi.getConversations(page, limit).pipe(
-          tap(result => console.log('[API] Fetched conversations:', result)),
           map(result =>
             ConversationActions.loadConversationsSuccess({
               conversations: result.conversations,

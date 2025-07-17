@@ -29,14 +29,14 @@ export class MessageReadReceiptApiService {
   }
 
   // Mark a single message as read
-  markMessageAsRead(messageId: string, userId: string, conversationId: string): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/messages/${messageId}/read`, { userId, conversationId })
+  markMessageAsRead(messageId: string, conversationId: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/messages/${messageId}/read`, { conversationId })
       .pipe(map((response: any) => response.data));
   }
 
   // Mark multiple messages as read in a conversation
-  markMultipleMessagesAsRead(conversationId: string, userId: string, messageIds: string[]): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/conversations/${conversationId}/read`, { userId, messageIds })
+  markMultipleMessagesAsRead(conversationId: string, messageIds: string[]): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/conversations/${conversationId}/read`, { messageIds })
       .pipe(map((response: any) => response.data));
   }
 }

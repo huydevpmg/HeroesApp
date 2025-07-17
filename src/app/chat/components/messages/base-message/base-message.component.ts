@@ -13,8 +13,7 @@ import {
 import { AuthService } from '../../../../auth/services/auth.service';
 import { Attachment } from '../../../../shared/enums/models/attachment.model';
 import { DeleteType } from '../../../../shared/enums/models/delete-type.enum';
-import { ReadReceiptSocketService } from '../../../services/socket/read-receipt-socket.service';
-
+import { Store } from '@ngrx/store';
 @Component({
   selector: 'app-base-message',
   templateUrl: './base-message.component.html',
@@ -60,7 +59,7 @@ export class BaseMessageComponent implements OnInit, OnChanges, AfterViewInit {
   constructor(
     protected authService: AuthService,
     private elementRef: ElementRef,
-    private readReceiptSocket: ReadReceiptSocketService
+    private store: Store // <-- inject Store
   ) {}
 
   ngOnInit(): void {
@@ -68,10 +67,6 @@ export class BaseMessageComponent implements OnInit, OnChanges, AfterViewInit {
     this.isCurrentUser = this.message.senderId === this.currentUserId;
 
     this.readByUsers = this.processReadByUsers(this.readReceipts);
-
-    if (!this.isCurrentUser) {
-      this.markAsRead();
-    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -94,22 +89,6 @@ export class BaseMessageComponent implements OnInit, OnChanges, AfterViewInit {
     const target = event.target as HTMLImageElement;
     if (target) {
       target.src = 'https://i.pravatar.cc/150?img=1';
-    }
-  }
-
-  private markAsRead() {
-    if (this.currentUserId && this.conversationId && this.message._id) {
-      const hasCurrentUserRead = this.readByUsers.some(
-        (u) => this.getUserId(u) === this.currentUserId
-      );
-
-      if (!hasCurrentUserRead) {
-        this.readReceiptSocket.markMessageAsReadBySocket(
-          this.message._id,
-          this.currentUserId,
-          this.conversationId
-        );
-      }
     }
   }
 

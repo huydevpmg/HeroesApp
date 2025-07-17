@@ -18,11 +18,11 @@ export class MessageReadReceiptService {
     return this.api.getConversationReadReceipts(conversationId, messageIds);
   }
 
-  markMessageAsRead(messageId: string, userId: string, conversationId: string): Observable<any> {
-    return this.api.markMessageAsRead(messageId, userId, conversationId);
+  markMessageAsRead(messageId: string, conversationId: string): Observable<any> {
+    return this.api.markMessageAsRead(messageId, conversationId);
   }
 
-  markMultipleMessagesAsRead(conversationId: string, userId: string, messageIds: string[]): Observable<any> {
-    return this.api.markMultipleMessagesAsRead(conversationId, userId, messageIds);
+  markMultipleMessagesAsRead(conversationId: string, messageIds: string[]): Observable<any> {
+    return this.api.markMultipleMessagesAsRead(conversationId, messageIds);
   }
 }

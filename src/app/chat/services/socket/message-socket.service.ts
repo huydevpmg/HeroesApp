@@ -9,12 +9,16 @@ import * as ConversationActions from '../../store/conversation/conversation.acti
 import * as MessageActions from '../../store/message/message.actions';
 import { selectSelectedConversationId } from '../../store/conversation/conversation.selectors';
 import { take } from 'rxjs/operators';
+import { AuthService } from '../../../auth/services/auth.service';
+import { MessageReadReceiptService } from '../message-read-receipt/message-read-receipt.service';
 @Injectable({
   providedIn: 'root'
 })
 export class MessageSocketService {
   private socketCore = inject(SocketCoreService);
   private store = inject(Store);
+  private authService = inject(AuthService);
+  private messageReadReceiptService = inject(MessageReadReceiptService);
 
   // Message subjects
   private messageSubject = new Subject<Message>();
@@ -32,13 +36,15 @@ export class MessageSocketService {
   private setupMessageListeners(): void {
     // Message received
     this.socketCore.on(SOCKET_EVENTS.RECEIVE_MESSAGE, (message: Message) => {
-      console.log('Message received:', message);
-      this.messageSubject.next(message);
-      this.store.dispatch(ConversationActions.loadConversations({ page: 1, limit: 20 }));
       this.store.select(selectSelectedConversationId).pipe(take(1)).subscribe(selectedId => {
         if (selectedId === message.conversationId) {
           this.store.dispatch(MessageActions.receiveMessage({ message }));
+            this.messageReadReceiptService.markMessageAsRead(
+              message._id!,
+              message.conversationId
+            ).subscribe();
         }
+        this.store.dispatch(ConversationActions.loadConversations({ page: 1, limit: 20 }));
       });
     });
 

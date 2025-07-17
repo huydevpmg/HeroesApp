@@ -16,24 +16,15 @@ export class ReadReceiptSocketService {
 
   private setupReadReceiptListeners(): void {
     this.socketCore.on(SOCKET_EVENTS.READ_RECEIPT_UPDATED, (data: any) => {
-      this.readReceiptUpdatedSubject.next(data);
+      if (data.type === 'bulk' && Array.isArray(data.receipts)) {
+        data.receipts.forEach((receipt: any) => {
+         this.readReceiptUpdatedSubject.next(receipt);
+        });
+      } else if (data.messageId) {
+        this.readReceiptUpdatedSubject.next(data);
+      }
+      // this.readReceiptUpdatedSubject.next(data);
     });
-  }
-
-  // Emit read receipt event via socket(single message)
-  markMessageAsReadBySocket(messageId: string, userId: string, conversationId: string): void {
-    this.socketCore.emit(
-      SOCKET_EVENTS.MESSAGE_READ,
-      { messageId, userId, conversationId }
-    );
-  }
-
-  // Emit read receipt event via socket(bulk messages)
-  markMultipleMessagesAsReadBySocket(messageIds: string[], userId: string, conversationId: string): void {
-    this.socketCore.emit(
-      SOCKET_EVENTS.BULK_MESSAGE_READ,
-      { messageIds, userId, conversationId }
-    );
   }
 
   // Observable for read receipt updates

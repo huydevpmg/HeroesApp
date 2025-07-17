@@ -110,7 +110,8 @@
                 <span *ngIf="!item.conversation.lastAttachmentName" style="font-size: 15px;">No messages yet</span>
               </ng-template>
             </div>
-            <span *ngIf="item.conversation.unreadCount" class="badge bg-primary rounded-pill">
+            <span *ngIf="item.conversation.unreadCount" class="badge rounded-pill d-flex align-items-center justify-content-center"
+              style="font-size: 10px; background-color: red; padding: 0; min-width: 20px; height: 20px; border-radius: 50%;">
               {{ item.conversation.unreadCount }}
             </span>
           </div>
@@ -185,9 +186,8 @@
               <div *ngFor="let user of users" class="user-pill-clean" [class.selected]="user.selected">
                 <span *ngIf="user.selected" class="pill-clean">
                   <div class="pill-avatar">
-                    <img [src]="
-                          'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'
-                        " [alt]="user.name" />
+                    <img [src]="user.avatar || 'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'"
+                        [alt]="user.fullName" />
                   </div>
                   <span class="pill-name">{{ user.fullName }}</span>
                   <div class="pill-remove-clean" (click)="user.selected = false">
@@ -210,7 +210,7 @@
                 </div>
                 <div class="user-avatar">
                   <img [src]="
-                        'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'
+                        user.avatar|| 'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'
                       " [alt]="user.fullName" />
                   <div class="user-status" [class.online]="isUserOnline(user._id)"></div>
                 </div>

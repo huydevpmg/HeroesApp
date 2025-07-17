@@ -166,7 +166,6 @@ export class ConversationSocketService {
   // Archive conversation
   archiveConversation(conversationId: string): Promise<{ success: boolean; result: any }> {
     return new Promise((resolve) => {
-      console.log('Archiving conversation:', conversationId);
 
       this.socketCore.emit(
         SOCKET_EVENTS.ARCHIVE_CONVERSATION,
@@ -186,7 +185,6 @@ export class ConversationSocketService {
   // Add label
   addLabel(conversationId: string, label: string): Promise<{ success: boolean; result: any }> {
     return new Promise((resolve) => {
-      console.log('Adding label to conversation:', { conversationId, label });
 
       this.socketCore.emit(
         SOCKET_EVENTS.ADD_LABEL,
@@ -206,7 +204,6 @@ export class ConversationSocketService {
   // Remove label
   removeLabel(conversationId: string, label: string): Promise<{ success: boolean; result: any }> {
     return new Promise((resolve) => {
-      console.log('Removing label from conversation:', { conversationId, label });
 
       this.socketCore.emit(
         SOCKET_EVENTS.REMOVE_LABEL,
