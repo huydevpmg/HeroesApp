@@ -6,24 +6,30 @@ import {
   OnInit,
   OnChanges,
   SimpleChanges,
-  HostListener,
   ElementRef,
   AfterViewInit,
+  ViewChild,
+  HostListener,
+  ChangeDetectorRef,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { AuthService } from '../../../../auth/services/auth.service';
 import { Attachment } from '../../../../shared/enums/models/attachment.model';
 import { DeleteType } from '../../../../shared/enums/models/delete-type.enum';
-import { Store } from '@ngrx/store';
+
 @Component({
   selector: 'app-base-message',
   templateUrl: './base-message.component.html',
   styleUrls: ['./base-message.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BaseMessageComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() message!: any;
   @Input() conversationId!: string;
-  @Input() isLast: boolean = false;
+  @Input() isLast = false;
   @Input() readReceipts: any[] = [];
+  @Input() openedEmojiId!: string | null;
+  @Input() openedMoreId!: string | null;
 
   @Output() react = new EventEmitter<any>();
   @Output() reply = new EventEmitter<any>();
@@ -33,15 +39,19 @@ export class BaseMessageComponent implements OnInit, OnChanges, AfterViewInit {
     message: any;
     deleteType: DeleteType;
   }>();
+  @Output() toggleEmoji = new EventEmitter<string | null>();
+  @Output() toggleMore = new EventEmitter<string | null>();
+
+  @ViewChild('emojiBtn') emojiBtn!: ElementRef;
+  @ViewChild('innerMessage') innerMessage!: ElementRef;
 
   isCurrentUser = false;
   currentUserId: string | null = null;
   previewAttachment: Attachment | null = null;
-  showDropdown = false;
   showDeleteModal = false;
   deleteOption: DeleteType = DeleteType.EVERYONE;
-
   readByUsers: any[] = [];
+  emojiPosition = { top: '0px', left: '0px' };
 
   fileIconMap: { [key: string]: string } = {
     pdf: '📄',
@@ -57,47 +67,117 @@ export class BaseMessageComponent implements OnInit, OnChanges, AfterViewInit {
   };
 
   constructor(
-    protected authService: AuthService,
+    private authService: AuthService,
     private elementRef: ElementRef,
-    private store: Store // <-- inject Store
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUserId();
     this.isCurrentUser = this.message.senderId === this.currentUserId;
-
     this.readByUsers = this.processReadByUsers(this.readReceipts);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['readReceipts'] && this.currentUserId) {
-      const newReceipts = changes['readReceipts'].currentValue || [];
-      this.readByUsers = this.processReadByUsers(newReceipts);
+      this.readByUsers = this.processReadByUsers(
+        changes['readReceipts'].currentValue || []
+      );
     }
+    this.cdr.markForCheck();
   }
 
   ngAfterViewInit(): void {
-    const tooltipTriggerList = this.elementRef.nativeElement.querySelectorAll(
+    const tooltipElements = this.elementRef.nativeElement.querySelectorAll(
       '[data-bs-toggle="tooltip"]'
     );
-    tooltipTriggerList.forEach((tooltipEl: HTMLElement) => {
-      new (window as any).bootstrap.Tooltip(tooltipEl);
-    });
+    tooltipElements.forEach(
+      (el: HTMLElement) => new (window as any).bootstrap.Tooltip(el)
+    );
   }
 
-  onImageError(event: any): void {
-    const target = event.target as HTMLImageElement;
-    if (target) {
-      target.src = 'https://i.pravatar.cc/150?img=1';
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const clickedInside = this.innerMessage?.nativeElement.contains(
+      event.target
+    );
+    if (!clickedInside) {
+      if (this.isEmojiOpen) {
+        this.toggleEmoji.emit(null);
+      }
+      if (this.isMoreOpen) {
+        this.toggleMore.emit(null);
+      }
     }
   }
 
-  isImage(url: string): boolean {
-    return /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+  get isEmojiOpen() {
+    return this.openedEmojiId === this.message._id;
+  }
+  get isMoreOpen() {
+    return this.openedMoreId === this.message._id;
   }
 
-  isVideo(url: string): boolean {
-    return /\.(mp4|webm|ogg|mov)$/i.test(url);
+  toggleEmojiPicker() {
+    const rect = this.emojiBtn.nativeElement.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    const pickerHeight = 360;
+    this.emojiPosition =
+      windowHeight - rect.bottom > pickerHeight + 50
+        ? { top: `${rect.bottom + 8}px`, left: `${rect.right - 300}px` }
+        : {
+            top: `${rect.top - pickerHeight - 8}px`,
+            left: `${rect.right - 300}px`,
+          };
+    this.toggleEmoji.emit(this.isEmojiOpen ? null : this.message._id);
+  }
+
+  toggleMoreDropdown() {
+    this.toggleMore.emit(this.isMoreOpen ? null : this.message._id);
+  }
+
+  onEmojiClick(event: any) {
+    const emoji =
+      event?.emoji?.native ||
+      event?.emoji?.colons ||
+      event?.native ||
+      event?.colons;
+    const existingReaction = this.message.reactions?.find(
+      (r: any) => r.emoji === emoji && r.userId === this.currentUserId
+    );
+    this.react.emit({
+      messageId: this.message._id,
+      emoji,
+      action: existingReaction ? 'remove' : 'add',
+    });
+    this.toggleEmoji.emit(null);
+  }
+
+  onReact() {
+    this.react.emit(this.message);
+  }
+  onReply() {
+    this.reply.emit(this.message);
+  }
+  onEdit() {
+    this.edit.emit(this.message);
+  }
+
+  onDelete() {
+    this.showDeleteModal = true;
+  }
+
+  confirmDelete() {
+    if (!this.deleteOption) {
+      return alert('Please select a delete option');
+    }
+    this.delete.emit({ message: this.message, deleteType: this.deleteOption });
+    this.closeDeleteModal();
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.deleteOption = DeleteType.JUSTME;
   }
 
   onAttachmentClick(attachment: Attachment): void {
@@ -111,129 +191,117 @@ export class BaseMessageComponent implements OnInit, OnChanges, AfterViewInit {
     }
   }
 
-  closePreview(): void {
+  closePreview() {
     this.previewAttachment = null;
   }
 
+  isImage(url: string): boolean {
+    return /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+  }
+  isVideo(url: string): boolean {
+    return /\.(mp4|webm|ogg|mov)$/i.test(url);
+  }
+
   getFileExtension(filename: string): string {
-    if (!filename) {
-      return '';
-    }
-    const parts = filename.split('.');
-    return parts.length > 1 ? parts.pop()?.toLowerCase() || '' : '';
-  }
-
-  formatFileSize(bytes: number): string {
-    if (!bytes || bytes === 0) {
-      return '0 B';
-    }
-
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    const size = (bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1);
-
-    return `${size} ${sizes[i]}`;
-  }
-
-  onReact() {
-    this.react.emit(this.message);
-  }
-
-  onReply() {
-    this.reply.emit(this.message);
-  }
-
-  onMore() {
-    this.showDropdown = !this.showDropdown;
-  }
-
-  onEdit() {
-    this.edit.emit(this.message);
-    this.showDropdown = false;
-  }
-
-  onDelete() {
-    this.deleteOption;
-    this.showDeleteModal = true;
-    this.showDropdown = false;
-  }
-
-  confirmDelete() {
-    if (!this.deleteOption) {
-      alert('Please select a delete option');
-      return;
-    }
-    this.delete.emit({
-      message: this.message,
-      deleteType: this.deleteOption,
-    });
-    this.closeDeleteModal();
-  }
-
-  closeDeleteModal() {
-    this.showDeleteModal = false;
-    this.deleteOption = DeleteType.JUSTME;
-  }
-
-  onClickOutside() {
-    this.showDropdown = false;
-  }
-
-  @HostListener('document:click', ['$event'])
-  clickOutside(event: any) {
-    if (!this.elementRef.nativeElement.contains(event.target)) {
-      this.showDropdown = false;
-    }
-  }
-
-  get shouldShowMessage(): boolean {
-    if (!this.currentUserId || !this.message) {
-      return false;
-    }
-    if (this.message.deletedForUserIds?.includes(this.currentUserId)) {
-      return false;
-    }
-
-    return true;
-  }
-  get isGloballyDeleted(): boolean {
-    const result = !!this.message?.isDeleteGlobal;
-    return result;
+    return filename?.split('.').pop()?.toLowerCase() || '';
   }
 
   getFileIconByExt(ext: string): string {
     return this.fileIconMap[ext] || '📎';
   }
 
+  formatFileSize(bytes: number): string {
+    if (!bytes) {
+      return '0 B';
+    }
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return `${(bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1)} ${
+      sizes[i]
+    }`;
+  }
+
+  get shouldShowMessage(): boolean {
+    return (
+      this.currentUserId &&
+      this.message &&
+      !this.message.deletedForUserIds?.includes(this.currentUserId)
+    );
+  }
+
+  get isGloballyDeleted(): boolean {
+    return !!this.message?.isDeleteGlobal;
+  }
+
   private processReadByUsers(users: any[]): any[] {
-    if (!users || !users.length || !this.currentUserId) {
+    if (!users?.length || !this.currentUserId) {
       return [];
     }
-
-    // Filter out current user and deduplicate
-    const uniqueUsers = users.filter((user, index, self) => {
-      const currentId = this.getUserId(user);
-
-      // Skip current user
-      if (currentId === this.currentUserId) {
-        return false;
-      }
-
-      // Deduplicate by user ID
-      return index === self.findIndex((u) => this.getUserId(u) === currentId);
+    return users.filter((u, i, self) => {
+      const id = this.getUserId(u);
+      return (
+        id !== this.currentUserId &&
+        i === self.findIndex((v) => this.getUserId(v) === id)
+      );
     });
-
-    return uniqueUsers;
   }
 
   private getUserId(user: any): string {
-    return (user as any).userId || (user as any)._id || '';
+    return user?.userId || user?._id || '';
   }
 
   getFirstNameInitial(name: string): string {
-    if (!name) {
-      return '';
+    return name?.trim().split(' ')[0] || '';
+  }
+
+  onImageError(event: any) {
+    if (event.target) {
+      event.target.src = 'https://i.pravatar.cc/150?img=1';
     }
-    return name?.trim().split(' ')[0];
+  }
+
+  getReactionUsersTooltip(reaction: any): string {
+    return (reaction.users || [])
+      .map((u: any) => {
+        if (typeof u === 'string') {
+          return u;
+        }
+        return u.fullName || u.username || u._id;
+      })
+      .join(', ');
+  }
+
+  isReactionActive(reaction: any): boolean {
+    if (!reaction.users || !this.currentUserId) {
+      return false;
+    }
+    return reaction.users.some((u: any) => {
+      if (typeof u === 'string') {
+        return u === this.currentUserId;
+      }
+      return this.getUserId(u) === this.currentUserId;
+    });
+  }
+
+  onReactionClick(reaction: any) {
+    if (this.isReactionActive(reaction)) {
+      this.react.emit({
+        messageId: this.message._id,
+        emoji: reaction.emoji,
+        action: 'remove',
+        conversationId: this.conversationId,
+      });
+    } else {
+      this.react.emit({
+        messageId: this.message._id,
+        emoji: reaction.emoji,
+        action: 'add',
+        conversationId: this.conversationId,
+      });
+    }
+  }
+
+  trackByReaction(index: number, reaction: any) {
+    return reaction.emoji + '-' + (reaction.users?.length || 0);
   }
 }

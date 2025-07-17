@@ -31,6 +31,7 @@ export class MessageSocketService {
 
   constructor() {
     this.setupMessageListeners();
+    this.setupReactionListeners();
   }
 
   private setupMessageListeners(): void {
@@ -74,6 +75,18 @@ export class MessageSocketService {
     // Message deleted personally
     this.socketCore.on(SOCKET_EVENTS.MESSAGE_DELETED_PERSONAL, (data: { messageId: string; userId: string; conversationId: string }) => {
       this.messageDeletedPersonalSubject.next(data);
+    });
+  }
+
+  private setupReactionListeners(): void {
+    this.socketCore.on(SOCKET_EVENTS.MESSAGE_REACTION, (data: { message: Message }) => {
+      console.log('Reaction received:', data.message);
+      this.store.dispatch(MessageActions.addReactionSuccess({ message: data.message }));
+    });
+
+    this.socketCore.on(SOCKET_EVENTS.REMOVE_REACTION, (data: { message: Message }) => {
+      console.log('Reaction received:', data.message);
+      this.store.dispatch(MessageActions.removeReactionSuccess({ message: data.message }));
     });
   }
 

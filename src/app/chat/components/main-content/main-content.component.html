@@ -39,7 +39,7 @@
         </div>
       </div>
 
-      <div class="chat-messages flex-grow-1 overflow-auto" #messagesContainer (scroll)="onMessagesScroll()">
+      <div class="chat-messages flex-grow-1" #messagesContainer (scroll)="onMessagesScroll()">
         <div *ngIf="loading$ | async" class="text-center p-3">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
@@ -58,9 +58,18 @@
             </div>
           </ng-container>
           <ng-template #normalMsg>
-            <app-base-message [message]="message" [conversationId]="conversation._id!" [isLast]="isLast"
-              [readReceipts]="isLast ? lastMessageReadReceipts : []" (edit)="onEditMessage($event)"
-              (reply)="onReplyMessage($event)" (delete)="onDeleteMessage($event)">
+            <app-base-message [message]="message"
+            [conversationId]="conversation._id!" [isLast]="isLast"
+              [readReceipts]="isLast ? lastMessageReadReceipts : []"
+              (edit)="onEditMessage($event)"
+              (reply)="onReplyMessage($event)"
+              (delete)="onDeleteMessage($event)"
+              (react)="onReactMessage($event)"
+              [openedEmojiId]="openedEmojiId"S
+              [openedMoreId]="openedMoreId"
+              (toggleEmoji)="openedEmojiId = $event"
+  (toggleMore)="openedMoreId = $event">
+              >
             </app-base-message>
           </ng-template>
         </ng-container>

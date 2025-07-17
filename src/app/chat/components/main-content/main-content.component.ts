@@ -20,13 +20,19 @@ import * as AttachmentActions from '../../store/attachment/attachment.actions';
 import { selectMessagesWithAttachment } from '../../store/message/message.selectors';
 import { AuthService } from '../../../auth/services/auth.service';
 import { SocketService } from '../../services/socket/socket.service';
-import { selectAttachmentEntities, selectAttachmentsByConversation } from '../../store/attachment/attachment.selectors';
+import {
+  selectAttachmentEntities,
+  selectAttachmentsByConversation,
+} from '../../store/attachment/attachment.selectors';
 import { MessageService } from '../../services/message/message.service';
 import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
 import { MessageReadReceiptService } from '../../services/message-read-receipt/message-read-receipt.service';
 import { ReadReceiptSocketService } from '../../services/socket/read-receipt-socket.service';
 import { ReplyingToMessage } from '../../../shared/enums/models/reply-msg.model';
-import { selectMessagesPage, selectMessagesTotalPages } from '../../store/message/message.selectors';
+import {
+  selectMessagesPage,
+  selectMessagesTotalPages,
+} from '../../store/message/message.selectors';
 import { Attachment } from '../../../shared/enums/models/attachment.model';
 import * as ConversationActions from '../../store/conversation/conversation.actions';
 
@@ -35,7 +41,9 @@ import * as ConversationActions from '../../store/conversation/conversation.acti
   templateUrl: './main-content.component.html',
   styleUrls: ['./main-content.component.css'],
 })
-export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, AfterViewChecked {
+export class MainContentComponent
+  implements OnInit, AfterViewInit, OnDestroy, AfterViewChecked
+{
   // --- State ---
   myId = this.authService.getCurrentUserId();
   showRightbar = true;
@@ -65,7 +73,8 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
   private readReceiptSocketSub?: Subscription;
 
   // --- ViewChild ---
-  @ViewChild('messagesContainer') messagesContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('messagesContainer')
+  messagesContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLInputElement>;
 
   // --- Observables ---
@@ -78,6 +87,9 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
   onlineUsers$: Observable<string[]>;
   otherUserId$: Observable<string | null>;
   attachments$: Observable<Attachment[]>;
+
+  openedEmojiId: string | null = null;
+  openedMoreId: string | null = null;
 
   constructor(
     private store: Store,
@@ -103,7 +115,9 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
     );
     this.otherUserId$ = this.selectedConversation$.pipe(
       map((conversation) => {
-        if (!conversation || conversation.isGroup) { return null; }
+        if (!conversation || conversation.isGroup) {
+          return null;
+        }
         return conversation.participants.find((id) => id !== this.myId) || null;
       })
     );
@@ -111,9 +125,11 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
       selectMessagesWithAttachment
     );
     this.attachments$ = this.selectedConversation$.pipe(
-      map(convo => convo?._id),
+      map((convo) => convo?._id),
       filter(Boolean),
-      switchMap(conversationId => this.store.select(selectAttachmentsByConversation(conversationId!)))
+      switchMap((conversationId) =>
+        this.store.select(selectAttachmentsByConversation(conversationId!))
+      )
     );
   }
 
@@ -132,34 +148,49 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
           this.store.dispatch(MessageActions.loadMessages({ conversationId }));
           this.socketService.joinConversation(conversationId);
         }
-        this.messages$.subscribe(messages => {
-          this.markLastMessageAsReadIfNeeded(messages);
-        }).unsubscribe();
+        this.messages$
+          .subscribe((messages) => {
+            this.markLastMessageAsReadIfNeeded(messages);
+          })
+          .unsubscribe();
       });
 
-    this.socketMessageSub = this.socketService.onMessage().subscribe((message) => {
-      this.store.dispatch(MessageActions.receiveMessage({ message }));
-    });
+    this.socketMessageSub = this.socketService
+      .onMessage()
+      .subscribe((message) => {
+        this.store.dispatch(MessageActions.receiveMessage({ message }));
+      });
 
-    this.readReceiptSocketSub = this.readReceiptSocket.onReadReceiptUpdated().subscribe((event) => {
-      if (event.messageId && this.conversationReadReceipts[event.messageId]) {
-        const newUser = event.user || { userId: event.userId };
-        const existingUsers = this.conversationReadReceipts[event.messageId];
-        const userExists = existingUsers.some((u) => (u.userId || u._id) === (newUser.userId || newUser._id));
-        if (!userExists) {
-          this.conversationReadReceipts[event.messageId] = [...existingUsers, newUser];
-          this.messages$.pipe().subscribe((messages) => {
-            if (messages.length > 0) {
-              const lastMessage = messages[messages.length - 1];
-              if (lastMessage && lastMessage._id === event.messageId) {
-                this.lastMessageReadReceipts = this.conversationReadReceipts[event.messageId];
-                this.cdr.detectChanges();
-              }
-            }
-          }).unsubscribe();
+    this.readReceiptSocketSub = this.readReceiptSocket
+      .onReadReceiptUpdated()
+      .subscribe((event) => {
+        if (event.messageId && this.conversationReadReceipts[event.messageId]) {
+          const newUser = event.user || { userId: event.userId };
+          const existingUsers = this.conversationReadReceipts[event.messageId];
+          const userExists = existingUsers.some(
+            (u) => (u.userId || u._id) === (newUser.userId || newUser._id)
+          );
+          if (!userExists) {
+            this.conversationReadReceipts[event.messageId] = [
+              ...existingUsers,
+              newUser,
+            ];
+            this.messages$
+              .pipe()
+              .subscribe((messages) => {
+                if (messages.length > 0) {
+                  const lastMessage = messages[messages.length - 1];
+                  if (lastMessage && lastMessage._id === event.messageId) {
+                    this.lastMessageReadReceipts =
+                      this.conversationReadReceipts[event.messageId];
+                    this.cdr.detectChanges();
+                  }
+                }
+              })
+              .unsubscribe();
+          }
         }
-      }
-    });
+      });
 
     this.messagesAndAttachmentsSub = combineLatest([
       this.messages$,
@@ -167,7 +198,11 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
     ]).subscribe(([messages, entities]) => {
       messages.forEach((msg) => {
         if (msg.attachmentId && !entities[msg.attachmentId]) {
-          this.store.dispatch(AttachmentActions.loadAttachment({ attachmentId: msg.attachmentId! }));
+          this.store.dispatch(
+            AttachmentActions.loadAttachment({
+              attachmentId: msg.attachmentId!,
+            })
+          );
         }
       });
       this.loadReadReceiptsForMessages(messages);
@@ -184,7 +219,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
     });
 
     this.selectedConversation$?.subscribe(
-      (convo) => (this.selectedConversationId = convo?._id || "")
+      (convo) => (this.selectedConversationId = convo?._id || '')
     );
   }
 
@@ -215,22 +250,25 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
   private markLastMessageAsReadIfNeeded(messages: Message[]) {
     if (messages && messages.length > 0) {
       const unreadIds: string[] = messages
-        .filter(msg =>
-          msg.senderId !== this.myId &&
-          this.selectedConversationId &&
-          this.lastMessageReadReceipts &&
-          !this.lastMessageReadReceipts.some(u => (u.userId || u._id) === this.myId && u.messageId === msg._id)
+        .filter(
+          (msg) =>
+            msg.senderId !== this.myId &&
+            this.selectedConversationId &&
+            this.lastMessageReadReceipts &&
+            !this.lastMessageReadReceipts.some(
+              (u) =>
+                (u.userId || u._id) === this.myId && u.messageId === msg._id
+            )
         )
-        .map(msg => msg._id + '');
+        .map((msg) => msg._id + '');
       if (unreadIds.length > 0) {
-        this.messageReadReceiptService.markMultipleMessagesAsRead(
-          this.selectedConversationId,
-          unreadIds
-        ).subscribe(() => {
-          this.store.dispatch(
-            ConversationActions.loadConversations({ page: 1, limit: 20 })
-          );
-        });
+        this.messageReadReceiptService
+          .markMultipleMessagesAsRead(this.selectedConversationId, unreadIds)
+          .subscribe(() => {
+            this.store.dispatch(
+              ConversationActions.loadConversations({ page: 1, limit: 20 })
+            );
+          });
       }
     }
   }
@@ -248,7 +286,9 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
       this.lastMessageReadReceipts = [];
       return;
     }
-    if (this.isLoadingReadReceipts) { return; }
+    if (this.isLoadingReadReceipts) {
+      return;
+    }
     this.readReceiptsSub?.unsubscribe();
     this.isLoadingReadReceipts = true;
     this.readReceiptsSub = this.messageReadReceiptService
@@ -257,11 +297,14 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
         next: (receiptsMap) => {
           this.conversationReadReceipts = {};
           Object.keys(receiptsMap).forEach((messageId) => {
-            this.conversationReadReceipts[messageId] = receiptsMap[messageId].map((receipt) => receipt.user || { userId: receipt.userId });
+            this.conversationReadReceipts[messageId] = receiptsMap[
+              messageId
+            ].map((receipt) => receipt.user || { userId: receipt.userId });
           });
           const lastMessage = messages[messages.length - 1];
           if (lastMessage && lastMessage._id) {
-            this.lastMessageReadReceipts = this.conversationReadReceipts[lastMessage._id] || [];
+            this.lastMessageReadReceipts =
+              this.conversationReadReceipts[lastMessage._id] || [];
           }
           this.isLoadingReadReceipts = false;
           this.cdr.detectChanges();
@@ -282,31 +325,45 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
 
   scrollToBottom() {
     try {
-      this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
-    } catch { }
+      this.messagesContainer.nativeElement.scrollTop =
+        this.messagesContainer.nativeElement.scrollHeight;
+    } catch {}
   }
 
   onMessagesScroll() {
     const container = this.messagesContainer?.nativeElement;
-    if (!container) { return; }
+    if (!container) {
+      return;
+    }
     const threshold = 200;
-    if (container.scrollTop < threshold && !this.loading && this.page < this.totalPages) {
+    if (
+      container.scrollTop < threshold &&
+      !this.loading &&
+      this.page < this.totalPages
+    ) {
       this.loadMoreMessages();
     }
-    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 2) {
-      this.messages$.subscribe(messages => {
-        this.markLastMessageAsReadIfNeeded(messages);
-      }).unsubscribe();
+    if (
+      container.scrollTop + container.clientHeight >=
+      container.scrollHeight - 2
+    ) {
+      this.messages$
+        .subscribe((messages) => {
+          this.markLastMessageAsReadIfNeeded(messages);
+        })
+        .unsubscribe();
     }
   }
 
   loadMoreMessages() {
     if (typeof this.selectedConversationId === 'string') {
-      this.store.dispatch(MessageActions.loadMessages({
-        conversationId: this.selectedConversationId,
-        page: this.page + 1,
-        limit: this.limit
-      }));
+      this.store.dispatch(
+        MessageActions.loadMessages({
+          conversationId: this.selectedConversationId,
+          page: this.page + 1,
+          limit: this.limit,
+        })
+      );
     }
   }
 
@@ -348,8 +405,12 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
 
   getFileIconClass(file: File): string {
     const extension = this.getFileExtension(file.name);
-    if (['mp4', 'avi', 'mov', 'webm'].includes(extension)) { return 'video'; }
-    if (['mp3', 'wav', 'flac', 'aac'].includes(extension)) { return 'audio'; }
+    if (['mp4', 'avi', 'mov', 'webm'].includes(extension)) {
+      return 'video';
+    }
+    if (['mp3', 'wav', 'flac', 'aac'].includes(extension)) {
+      return 'audio';
+    }
     return extension;
   }
 
@@ -358,15 +419,20 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
   }
 
   truncateFileName(filename: string, maxLength: number): string {
-    if (filename.length <= maxLength) { return filename; }
+    if (filename.length <= maxLength) {
+      return filename;
+    }
     const extension = filename.split('.').pop();
     const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.'));
-    const truncatedName = nameWithoutExt.substring(0, maxLength - extension!.length - 4) + '...';
+    const truncatedName =
+      nameWithoutExt.substring(0, maxLength - extension!.length - 4) + '...';
     return `${truncatedName}.${extension}`;
   }
 
   formatFileSize(bytes: number): string {
-    if (bytes === 0) { return '0 Bytes'; }
+    if (bytes === 0) {
+      return '0 Bytes';
+    }
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -387,13 +453,17 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
     const input = event.target as HTMLInputElement;
     if (input.files) {
       this.selectedFiles = Array.from(input.files);
-      this.previews = this.selectedFiles.map((file) => file.type.startsWith('image/') ? URL.createObjectURL(file) : '');
+      this.previews = this.selectedFiles.map((file) =>
+        file.type.startsWith('image/') ? URL.createObjectURL(file) : ''
+      );
     }
   }
 
   // --- Message actions ---
   async sendMessageWithFiles(content: string) {
-    if (!this.selectedConversationId) { return; }
+    if (!this.selectedConversationId) {
+      return;
+    }
     const trimmedContent = content.trim();
     const hasContent = trimmedContent.length > 0;
     const hasFiles = this.selectedFiles.length > 0;
@@ -411,7 +481,9 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
       this.messageInput.nativeElement.value = '';
       return;
     }
-    if (!hasContent && !hasFiles) { return; }
+    if (!hasContent && !hasFiles) {
+      return;
+    }
     this.uploading = true;
     try {
       switch (this.selectedFiles.length) {
@@ -421,7 +493,10 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
               MessageActions.sendMessage({
                 conversationId: this.selectedConversationId,
                 content: trimmedContent,
-                parentMessageId: this.replyMode && this.replyingToMessage ? this.replyingToMessage._id : undefined,
+                parentMessageId:
+                  this.replyMode && this.replyingToMessage
+                    ? this.replyingToMessage._id
+                    : undefined,
               })
             );
           }
@@ -467,7 +542,9 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
       this.selectedFiles = [];
       this.previews = [];
       this.uploading = false;
-      if (this.replyMode) { this.cancelReply(); }
+      if (this.replyMode) {
+        this.cancelReply();
+      }
     }
   }
 
@@ -491,7 +568,7 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
     this.replyMode = true;
     this.replyingToMessage = {
       ...message,
-      senderName: message.sender?.fullName || message.senderName || 'Unknown'
+      senderName: message.sender?.fullName || message.senderName || 'Unknown',
     };
     this.messageInput?.nativeElement.focus();
   }
@@ -507,8 +584,34 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
     this.messageService.deleteMessage(message._id, deleteType);
   }
 
+  onReactMessage(event: {
+    messageId: string;
+    emoji: string;
+    action: 'add' | 'remove';
+  }) {
+    if (event.action === 'add') {
+      this.store.dispatch(
+        MessageActions.addReaction({
+          messageId: event.messageId,
+          emoji: event.emoji,
+          conversationId: this.selectedConversationId,
+        })
+      );
+    } else if (event.action === 'remove') {
+      this.store.dispatch(
+        MessageActions.removeReaction({
+          messageId: event.messageId,
+          emoji: event.emoji,
+          conversationId: this.selectedConversationId,
+        })
+      );
+    }
+  }
+
   getSystemMessageText(message: Message): string {
-    if (!message || message.type !== 'SYSTEM') { return ''; }
+    if (!message || message.type !== 'SYSTEM') {
+      return '';
+    }
     const performer = message.meta?.actionPerformer?.fullName || 'A user';
     switch (message.systemType) {
       case 'USER_LEAVE':
@@ -518,22 +621,27 @@ export class MainContentComponent implements OnInit, AfterViewInit, OnDestroy, A
         return `${performer} removed ${removed} from the group`;
       }
       case 'USER_ADDED': {
-        const addedUsers = message.meta?.addedUsers?.map((u: any) => u.fullName).join(', ') || 'a user';
+        const addedUsers =
+          message.meta?.addedUsers?.map((u: any) => u.fullName).join(', ') ||
+          'a user';
         return `${performer} added ${addedUsers} to the group`;
       }
       case 'GROUP_RENAME':
-        return `Group was renamed${message.meta?.newName ? ' to ' + message.meta.newName : ''}`;
+        return `Group was renamed${
+          message.meta?.newName ? ' to ' + message.meta.newName : ''
+        }`;
       default:
         return 'System event';
     }
   }
 
   getFirstNameInitial(name: string): string {
-    if (!name) { return ''; }
+    if (!name) {
+      return '';
+    }
     return name?.trim().split(' ')[0];
   }
 
-  // --- TrackBy helper for ngFor ---
   trackByMessageId(index: number, message: Message): string {
     return message._id || '';
   }

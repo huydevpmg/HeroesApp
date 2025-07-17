@@ -34,13 +34,11 @@ export class MessageService {
     this.store.dispatch(MessageActions.deleteMessage({ messageId, deleteType }));
   }
 
-  addReaction(messageId: string, emoji: string) {
-    this.store.dispatch(MessageActions.addReaction({ messageId, emoji }));
+  addReaction(messageId: string, emoji: string, conversationId: string) {
+    this.store.dispatch(MessageActions.addReaction({ messageId, emoji, conversationId }));
   }
 
-  removeReaction(messageId: string) {
-    this.store.dispatch(MessageActions.removeReaction({ messageId }));
+  removeReaction(messageId: string, emoji: string, conversationId: string) {
+    this.store.dispatch(MessageActions.removeReaction({ messageId, emoji, conversationId }));
   }
-
-
 }

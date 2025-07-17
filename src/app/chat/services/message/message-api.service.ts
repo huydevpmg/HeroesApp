@@ -46,16 +46,6 @@ export class MessageApiService {
     return this.http.patch<void>(`${this.apiUrl}/${messageId}/delete`, body);
   }
 
-  addReaction(messageId: string, emoji: string): Observable<Message> {
-    // TODO: Replace with real API call if available
-    return of({} as Message); // Temporary stub to satisfy type
-  }
-
-  removeReaction(messageId: string): Observable<Message> {
-    // TODO: Replace with real API call if available
-    return of({} as Message); // Temporary stub to satisfy type
-  }
-
   sendMessage(conversationId: string, content: string, attachmentId?: string, parentMessageId?: string): Observable<Message> {
     const senderId = this.authService.getCurrentUserId() || '';
     const message: Partial<Message> = {

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
-import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ChatRoutingModule } from './chat-routing.module';
 import { ChatComponent } from './chat.component';
 import { LeftbarComponent } from './components/leftbar/leftbar.component';
@@ -23,6 +23,7 @@ import { PreviewAttachmentComponent } from './components/messages/preview-attach
 import { DropdownLabelComponent } from './components/dropdown-label/dropdown-label.component';
 import { LabelManagementComponent } from './components/label-management/label-management.component';
 import { FilterDropdownComponent } from './components/filter-dropdown/filter-dropdown.component';
+import { PickerModule } from '@ctrl/ngx-emoji-mart';
 
 @NgModule({
   declarations: [
@@ -41,12 +42,14 @@ import { FilterDropdownComponent } from './components/filter-dropdown/filter-dro
   imports: [
     CommonModule,
     ChatRoutingModule,
+    NgbTooltipModule,
     FormsModule,
     NgbDropdownModule,
     StoreModule.forFeature('conversation', conversationReducer),
     StoreModule.forFeature('messages', messageReducer),
     StoreModule.forFeature('attachments', attachmentReducer),
     EffectsModule.forFeature([ConversationEffects, MessageEffects, AttachmentEffects]),
-  ]
+    PickerModule
+]
 })
 export class ChatModule { }

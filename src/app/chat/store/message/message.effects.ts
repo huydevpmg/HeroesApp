@@ -7,6 +7,7 @@ import * as ConversationActions from '../conversation/conversation.actions';
 import { SocketService } from '../../services/socket/socket.service';
 import { MessageApiService } from '../../services/message/message-api.service';
 import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
+import { ReactionApiService } from '../../services/reactions/reaction-api.service';
 
 @Injectable()
 export class MessageEffects {
@@ -82,9 +83,9 @@ export class MessageEffects {
   addReaction$ = createEffect(() =>
     this.actions$.pipe(
       ofType(MessageActions.addReaction),
-      mergeMap(({ messageId, emoji }) =>
-        this.messageApiService.addReaction(messageId, emoji).pipe(
-          map(message => MessageActions.addReactionSuccess({ message })),
+      mergeMap(({ messageId, emoji, conversationId }) =>
+        this.reactionApiService.addReaction(messageId, emoji, conversationId).pipe(
+          map(res => MessageActions.addReactionSuccess({ message: res.message })),
           catchError(error => of(MessageActions.addReactionFailure({ error: error.message })))
         )
       )
@@ -94,9 +95,9 @@ export class MessageEffects {
   removeReaction$ = createEffect(() =>
     this.actions$.pipe(
       ofType(MessageActions.removeReaction),
-      mergeMap(({ messageId }) =>
-        this.messageApiService.removeReaction(messageId).pipe(
-          map(message => MessageActions.removeReactionSuccess({ message })),
+      mergeMap(({ messageId, emoji, conversationId }) =>
+        this.reactionApiService.removeReaction(messageId, emoji, conversationId).pipe(
+          map(res => MessageActions.removeReactionSuccess({ message: res.message })),
           catchError(error => of(MessageActions.removeReactionFailure({ error: error.message })))
         )
       )
@@ -161,25 +162,10 @@ export class MessageEffects {
     )
   );
 
-  handleReaction$ = createEffect(() =>
-    this.socketService.onReaction().pipe(
-      map(({ messageId, userId, emoji }) =>
-        MessageActions.messageReactionAdded({ messageId, userId, emoji })
-      )
-    )
-  );
-
-  handleReactionRemoved$ = createEffect(() =>
-    this.socketService.onReactionRemoved().pipe(
-      map(({ messageId, userId }) =>
-        MessageActions.messageReactionRemoved({ messageId, userId })
-      )
-    )
-  );
-
   constructor(
     private actions$: Actions,
     private messageApiService: MessageApiService,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private reactionApiService: ReactionApiService
   ) { }
 }

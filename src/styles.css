@@ -1,5 +1,6 @@
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 @import 'ngx-toastr/toastr';
+@import '@ctrl/ngx-emoji-mart/picker';
 
 :root {
   --bs-purple: #985cb1;

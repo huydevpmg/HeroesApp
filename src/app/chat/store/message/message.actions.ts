@@ -93,7 +93,7 @@ export const updateMessageSuccess = createAction(
 // Add reaction
 export const addReaction = createAction(
   '[Message] Add Reaction',
-  props<{ messageId: string; emoji: string }>()
+  props<{ messageId: string; emoji: string; conversationId: string }>()
 );
 export const addReactionSuccess = createAction(
   '[Message] Add Reaction Success',
@@ -107,7 +107,7 @@ export const addReactionFailure = createAction(
 // Remove reaction
 export const removeReaction = createAction(
   '[Message] Remove Reaction',
-  props<{ messageId: string }>()
+  props<{ messageId: string; emoji: string; conversationId: string }>()
 );
 export const removeReactionSuccess = createAction(
   '[Message] Remove Reaction Success',

@@ -4,7 +4,6 @@ import { SocketCoreService } from './socket-core.service';
 import { MessageSocketService } from './message-socket.service';
 import { ConversationSocketService } from './conversation-socket.service';
 import { PresenceSocketService } from './status-socket.service';
-import { ReactionSocketService } from './reaction-socket.service';
 import { AttachmentSocketService } from './attachment-socket.service';
 import { Message } from '../../../shared/enums/models/message.model';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
@@ -20,7 +19,6 @@ export class SocketService {
   private messageSocket = inject(MessageSocketService);
   private conversationSocket = inject(ConversationSocketService);
   private presenceSocket = inject(PresenceSocketService);
-  private reactionSocket = inject(ReactionSocketService);
   private attachmentSocket = inject(AttachmentSocketService);
 
   // === CONNECTION METHODS ===
@@ -110,19 +108,6 @@ export class SocketService {
     return this.presenceSocket.areUsersOnline(userIds);
   }
 
-  // === REACTION METHODS ===
-  addReaction(messageId: string, emoji: string): Promise<{ success: boolean; message: Message }> {
-    return this.reactionSocket.addReaction(messageId, emoji);
-  }
-
-  removeReaction(messageId: string): Promise<{ success: boolean; message: Message }> {
-    return this.reactionSocket.removeReaction(messageId);
-  }
-
-  toggleReaction(messageId: string, emoji: string, currentUserReaction?: string): Promise<{ success: boolean; message: Message }> {
-    return this.reactionSocket.toggleReaction(messageId, emoji, currentUserReaction);
-  }
-
   // === ATTACHMENT METHODS ===
   emitAttachmentCreated(attachment: Attachment, conversationId: string): void {
     this.attachmentSocket.emitAttachmentCreated(attachment, conversationId);
@@ -195,19 +180,6 @@ export class SocketService {
 
   getCurrentOnlineUsers(): Observable<Set<string>> {
     return this.presenceSocket.getCurrentOnlineUsers();
-  }
-
-  // Reaction observables
-  onReaction(): Observable<{ messageId: string; userId: string; emoji: string }> {
-    return this.reactionSocket.onReaction();
-  }
-
-  onReactionRemoved(): Observable<{ messageId: string; userId: string }> {
-    return this.reactionSocket.onReactionRemoved();
-  }
-
-  onReactionChange(): Observable<{ messageId: string; userId: string; emoji?: string; action: 'add' | 'remove' }> {
-    return this.reactionSocket.onReactionChange();
   }
 
   // Attachment observables

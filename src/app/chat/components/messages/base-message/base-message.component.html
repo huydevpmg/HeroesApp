@@ -1,151 +1,174 @@
 <div class="message" *ngIf="shouldShowMessage" [class.sent]="isCurrentUser" [class.received]="!isCurrentUser"
   [class.deleted]="isGloballyDeleted">
 
-  <div class="message-avatar shadow me-2" *ngIf="!isCurrentUser">
-    <img [src]="message.sender?.avatar || 'https://i.pravatar.cc/150?img=1'" [alt]="message.sender?.fullName || 'User'"
-      (error)="onImageError($event)">
-  </div>
+ <div class="inner-message" #innerMessage>
+  <div class="message-header d-flex align-items-center justify-content-center gap-3">
+    <div class="message-avatar shadow me-2" *ngIf="!isCurrentUser">
+      <img [src]="message.sender?.avatar || 'https://i.pravatar.cc/150?img=1'" [alt]="message.sender?.fullName || 'User'"
+        (error)="onImageError($event)">
+    </div>
 
-  <ng-container *ngIf="!isGloballyDeleted; else deletedMsg">
-    <div class="message-content d-flex flex-column gap-0">
-      <span *ngIf="message.isEdit" class="edited-label" [class.me-2]="isCurrentUser"
-        [class.ms-2]="!isCurrentUser">Edited</span>
+    <ng-container *ngIf="!isGloballyDeleted; else deletedMsg">
+      <div class="message-content d-flex flex-column gap-0">
+        <span *ngIf="message.isEdit" class="edited-label" [class.me-2]="isCurrentUser"
+          [class.ms-2]="!isCurrentUser">Edited</span>
 
-      <!-- Parent Message (Reply) -->
-      <div class="parent-message" *ngIf="message.parentMessage">
-        <div class="parent-message-label">
-          Replying to
-          <span class="parent-message-author">
-            {{
-            message.parentMessage.sender?._id === currentUserId
-            ? (message.senderId === currentUserId ? 'yourself' : 'you')
-            : getFirstNameInitial(message.parentMessage.sender?.fullName || 'Unknown')
-            }}
-          </span>
+        <!-- Parent Message (Reply) -->
+        <div class="parent-message" *ngIf="message.parentMessage">
+          <div class="parent-message-label">
+            Replying to
+            <span class="parent-message-author">
+              {{
+              message.parentMessage.sender?._id === currentUserId
+              ? (message.senderId === currentUserId ? 'yourself' : 'you')
+              : getFirstNameInitial(message.parentMessage.sender?.fullName || 'Unknown')
+              }}
+            </span>
+          </div>
+          <div class="parent-message-text">
+            <ng-container *ngIf="!message.parentMessage.isDeleteGlobal; else parentDeletedMsg">
+              {{ message.parentMessage.content || 'Attachment' }}
+            </ng-container>
+            <ng-template #parentDeletedMsg>
+              <span class="text-muted fst-italic">Message was deleted</span>
+            </ng-template>
+          </div>
         </div>
-        <div class="parent-message-text">
-          <ng-container *ngIf="!message.parentMessage.isDeleteGlobal; else parentDeletedMsg">
-            {{ message.parentMessage.content || 'Attachment' }}
-          </ng-container>
-          <ng-template #parentDeletedMsg>
-            <span class="text-muted fst-italic">Message was deleted</span>
-          </ng-template>
-        </div>
-      </div>
 
-      <!-- Text Message Only -->
-      <div class="message-bubble text" *ngIf="message.content && !message.attachmentId" data-bs-toggle="tooltip"
-        [attr.data-bs-placement]="isCurrentUser ? 'left' : 'right'" [attr.title]="message.createdAt | date:'medium'">
-        <p>{{ message.content }}</p>
-      </div>
-
-      <!-- Message with Attachment -->
-      <div class="attachment-container" *ngIf="message.attachmentId">
-        <div class="message-bubble text" *ngIf="message.content">
+        <!-- Text Message Only -->
+        <div class="message-bubble text" *ngIf="message.content && !message.attachmentId" data-bs-toggle="tooltip"
+          [attr.data-bs-placement]="isCurrentUser ? 'left' : 'right'" [attr.title]="message.createdAt | date:'medium'">
           <p>{{ message.content }}</p>
         </div>
 
-        <!-- Attachment Content -->
-        <div class="attachment-bubble">
-          <div class="attachment-loading" *ngIf="!message.attachment">
-            <div class="loading-spinner"></div>
+        <!-- Message with Attachment -->
+        <div class="attachment-container" *ngIf="message.attachmentId">
+          <div class="message-bubble text" *ngIf="message.content">
+            <p>{{ message.content }}</p>
           </div>
 
           <!-- Attachment Content -->
-          <ng-container *ngIf="message.attachment">
-            <!-- Image Attachment -->
-            <ng-container *ngIf="message.attachment?.type && message.attachment?.type.startsWith('image/')">
-              <img [src]="message.attachment?.url" [alt]="message.attachment?.name || 'Image attachment'"
-                class="attachment-image" (click)="onAttachmentClick(message.attachment)">
-            </ng-container>
+          <div class="attachment-bubble">
+            <div class="attachment-loading" *ngIf="!message.attachment">
+              <div class="loading-spinner"></div>
+            </div>
 
-            <!-- Video Attachment -->
-            <ng-container *ngIf="message.attachment.type && message.attachment.type.startsWith('video/')">
-              <video [src]="message.attachment.url" class="attachment-video" controls
-                [attr.poster]="message.attachment.thumbnailUrl">
-              </video>
-            </ng-container>
+            <!-- Attachment Content -->
+            <ng-container *ngIf="message.attachment">
+              <!-- Image Attachment -->
+              <ng-container *ngIf="message.attachment?.type && message.attachment?.type.startsWith('image/')">
+                <img [src]="message.attachment?.url" [alt]="message.attachment?.name || 'Image attachment'"
+                  class="attachment-image" (click)="onAttachmentClick(message.attachment)">
+              </ng-container>
 
-            <!-- File Attachment -->
-            <ng-container
-              *ngIf="message.attachment.type && !message.attachment.type.startsWith('image/') && !message.attachment.type.startsWith('video/')">
-              <div class="attachment-file" (click)="onAttachmentClick(message.attachment)">
-                <div class="file-icon">
-                  {{ getFileIconByExt(getFileExtension(message.attachment.name)) }}
-                </div>
-                <div class="file-info">
-                  <div class="file-name text-dark" [title]="message.attachment.name">
-                    {{ message.attachment.name }}
+              <!-- Video Attachment -->
+              <ng-container *ngIf="message.attachment.type && message.attachment.type.startsWith('video/')">
+                <video [src]="message.attachment.url" class="attachment-video" controls
+                  [attr.poster]="message.attachment.thumbnailUrl">
+                </video>
+              </ng-container>
+
+              <!-- File Attachment -->
+              <ng-container
+                *ngIf="message.attachment.type && !message.attachment.type.startsWith('image/') && !message.attachment.type.startsWith('video/')">
+                <div class="attachment-file" (click)="onAttachmentClick(message.attachment)">
+                  <div class="file-icon">
+                    {{ getFileIconByExt(getFileExtension(message.attachment.name)) }}
                   </div>
-                  <div class="file-size text-dark">
-                    {{ formatFileSize(message.attachment.size) }}
+                  <div class="file-info">
+                    <div class="file-name text-dark" [title]="message.attachment.name">
+                      {{ message.attachment.name }}
+                    </div>
+                    <div class="file-size text-dark">
+                      {{ formatFileSize(message.attachment.size) }}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </ng-container>
             </ng-container>
-          </ng-container>
+          </div>
         </div>
-      </div>
 
-      <!-- Message Info -->
-      <div class="message-info">
-        <!-- <span class="message-time">{{ message.createdAt | date:'shortTime' }}</span> -->
-        <span class="message-status" *ngIf="isCurrentUser && isLast && readByUsers.length === 0">
-          {{ message.status }}
-        </span>
+        <!-- Message Info -->
+        <div class="message-info">
+          <!-- <span class="message-time">{{ message.createdAt | date:'shortTime' }}</span> -->
+          <span class="message-status" *ngIf="isCurrentUser && isLast && readByUsers.length === 0">
+            {{ message.status }}
+          </span>
 
-        <span class="read-receipt-info" *ngIf="isCurrentUser && isLast && readByUsers.length > 0">
-          <app-read-receipt [users]="readByUsers"></app-read-receipt>
-        </span>
-      </div>
-
-      <!-- Reactions -->
-      <div class="message-reactions" *ngIf="message.reactions?.length">
-        <div class="reaction" *ngFor="let reaction of message.reactions">
-          <span class="reaction-emoji">{{ reaction.emoji }}</span>
-          <span class="reaction-count">{{ reaction.userId }}</span>
+          <span class="read-receipt-info" *ngIf="isCurrentUser && isLast && readByUsers.length > 0">
+            <app-read-receipt [users]="readByUsers"></app-read-receipt>
+          </span>
         </div>
-      </div>
-    </div>
 
-    <!-- Message Actions -->
-    <div class="message-actions">
-      <button class="action-btn" (click)="onReact()" title="React">
-        <i class="bi bi-emoji-smile"></i>
-      </button>
-      <button class="action-btn" (click)="onReply()" title="Reply">
-        <i class="bi bi-reply"></i>
-      </button>
-      <div class="dropdown position-relative">
-        <button class="action-btn" (click)="onMore()" title="More" [class.active]="showDropdown">
-          <i class="bi bi-three-dots"></i>
+        <!-- Reactions -->
+
+      </div>
+      <!-- Emoji picker -->
+
+      <!-- Message Actions -->
+      <div class="message-actions">
+        <emoji-mart class="emoji-picker-floating" *ngIf="isEmojiOpen" title="Chọn emoji…" [set]="'apple'"
+          [showPreview]="true" [enableSearch]="true" (emojiClick)="onEmojiClick($event)" [ngStyle]="emojiPosition">
+        </emoji-mart>
+        <!-- Nút mở emoji picker -->
+        <button class="action-btn" #emojiBtn (click)="toggleEmojiPicker()" title="React">
+          <i class="bi bi-emoji-smile"></i>
         </button>
-        <ul class="dropdown-menu" [class.show]="showDropdown">
-          <li>
-            <a class="dropdown-item" href="#" (click)="onReply(); $event.preventDefault()">
-              <i class="bi bi-reply me-2"></i>Reply
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item" href="#" (click)="onEdit(); $event.preventDefault()">
-              <i class="bi bi-pencil me-2"></i>Edit
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item" href="#" (click)="onDelete(); $event.preventDefault()">
-              <i class="bi bi-trash me-2"></i>Delete
-            </a>
-          </li>
-        </ul>
+
+        <!-- Các nút khác -->
+        <button class="action-btn" (click)="onReply()" title="Reply">
+          <i class="bi bi-reply"></i>
+        </button>
+        <div class="dropdown position-relative">
+          <button class="action-btn" (click)="toggleMoreDropdown()" title="More">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <ul class="dropdown-menu" [class.show]="isMoreOpen">
+            <li>
+              <a class="dropdown-item" href="#" (click)="onReply(); $event.preventDefault()">
+                <i class="bi bi-reply me-2"></i>Reply
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#" (click)="onEdit(); $event.preventDefault()">
+                <i class="bi bi-pencil me-2"></i>Edit
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#" (click)="onDelete(); $event.preventDefault()">
+                <i class="bi bi-trash me-2"></i>Delete
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
+      </ng-container>
+  </div>
+
+  <div class="message-reactions" *ngIf="message.reactions?.length"
+    [ngClass]="{
+    'reactions-received': !isCurrentUser,
+    'reactions-sent': isCurrentUser
+  }">
+    <div class="reaction"
+         *ngFor="let reaction of message.reactions; trackBy: trackByReaction"
+         [ngbTooltip]="getReactionUsersTooltip(reaction)"
+         container="body"
+         placement="top"
+         triggers="hover"
+         [class.reaction-active]="isReactionActive(reaction)"
+         (click)="onReactionClick(reaction)">
+      <span class="reaction-emoji">{{ reaction.emoji }}</span>
+      <span class="reaction-count">{{ reaction.users?.length || 0 }}</span>
     </div>
-  </ng-container>
+  </div>
+
 
   <!-- Template globally deleted message-->
   <ng-template #deletedMsg>
     <div class="deleted-message-bubble" [class.sent]="isCurrentUser" [class.received]="!isCurrentUser"
-      data-bs-toggle="tooltip"
-      [attr.data-bs-placement]="isCurrentUser ? 'left' : 'right'"
+      data-bs-toggle="tooltip" [attr.data-bs-placement]="isCurrentUser ? 'left' : 'right'"
       [attr.title]="message.createdAt | date:'medium'">
       <div class="deleted-message-content">
         <span class="deleted-text">Message was deleted</span>
@@ -154,11 +177,8 @@
   </ng-template>
 
   <!-- Modal preview attachment -->
-  <app-preview-attachment
-    [previewAttachment]="previewAttachment"
-    (close)="closePreview()"
-    *ngIf="previewAttachment"
-  ></app-preview-attachment>
+  <app-preview-attachment [previewAttachment]="previewAttachment" (close)="closePreview()"
+    *ngIf="previewAttachment"></app-preview-attachment>
 
   <!-- Modal delete message -->
   <div class="modal fade show" tabindex="-1"
@@ -205,4 +225,5 @@
       </div>
     </div>
   </div>
+ </div>
 </div>
