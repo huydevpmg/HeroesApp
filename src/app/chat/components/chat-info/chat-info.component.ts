@@ -85,8 +85,8 @@ export class ChatInfoComponent implements OnInit {
     this.close.emit();
   }
 
-  viewProfile(member: any) {
-    console.log('View profile:', member);
+  chatWithProfile(member: any) {
+    this.conversationService.findOrCreate1on1Conversation(member.id);
   }
 
   showUserProfile(member: any) {

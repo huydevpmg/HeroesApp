@@ -33,31 +33,15 @@ export class ConversationEffects {
     )
   );
 
-  // loadConversation$ = createEffect(() =>
-  //   this.actions$.pipe(
-  //     ofType(ConversationActions.loadConversation),
-  //     tap(({ id }) => console.log('[Effect] Load conversation with ID:', id)),
-  //     mergeMap(({ id }) =>
-  //       this.conversationApi.getConversationById(id).pipe(
-  //         tap(conversation => console.log('[API] Fetched conversation:', conversation)),
-  //         map((conversation: Conversation) =>
-  //           ConversationActions.loadConversationSuccess({ conversation })
-  //         ),
-  //         catchError(error => {
-  //           console.error('[API] Error fetching conversation:', error);
-  //           return of(ConversationActions.loadConversationFailure({ error: error.message }));
-  //         })
-  //       )
-  //     )
-  //   )
-  // );
-
   findOrCreate1on1Conversation$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ConversationActions.findOrCreate1on1Conversation),
       mergeMap(({ participantId }) =>
         this.conversationApi.findOrCreate1on1Conversation(participantId).pipe(
-          map((conversation: Conversation) => ConversationActions.findOrCreate1on1ConversationSuccess({ conversation })),
+          mergeMap((conversation: Conversation) => [
+            ConversationActions.findOrCreate1on1ConversationSuccess({ conversation }),
+            ConversationActions.loadConversations({ page: 1, limit: 20 })
+          ]),
           catchError(error => of(ConversationActions.findOrCreate1on1ConversationFailure({ error: error.message })))
         )
       )
@@ -177,7 +161,10 @@ export class ConversationEffects {
   clearConversationSuccess$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ConversationActions.clearConversationSuccess),
-      map(({ conversationId }) => MessageActions.loadMessages({ conversationId }))
+      mergeMap(({ conversationId }) => [
+        MessageActions.loadMessages({ conversationId }),
+        ConversationActions.loadConversations({ page: 1, limit: 20 })
+      ])
     )
   );
 

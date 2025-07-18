@@ -5,9 +5,15 @@
         <div class="d-flex align-items-center">
           <div class="avatar">
             <div class="conversation-avatar">
-              <div class="rounded-circle bg-secondary group-avatar">
-                <i class="bi bi-people-fill"></i>
-              </div>
+              <ng-container *ngIf="conversation.isGroup; else singleAvatar">
+                <div class="rounded-circle bg-secondary group-avatar">
+                  <i class="bi bi-people-fill"></i>
+                </div>
+              </ng-container>
+              <ng-template #singleAvatar>
+                <img [src]="conversation.avatar || 'https://i.pravatar.cc/150?img=1'" class="rounded-circle convo-avatar" width="40"
+                  height="40" alt="avatar" />
+              </ng-template>
             </div>
             <ng-container *ngIf="(otherUserId$ | async) as otherUserId">
               <ng-container *ngIf="(onlineUsers$ | async) as onlineUsers">
@@ -54,7 +60,7 @@
           *ngFor="let message of messagesWithAttachment$ | async; let isLast = last; trackBy: trackByMessageId">
           <ng-container *ngIf="message.type === 'SYSTEM'; else normalMsg">
             <div class="system-message text-secondary text-center small py-2">
-              {{ getSystemMessageText(message) }}
+             {{message.content}}
             </div>
           </ng-container>
           <ng-template #normalMsg>

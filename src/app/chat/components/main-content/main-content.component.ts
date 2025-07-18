@@ -608,33 +608,6 @@ export class MainContentComponent
     }
   }
 
-  getSystemMessageText(message: Message): string {
-    if (!message || message.type !== 'SYSTEM') {
-      return '';
-    }
-    const performer = message.meta?.actionPerformer?.fullName || 'A user';
-    switch (message.systemType) {
-      case 'USER_LEAVE':
-        return `${performer} left the group`;
-      case 'USER_REMOVED': {
-        const removed = message.meta?.removedUser?.fullName || 'a user';
-        return `${performer} removed ${removed} from the group`;
-      }
-      case 'USER_ADDED': {
-        const addedUsers =
-          message.meta?.addedUsers?.map((u: any) => u.fullName).join(', ') ||
-          'a user';
-        return `${performer} added ${addedUsers} to the group`;
-      }
-      case 'GROUP_RENAME':
-        return `Group was renamed${
-          message.meta?.newName ? ' to ' + message.meta.newName : ''
-        }`;
-      default:
-        return 'System event';
-    }
-  }
-
   getFirstNameInitial(name: string): string {
     if (!name) {
       return '';

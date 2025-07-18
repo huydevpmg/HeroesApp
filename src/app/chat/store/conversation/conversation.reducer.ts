@@ -68,30 +68,6 @@ export const conversationReducer = createReducer(
     error,
   })),
 
-  // Find or create 1-on-1
-  on(ConversationActions.findOrCreate1on1Conversation, (state) => ({
-    ...state,
-    loading: true,
-    error: null,
-  })),
-  on(
-    ConversationActions.findOrCreate1on1ConversationSuccess,
-    (state, { conversation }) =>
-      conversationAdapter.upsertOne(conversation, {
-        ...state,
-        selectedConversationId: conversation._id!,
-        loading: false,
-        error: null,
-      })
-  ),
-  on(
-    ConversationActions.findOrCreate1on1ConversationFailure,
-    (state, { error }) => ({
-      ...state,
-      loading: false,
-      error,
-    })
-  ),
 
   // Create group
   on(ConversationActions.createConversation, (state) => ({
@@ -320,17 +296,6 @@ export const conversationReducer = createReducer(
     }
     return state;
   }),
-
-  // Clear conversation
-  on(ConversationActions.clearConversationSuccess, (state) => {
-    // Clear conversation doesn't change the conversation list, just reloads messages
-    // Could optionally update clearAt timestamp in state if needed
-    return state;
-  }),
-  on(ConversationActions.clearConversationFailure, (state, { error }) => ({
-    ...state,
-    error,
-  })),
 
   // Toggle Archive
   on(ConversationActions.toggleArchive, (state) => ({

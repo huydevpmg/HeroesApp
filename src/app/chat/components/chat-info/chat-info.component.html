@@ -43,7 +43,7 @@
                 <p class="member-name mb-0">{{ member.fullName }}</p>
                 <small class="text-muted">
                   <ng-container *ngIf="member.id === chatInfo.createdBy; else memberLabel">
-                    Owner
+                    <b>Owner</b>
                   </ng-container>
                   <ng-template #memberLabel>
                     Member
@@ -51,7 +51,8 @@
                 </small>
               </div>
               <div class="member-actions">
-                <button class="btn btn-outline-dark btn-sm me-1" (click)="viewProfile(member)">
+                <button class="btn btn-outline-dark btn-sm me-1" (click)="chatWithProfile(member)"
+                  *ngIf="member.id !== ownerId">
                   <i class="bi bi-chat-square"></i>
                 </button>
                 <button class="btn btn-outline-danger btn-sm" (click)="showRemoveModal(member.id)"

@@ -42,8 +42,8 @@
             <i class="bi bi-people-fill" style="font-size: 30px;"></i>
           </div>
           <img *ngIf="!item.conversation.isGroup"
-            [src]="'https://st4.depositphotos.com/34939642/39599/v/450/depositphotos_395993304-stock-illustration-avatar-man-long-hair-vector.jpg'"
-            [alt]="item.conversation.name" class="rounded-circle" />
+            [src]="item.conversation.avatar"
+            [alt]="item.conversation.name" class="rounded-circle convo-avatar" />
           <ng-container *ngIf="onlineUsers$ | async as onlineUsers">
             <span class="status-badge" *ngIf="!item.conversation.isGroup"
               [class.online]="item.otherUserId && onlineUsers.includes(item.otherUserId)"
@@ -83,10 +83,13 @@
                     </g>
                   </svg>
                 </ng-container>
-                <span *ngIf="!item.conversation.lastMessage?.isDeleteGlobal; else showDeletedMessage"
+                <span *ngIf="!item.conversation.lastMessage?.isDeleteGlobal && item.conversation.lastMessage?.type !== 'SYSTEM'"
                   class="text-truncate fw-bold" style="font-size: 15px;">
-                  {{ item.conversation.lastMessage?.senderId === currentUserId ? 'You' :
-                  item.conversation.lastMessage?.senderName }}: {{ item.conversation.lastMessage?.content }}
+                  {{ item.conversation.lastMessage?.senderId === currentUserId ? 'You' : item.conversation.lastMessage?.senderName }}: {{ item.conversation.lastMessage?.content }}
+                </span>
+                <span *ngIf="!item.conversation.lastMessage?.isDeleteGlobal && item.conversation.lastMessage?.type === 'SYSTEM'"
+                  class="text-truncate fw-bold" style="font-size: 15px;">
+                  {{ item.conversation.lastMessage?.content }}
                 </span>
                 <span> · </span>
                 <small class="text-truncate" [appTimeAgo]="item.conversation.updatedAt ?? ''" style="font-size: 15px; margin-left: 10px;"> </small>

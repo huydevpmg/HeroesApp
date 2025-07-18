@@ -28,9 +28,14 @@
   height: 4rem
 }
 
+.convo-avatar{
+  height: 54px !important;
+  width: 54px !important;
+}
+
 .group-avatar {
-  width: 50px;
-  height: 50px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
   display: flex;
@@ -55,8 +60,8 @@
   position: absolute;
   bottom: 2px;
   right: 2px;
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   border: 3px solid #fff;
   box-shadow: 0 1px 4px rgba(0,0,0,0.10);
@@ -336,46 +341,6 @@
   height: 32px;
   object-fit: cover;
 }
-
-/* Chat Input */
-/* .chat-input {
-  padding: 15px;
-  background-color: #fff;
-  border-top: 1px solid #e9ecef;
-  flex-shrink: 0;
-}
-
-.chat-input .input-group {
-  background-color: #f8f9fa;
-  border-radius: 24px;
-  overflow: hidden;
-}
-
-.chat-input .form-control {
-  border: none;
-  background-color: #f8f9fa;
-}
-
-.chat-input .form-control:focus {
-  box-shadow: none;
-}
-
-.chat-input .btn {
-  border-radius: 0;
-} */
-
-/* Right Sidebar */
-/* .rightbar {
-  width: 300px;
-  background-color: #fff;
-  border-left: 1px solid #e9ecef;
-  transition: transform 0.3s ease;
-}
-
-.rightbar.hidden {
-  transform: translateX(100%);
-} */
-
 
 /* Chat Input Styles */
 .chat-input {
@@ -899,18 +864,6 @@
   z-index: 20;
 }
 
-@media (max-width: 600px) {
-  .edit-banner {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 10px 8px;
-    gap: 8px;
-  }
-  .edit-banner .edit-message-preview {
-    max-width: 90vw;
-  }
-}
-
 /* Dimming effect for reply mode */
 .chat-main.reply-mode .chat-messages,
 .chat-main.reply-mode .file-preview-container {
@@ -921,47 +874,4 @@
 .chat-main.reply-mode .chat-header,
 .chat-main.reply-mode .chat-input {
   opacity: 1 !important;
-}
-
-/* Responsive Design for Reply Banner */
-@media (max-width: 768px) {
-  .reply-banner {
-    padding: 8px 12px;
-    gap: 10px;
-  }
-
-  .reply-banner .reply-message-preview {
-    max-width: 200px;
-    font-size: 0.75rem;
-  }
-
-  .parent-message {
-    max-width: 220px;
-    font-size: 0.8rem;
-  }
-
-  .parent-message-author {
-    font-size: 0.7rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .reply-banner {
-    padding: 6px 10px;
-    gap: 8px;
-  }
-
-  .reply-banner .reply-message-preview {
-    max-width: 150px;
-    font-size: 0.7rem;
-  }
-
-  .parent-message {
-    max-width: 180px;
-    padding: 4px 8px;
-  }
-
-  .parent-message-text {
-    font-size: 0.75rem;
-  }
 }

@@ -76,7 +76,6 @@ export class ConversationService {
 
   clearConversation(conversationId: string) {
     this.store.dispatch(ConversationActions.clearConversation({ conversationId }));
-    this.store.dispatch(ConversationActions.loadConversations({ page: 1, limit: 20 }));
   }
 
   toggleArchive(userConversationId: string) {

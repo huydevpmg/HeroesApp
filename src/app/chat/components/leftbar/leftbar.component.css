@@ -144,6 +144,11 @@
   visibility: visible;
 }
 
+.convo-avatar{
+  height: 54px !important;
+  width: 54px !important;
+}
+
 .avatar {
   position: relative;
   margin-right: 12px;
@@ -175,8 +180,8 @@
 
 .status-badge {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
+  top: 100%;
+  left: 90%;
   width: 16px;
   height: 16px;
   border-radius: 50%;
