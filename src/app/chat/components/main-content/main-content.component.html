@@ -104,7 +104,9 @@
         <div class="edit-banner" *ngIf="editMode && editingMessage">
           <i class="bi bi-pencil-square edit-icon" style="font-size: 0.8rem !important;"></i>
           <span class="edit-label">Editing message:</span>
-          <div class="edit-message-preview">{{ editingMessage.content }}</div>
+            <div class="edit-message-preview">
+            {{ editingMessage.attachmentId ? 'attachment' : editingMessage.content }}
+            </div>
           <button class="edit-cancel-btn" (click)="cancelEdit()">
             <i class="bi bi-x-lg"></i>
             Cancel
@@ -125,7 +127,7 @@
                 }}
               </span>
             </span>
-            <div class="reply-message-preview">{{ replyingToMessage.content }}</div>
+            <div class="reply-message-preview">{{ replyingToMessage.attachmentId ? "Attachment" : replyingToMessage.content }}</div>
           </div>
           <button class="reply-cancel-btn" (click)="cancelReply()">
             <i class="bi bi-x-lg"></i>

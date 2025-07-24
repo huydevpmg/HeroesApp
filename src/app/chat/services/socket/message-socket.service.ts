@@ -56,6 +56,7 @@ export class MessageSocketService {
 
     // Message updated
     this.socketCore.on(SOCKET_EVENTS.MESSAGE_UPDATED, (message: Message) => {
+      console.log('Message updated:', message);
       this.messageUpdatedSubject.next(message);
     });
 
@@ -90,23 +91,6 @@ export class MessageSocketService {
     });
   }
 
-  // Edit message
-  editMessage(messageId: string, content: string): Promise<{ success: boolean; message: Message }> {
-    return new Promise((resolve) => {
-      this.socketCore.emit(
-        SOCKET_EVENTS.EDIT_MESSAGE,
-        { messageId, content },
-        (response: any) => {
-          if (response.success) {
-            // Message edited successfully
-          } else {
-            console.error('Failed to edit message:', response);
-          }
-          resolve(response);
-        }
-      );
-    });
-  }
 
   // Delete message
   deleteMessage(messageId: string, deleteType: DeleteType): Promise<{ success: boolean; message: string }> {
