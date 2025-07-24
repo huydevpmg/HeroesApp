@@ -22,10 +22,6 @@ export class MessageService {
     this.store.dispatch(MessageActions.loadMessages({ conversationId }));
   }
 
-  updateMessageStatus(messageId: string, status: string) {
-    this.store.dispatch(MessageActions.updateMessageStatus({ messageId, status }));
-  }
-
   editMessage(messageId: string, content: string) {
     this.store.dispatch(MessageActions.editMessage({messageId, content}));
   }

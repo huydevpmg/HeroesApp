@@ -40,9 +40,9 @@ export class SocketService {
   }
 
   // === MESSAGE METHODS ===
-  sendMessage(message: Message): Promise<{ success: boolean; message: Message }> {
-    return this.messageSocket.sendMessage(message);
-  }
+  // sendMessage(message: Message): Promise<{ success: boolean; message: Message }> {
+  //   return this.messageSocket.sendMessage(message);
+  // }
 
   editMessage(messageId: string, content: string): Promise<{ success: boolean; message: Message }> {
     return this.messageSocket.editMessage(messageId, content);
@@ -60,35 +60,10 @@ export class SocketService {
     this.messageSocket.stopTyping(conversationId);
   }
 
-  markMessageAsRead(conversationId: string, messageId: string): Promise<{ success: boolean; result: any }> {
-    return this.messageSocket.markMessageAsRead(conversationId, messageId);
-  }
 
   // === CONVERSATION METHODS ===
   joinConversation(conversationId: string): void {
     this.conversationSocket.joinConversation(conversationId);
-  }
-
-  connectConversation(partnerId: string): Promise<{ success: boolean; conversationId: string }> {
-    return this.conversationSocket.connectConversation(partnerId);
-  }
-
-
-
-  pinConversation(conversationId: string): Promise<{ success: boolean; result: any }> {
-    return this.conversationSocket.pinConversation(conversationId);
-  }
-
-  archiveConversation(conversationId: string): Promise<{ success: boolean; result: any }> {
-    return this.conversationSocket.archiveConversation(conversationId);
-  }
-
-  addLabel(conversationId: string, label: string): Promise<{ success: boolean; result: any }> {
-    return this.conversationSocket.addLabel(conversationId, label);
-  }
-
-  removeLabel(conversationId: string, label: string): Promise<{ success: boolean; result: any }> {
-    return this.conversationSocket.removeLabel(conversationId, label);
   }
 
   // === PRESENCE METHODS ===

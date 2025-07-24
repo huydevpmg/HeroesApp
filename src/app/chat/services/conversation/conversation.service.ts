@@ -35,6 +35,7 @@ export class ConversationService {
   }
 
   createConversation(data: Partial<Conversation>) {
+    console.log('Creating conversation with data:', data);
     this.store.dispatch(ConversationActions.createConversation({ data }));
   }
 
@@ -48,10 +49,6 @@ export class ConversationService {
 
   getAllUsers() {
     this.store.dispatch(ConversationActions.getAllUsers());
-  }
-
-  findOrCreate1on1Conversation(participantId: string) {
-    this.store.dispatch(ConversationActions.findOrCreate1on1Conversation({ participantId }));
   }
 
   getConversationById(id: string) {

@@ -13,9 +13,6 @@ export class ConversationApiService {
 
   constructor(private http: HttpClient) { }
 
-  findOrCreate1on1Conversation(participantId: string): Observable<Conversation> {
-    return this.http.post<Conversation>(`${this.apiUrl}/1on1`, { participantId });
-  }
 
   createConversation(data: Partial<Conversation>): Observable<Conversation> {
     return this.http.post<Conversation>(`${this.apiUrl}/`, data);

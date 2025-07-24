@@ -197,6 +197,8 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
     if (conversation && conversation._id) {
       this.conversationService.selectConversation(conversation._id);
       this.selectedConversationId = conversation._id;
+      this.store.dispatch(ConversationActions.resetUnreadCount({ conversationId: conversation._id }));
+      this.messageReadReceiptService.markAllMessagesAsRead(conversation._id).subscribe();
     }
   }
 
@@ -372,11 +374,8 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
 
   onMarkRead(conversation: any) {
     if (!conversation || !conversation._id) { return; }
-    this.messageReadReceiptService
-      .markAllMessagesAsRead(conversation._id)
-      .subscribe(() => {
-        this.store.dispatch(ConversationActions.loadConversations({ page: this.page, limit: this.limit }));
-      });
+    this.store.dispatch(ConversationActions.resetUnreadCount({ conversationId: conversation._id }));
+    this.messageReadReceiptService.markAllMessagesAsRead(conversation._id).subscribe();
   }
 
   onArchive(conversation: any) {

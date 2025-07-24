@@ -230,7 +230,6 @@ export const conversationReducer = createReducer(
   })),
   on(ConversationActions.addMembersToGroupSuccess, (state, { conversation }) => {
     if (!conversation || !conversation._id) {
-      console.warn('addMembersToGroupSuccess: conversation is undefined or missing _id');
       return { ...state, loading: false, error: null };
     }
     const newState = conversationAdapter.updateOne(
@@ -256,7 +255,6 @@ export const conversationReducer = createReducer(
   })),
   on(ConversationActions.removeMemberFromGroupSuccess, (state, { conversation }) => {
     if (!conversation || !conversation._id) {
-      console.warn('removeMemberFromGroupSuccess: conversation is undefined or missing _id');
       return { ...state, loading: false, error: null };
     }
     return conversationAdapter.updateOne(
@@ -315,4 +313,33 @@ export const conversationReducer = createReducer(
     loading: false,
     error,
   })),
+
+  // Unread count actions for conversation
+  on(ConversationActions.incrementUnreadCount, (state, { conversationId }) => {
+    const conversation = state.entities[conversationId];
+    if (conversation) {
+      const unreadCount = (conversation.unreadCount || 0) + 1;
+      return conversationAdapter.updateOne(
+        {
+          id: conversationId,
+          changes: { unreadCount }
+        },
+        state
+      );
+    }
+    return state;
+  }),
+  on(ConversationActions.resetUnreadCount, (state, { conversationId }) => {
+    const conversation = state.entities[conversationId];
+    if (conversation) {
+      return conversationAdapter.updateOne(
+        {
+          id: conversationId,
+          changes: { unreadCount: 0 }
+        },
+        state
+      );
+    }
+    return state;
+  }),
 );

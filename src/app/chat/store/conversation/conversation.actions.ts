@@ -33,22 +33,6 @@ export const loadConversationFailure = createAction(
   props<{ error: string }>()
 );
 
-// Create 1on1 Conversation
-export const findOrCreate1on1Conversation = createAction(
-  '[Conversation] Find Or Create 1on1 Conversation',
-  props<{ participantId: string }>()
-);
-
-export const findOrCreate1on1ConversationSuccess = createAction(
-  '[Conversation] Find Or Create 1on1 Conversation Success',
-  props<{ conversation: Conversation }>()
-);
-
-export const findOrCreate1on1ConversationFailure = createAction(
-  '[Conversation] Find Or Create 1on1 Conversation Failure',
-  props<{ error: string }>()
-);
-
 // Create Group Conversation
 export const createConversation = createAction(
   '[Conversation] Create Conversation',
@@ -268,4 +252,15 @@ export const toggleArchiveSuccess = createAction(
 export const toggleArchiveFailure = createAction(
   '[Conversation] Toggle Archive Failure',
   props<{ error: string }>()
+);
+
+// Unread count actions
+export const incrementUnreadCount = createAction(
+  '[Conversation] Increment Unread Count',
+  props<{ conversationId: string }>()
+);
+
+export const resetUnreadCount = createAction(
+  '[Conversation] Reset Unread Count',
+  props<{ conversationId: string }>()
 );

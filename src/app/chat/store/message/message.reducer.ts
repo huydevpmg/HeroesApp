@@ -81,9 +81,6 @@ export const messageReducer = createReducer(
   on(MessageActions.removeReactionSuccess, (state, { message }) => {
     return messageAdapter.updateOne({ id: message._id!, changes: message }, state);
   }),
-  on(MessageActions.updateMessageStatusSuccess, (state, { message }) =>
-    messageAdapter.updateOne({ id: message._id!, changes: message }, state)
-  ),
 
   on(MessageActions.editMessageSuccess, (state, { message }) =>
     messageAdapter.updateOne({ id: message._id!, changes: message }, state)

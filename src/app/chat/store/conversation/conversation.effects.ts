@@ -33,20 +33,6 @@ export class ConversationEffects {
     )
   );
 
-  findOrCreate1on1Conversation$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(ConversationActions.findOrCreate1on1Conversation),
-      mergeMap(({ participantId }) =>
-        this.conversationApi.findOrCreate1on1Conversation(participantId).pipe(
-          mergeMap((conversation: Conversation) => [
-            ConversationActions.findOrCreate1on1ConversationSuccess({ conversation }),
-            ConversationActions.loadConversations({ page: 1, limit: 20 })
-          ]),
-          catchError(error => of(ConversationActions.findOrCreate1on1ConversationFailure({ error: error.message })))
-        )
-      )
-    )
-  );
 
   createConversation$ = createEffect(() =>
     this.actions$.pipe(

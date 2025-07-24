@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError, of } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { Message } from '../../../shared/enums/models/message.model';
@@ -32,10 +32,6 @@ export class MessageApiService {
 
   editMessage(messageId: string, content: string): Observable<Message> {
     return this.http.put<Message>(`${this.apiUrl}/${messageId}`, { content })
-  }
-
-  updateMessageStatus(messageId: string, status: string): Observable<Message> {
-    return this.http.put<Message>(`${this.apiUrl}/${messageId}/status`, { status });
   }
 
   deleteMessage(messageId: string, deleteType: DeleteType, userId?: string): Observable<void> {

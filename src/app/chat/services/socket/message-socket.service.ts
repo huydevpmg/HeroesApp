@@ -9,7 +9,6 @@ import * as ConversationActions from '../../store/conversation/conversation.acti
 import * as MessageActions from '../../store/message/message.actions';
 import { selectSelectedConversationId } from '../../store/conversation/conversation.selectors';
 import { take } from 'rxjs/operators';
-import { AuthService } from '../../../auth/services/auth.service';
 import { MessageReadReceiptService } from '../message-read-receipt/message-read-receipt.service';
 @Injectable({
   providedIn: 'root'
@@ -17,7 +16,6 @@ import { MessageReadReceiptService } from '../message-read-receipt/message-read-
 export class MessageSocketService {
   private socketCore = inject(SocketCoreService);
   private store = inject(Store);
-  private authService = inject(AuthService);
   private messageReadReceiptService = inject(MessageReadReceiptService);
 
   // Message subjects
@@ -37,15 +35,17 @@ export class MessageSocketService {
   private setupMessageListeners(): void {
     // Message received
     this.socketCore.on(SOCKET_EVENTS.RECEIVE_MESSAGE, (message: Message) => {
+      console.log('Message received:', message);
       this.store.select(selectSelectedConversationId).pipe(take(1)).subscribe(selectedId => {
+        this.store.dispatch(ConversationActions.updateConversationLastMessage({ conversationId: message.conversationId, message }));
+
         if (selectedId === message.conversationId) {
           this.store.dispatch(MessageActions.receiveMessage({ message }));
-            this.messageReadReceiptService.markMessageAsRead(
-              message._id!,
-              message.conversationId
-            ).subscribe();
+          this.messageReadReceiptService.markAllMessagesAsRead(message.conversationId).subscribe();
+          this.store.dispatch(ConversationActions.resetUnreadCount({ conversationId: message.conversationId }));
+        } else {
+          this.store.dispatch(ConversationActions.incrementUnreadCount({ conversationId: message.conversationId }));
         }
-        this.store.dispatch(ConversationActions.loadConversations({ page: 1, limit: 20 }));
       });
     });
 
@@ -87,43 +87,6 @@ export class MessageSocketService {
     this.socketCore.on(SOCKET_EVENTS.REMOVE_REACTION, (data: { message: Message }) => {
       console.log('Reaction received:', data.message);
       this.store.dispatch(MessageActions.removeReactionSuccess({ message: data.message }));
-    });
-  }
-
-  // Send message
-  sendMessage(message: Message): Promise<{ success: boolean; message: Message }> {
-    return new Promise((resolve, reject) => {
-      const payload: any = {
-        conversationId: message.conversationId,
-        content: message.content,
-        senderId: message.senderId,
-        parentMessage: message.parentMessage,
-        heroContext: message.heroContext
-      };
-
-      // Single file support
-      if (message.attachmentId) {
-        payload.attachmentId = message.attachmentId;
-      }
-
-      // Multiple files support
-      const multi = (message as any).attachmentIds;
-      if (Array.isArray(multi) && multi.length) {
-        payload.attachments = multi;
-      }
-
-      this.socketCore.getSocket().timeout(5000).emit(
-        SOCKET_EVENTS.SEND_MESSAGE,
-        payload,
-        (err: any, response: any) => {
-          if (err) {
-            console.error('Failed to send message:', err);
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        }
-      );
     });
   }
 
@@ -170,17 +133,6 @@ export class MessageSocketService {
 
   stopTyping(conversationId: string): void {
     this.socketCore.emit(SOCKET_EVENTS.TYPING, { conversationId, isTyping: false });
-  }
-
-  // Mark as read
-  markMessageAsRead(conversationId: string, messageId: string): Promise<{ success: boolean; result: any }> {
-    return new Promise((resolve) => {
-      this.socketCore.emit(
-        SOCKET_EVENTS.MARK_AS_READ,
-        { conversationId, messageId },
-        (response: any) => resolve(response)
-      );
-    });
   }
 
   // Observables

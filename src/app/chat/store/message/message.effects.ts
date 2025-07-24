@@ -56,17 +56,6 @@ export class MessageEffects {
     )
   );
 
-  updateMessageStatus$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(MessageActions.updateMessageStatus),
-      mergeMap(({ messageId, status }) =>
-        this.messageApiService.updateMessageStatus(messageId, status).pipe(
-          map(message => MessageActions.updateMessageStatusSuccess({ message })),
-          catchError(error => of(MessageActions.updateMessageStatusFailure({ error: error.message })))
-        )
-      )
-    )
-  );
 
   editMessage$ = createEffect(() => (
     this.actions$.pipe(

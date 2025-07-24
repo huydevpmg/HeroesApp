@@ -34,7 +34,6 @@ import {
   selectMessagesTotalPages,
 } from '../../store/message/message.selectors';
 import { Attachment } from '../../../shared/enums/models/attachment.model';
-import * as ConversationActions from '../../store/conversation/conversation.actions';
 
 @Component({
   selector: 'app-main-content',
@@ -264,11 +263,11 @@ export class MainContentComponent
       if (unreadIds.length > 0) {
         this.messageReadReceiptService
           .markMultipleMessagesAsRead(this.selectedConversationId, unreadIds)
-          .subscribe(() => {
-            this.store.dispatch(
-              ConversationActions.loadConversations({ page: 1, limit: 20 })
-            );
-          });
+          // .subscribe(() => {
+          //   this.store.dispatch(
+          //     ConversationActions.loadConversations({ page: 1, limit: 20 })
+          //   );
+          // });
       }
     }
   }

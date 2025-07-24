@@ -118,111 +118,13 @@ export class ConversationSocketService {
 
   // Join conversation room
   joinConversation(conversationId: string): void {
-
-    // Avoid joining the same conversation multiple times
+    console.log('[FE] Emit JOIN_ROOM', conversationId);
     if (this.currentJoinedConversation === conversationId) {
-      return;
-    }
-
+      return
+    };
     this.currentJoinedConversation = conversationId;
+    console.log('[FE] Emit JOIN_ROOM', conversationId);
     this.socketCore.emit(SOCKET_EVENTS.JOIN_ROOM, conversationId);
-  }
-
-  // Connect or create 1-on-1 conversation
-  connectConversation(partnerId: string): Promise<{ success: boolean; conversationId: string }> {
-    return new Promise((resolve) => {
-      this.socketCore.emit(
-        SOCKET_EVENTS.CONNECT_CONVERSATION,
-        { partnerId },
-        (response: any) => {
-          if (response.success) {
-            console.log('Connected to conversation:', response);
-          } else {
-            console.error('Failed to connect to conversation:', response);
-          }
-          resolve(response);
-        }
-      );
-    });
-  }
-  // Pin conversation
-  pinConversation(conversationId: string): Promise<{ success: boolean; result: any }> {
-    return new Promise((resolve) => {
-      this.socketCore.emit(
-        SOCKET_EVENTS.PIN_CONVERSATION,
-        { conversationId },
-        (response: any) => {
-          if (response.success) {
-            console.log('Conversation pinned successfully:', response);
-          } else {
-            console.error('Failed to pin conversation:', response);
-          }
-          resolve(response);
-        }
-      );
-    });
-  }
-
-  // Archive conversation
-  archiveConversation(conversationId: string): Promise<{ success: boolean; result: any }> {
-    return new Promise((resolve) => {
-
-      this.socketCore.emit(
-        SOCKET_EVENTS.ARCHIVE_CONVERSATION,
-        { conversationId },
-        (response: any) => {
-          if (response.success) {
-            console.log('Conversation archived successfully:', response);
-          } else {
-            console.error('Failed to archive conversation:', response);
-          }
-          resolve(response);
-        }
-      );
-    });
-  }
-
-  // Add label
-  addLabel(conversationId: string, label: string): Promise<{ success: boolean; result: any }> {
-    return new Promise((resolve) => {
-
-      this.socketCore.emit(
-        SOCKET_EVENTS.ADD_LABEL,
-        { conversationId, label },
-        (response: any) => {
-          if (response.success) {
-            console.log('Label added successfully:', response);
-          } else {
-            console.error('Failed to add label:', response);
-          }
-          resolve(response);
-        }
-      );
-    });
-  }
-
-  // Remove label
-  removeLabel(conversationId: string, label: string): Promise<{ success: boolean; result: any }> {
-    return new Promise((resolve) => {
-
-      this.socketCore.emit(
-        SOCKET_EVENTS.REMOVE_LABEL,
-        { conversationId, label },
-        (response: any) => {
-          if (response.success) {
-            console.log('Label removed successfully:', response);
-          } else {
-            console.error('Failed to remove label:', response);
-          }
-          resolve(response);
-        }
-      );
-    });
-  }
-
-  // Emit conversation updated
-  emitConversationUpdated(conversationId: string): void {
-    this.socketCore.emit(SOCKET_EVENTS.CONVERSATION_UPDATED, { conversationId });
   }
 
   // Observables

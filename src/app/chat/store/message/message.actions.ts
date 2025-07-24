@@ -36,6 +36,20 @@ export const sendMessageFailure = createAction(
   props<{ error: string }>()
 );
 
+// Socket events
+export const receiveMessage = createAction(
+  '[Message] Receive Message',
+  props<{ message: Message }>()
+);
+export const messageReactionAdded = createAction(
+  '[Message] Reaction Added',
+  props<{ messageId: string; userId: string; emoji: string }>()
+);
+export const messageReactionRemoved = createAction(
+  '[Message] Reaction Removed',
+  props<{ messageId: string; userId: string }>()
+);
+
 // Delete message
 export const deleteMessage = createAction(
   '[Message] Delete Message',
@@ -52,20 +66,6 @@ export const deleteMessageSuccess = createAction(
 );
 export const deleteMessageFailure = createAction(
   '[Message] Delete Message Failure',
-  props<{ error: string }>()
-);
-
-// Update message status
-export const updateMessageStatus = createAction(
-  '[Message] Update Message Status',
-  props<{ messageId: string; status: string }>()
-);
-export const updateMessageStatusSuccess = createAction(
-  '[Message] Update Message Status Success',
-  props<{ message: Message }>()
-);
-export const updateMessageStatusFailure = createAction(
-  '[Message] Update Message Status Failure',
   props<{ error: string }>()
 );
 
@@ -116,18 +116,4 @@ export const removeReactionSuccess = createAction(
 export const removeReactionFailure = createAction(
   '[Message] Remove Reaction Failure',
   props<{ error: string }>()
-);
-
-// Socket events
-export const receiveMessage = createAction(
-  '[Message] Receive Message',
-  props<{ message: Message }>()
-);
-export const messageReactionAdded = createAction(
-  '[Message] Reaction Added',
-  props<{ messageId: string; userId: string; emoji: string }>()
-);
-export const messageReactionRemoved = createAction(
-  '[Message] Reaction Removed',
-  props<{ messageId: string; userId: string }>()
 );
