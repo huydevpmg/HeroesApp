@@ -3,7 +3,7 @@
     <ng-container *ngIf="selectedConversation$ | async as conversation; else noConversation">
       <div class="chat-header flex-shrink-0">
         <div class="d-flex align-items-center">
-          <div class="avatar">
+          <div class="avatar position-relative d-flex align-items-center">
             <div class="conversation-avatar">
               <ng-container *ngIf="conversation.isGroup; else singleAvatar">
                 <div class="rounded-circle bg-secondary group-avatar">
@@ -17,14 +17,32 @@
             </div>
             <ng-container *ngIf="(otherUserId$ | async) as otherUserId">
               <ng-container *ngIf="(onlineUsers$ | async) as onlineUsers">
-                <span class="status-badge" [class.online]="otherUserId && onlineUsers.includes(otherUserId)"
+                <span class="status-badge ms-2" [class.online]="otherUserId && onlineUsers.includes(otherUserId)"
                   [class.offline]="!otherUserId || !onlineUsers.includes(otherUserId)">
                 </span>
               </ng-container>
             </ng-container>
           </div>
-          <div class="ms-2 ">
-            <h6 class="mb-0">{{ conversation.name }}</h6>
+          <div class="ms-3 d-flex flex-column justify-content-center">
+            <div class="d-flex flex-column align-items-start">
+              <h6 class="mb-0 fw-bold d-flex align-items-center" style="font-size: 1.1rem;">
+                {{ conversation.name }}
+              </h6>
+              <ng-container *ngIf="conversation.labels && conversation.labels.length > 0">
+                <span ngbTooltip="{{ conversation.labels[0].name }}" placement="top" class="d-flex align-items-center mt-1">
+                  <svg width="22" height="16" viewBox="0 0 80 60"
+                    style="vertical-align: middle; margin-left: 2px; flex-shrink: 0; border-radius: 4px; background: none; box-shadow: none;">
+                    <g transform="translate(8, 4) scale(1.25)">
+                      <path [attr.fill]="conversation.labels[0].color" d="M0 0H32L48 20L32 40H0V0Z" />
+                    </g>
+                  </svg>
+                  <span class="ms-1 fw-semibold label-name-ellipsis"
+                    >
+                    {{ conversation.labels[0].name }}
+                  </span>
+                </span>
+              </ng-container>
+            </div>
             <small class="text-muted" *ngIf="(typingUsers$ | async)?.length">
               {{ (typingUsers$ | async)?.length }} {{ (typingUsers$ | async)?.length === 1 ? 'person' : 'people' }}
               typing...

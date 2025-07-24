@@ -354,9 +354,15 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
     label: string;
     conversationId: string;
   }) {
-    this.userConversationService
-      .addLabel(event.userConversationId, event.label, event.conversationId)
-      .subscribe({
+    this.conversations$.pipe(take(1)).subscribe(convs => {
+      const found = convs.find(c => c._id === event.conversationId);
+      console.log('Found conversation:', found);
+      const hasLabel = found && found.labels && found.labels.some((l: any) => l._id === event.label);
+      console.log('Has label:', hasLabel, 'for label:', event.label, 'in conversation:', event.conversationId);
+      const obs = hasLabel
+        ? this.userConversationService.removeLabel(event.userConversationId, event.label, event.conversationId)
+        : this.userConversationService.addLabel(event.userConversationId, event.label, event.conversationId);
+      obs.subscribe({
         next: () => {
           this.store.dispatch(
             ConversationActions.loadConversations({
@@ -366,6 +372,7 @@ export class LeftbarComponent implements OnInit, AfterViewInit {
           );
         },
       });
+    });
   }
 
   onManageLabels() {

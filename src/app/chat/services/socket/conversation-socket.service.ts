@@ -118,12 +118,10 @@ export class ConversationSocketService {
 
   // Join conversation room
   joinConversation(conversationId: string): void {
-    console.log('[FE] Emit JOIN_ROOM', conversationId);
     if (this.currentJoinedConversation === conversationId) {
       return
     };
     this.currentJoinedConversation = conversationId;
-    console.log('[FE] Emit JOIN_ROOM', conversationId);
     this.socketCore.emit(SOCKET_EVENTS.JOIN_ROOM, conversationId);
   }
 

@@ -76,12 +76,14 @@
               <ng-container
                 *ngIf="item.conversation.lastMessage?.content?.trim() && item.conversation.lastMessage?.senderId && item.conversation.lastMessage?.senderName; else showAttachmentName">
                 <ng-container *ngIf="item.conversation.labels?.length! > 0">
-                  <svg width="16" height="12" viewBox="0 0 80 60"
-                    style="vertical-align: middle; margin-right: 6px; flex-shrink: 0;">
-                    <g transform="translate(8, 4) scale(1.25)">
-                      <path [attr.fill]="item.conversation.labels?.[0]?.color" d="M0 0H32L48 20L32 40H0V0Z" />
-                    </g>
-                  </svg>
+                  <span ngbTooltip="{{ item.conversation.labels?.[0]?.name }}" placement="top">
+                    <svg width="16" height="12" viewBox="0 0 80 60"
+                      style="vertical-align: middle; margin-right: 6px; flex-shrink: 0;">
+                      <g transform="translate(8, 4) scale(1.25)">
+                        <path [attr.fill]="item.conversation.labels?.[0]?.color" d="M0 0H32L48 20L32 40H0V0Z" />
+                      </g>
+                    </svg>
+                  </span>
                 </ng-container>
                 <span *ngIf="!item.conversation.lastMessage?.isDeleteGlobal && item.conversation.lastMessage?.type !== 'SYSTEM'"
                   class="text-truncate fw-bold" style="font-size: 15px;">
@@ -100,7 +102,8 @@
               <ng-template #showAttachmentName>
                 <ng-container *ngIf="item.conversation.labels?.length! > 0">
                   <svg width="16" height="12" viewBox="0 0 80 60"
-                    style="vertical-align: middle; margin-right: 6px; flex-shrink: 0;">
+                    style="vertical-align: middle; margin-right: 6px; flex-shrink: 0;"
+                    ngbTooltip="{{ item.conversation.labels?.[0]?.name }}" placement="top">
                     <g transform="translate(8, 4) scale(1.25)">
                       <path [attr.fill]="item.conversation.labels?.[0]?.color" d="M0 0H32L48 20L32 40H0V0Z" />
                     </g>
