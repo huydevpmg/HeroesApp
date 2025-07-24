@@ -28,6 +28,10 @@
   height: 4rem
 }
 
+.label-name-ellipsis{
+  font-size: 14px
+}
+
 .convo-avatar{
   height: 54px !important;
   width: 54px !important;

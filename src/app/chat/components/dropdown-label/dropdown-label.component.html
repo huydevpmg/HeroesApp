@@ -23,7 +23,8 @@
       </a>
       <ul ngbDropdownMenu class="dropdown-menu">
         <li *ngFor="let label of labels">
-          <a class="dropdown-item d-flex align-items-center gap-2" (click)="selectLabelHandler(label._id!, $event)">
+          <a class="dropdown-item d-flex align-items-center gap-2"
+             (click)="selectLabelHandler(label._id!, $event)">
             <span class="label-color-dot">
               <svg width="30" height="30" viewBox="4 4 24 24">
                 <path d="M4 4H20L28 12L20 20H4V4Z" [attr.fill]="label.color" />
