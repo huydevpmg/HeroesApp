@@ -44,10 +44,6 @@ export class SocketService {
   //   return this.messageSocket.sendMessage(message);
   // }
 
-  editMessage(messageId: string, content: string): Promise<{ success: boolean; message: Message }> {
-    return this.messageSocket.editMessage(messageId, content);
-  }
-
   deleteMessage(messageId: string, deleteType: DeleteType): Promise<{ success: boolean; message: string }> {
     return this.messageSocket.deleteMessage(messageId, deleteType);
   }

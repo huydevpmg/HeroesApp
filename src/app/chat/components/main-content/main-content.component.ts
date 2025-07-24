@@ -564,10 +564,12 @@ export class MainContentComponent
   }
 
   onReplyMessage(message: any) {
+    console.log('Replying to message:', message);
     this.replyMode = true;
     this.replyingToMessage = {
       ...message,
       senderName: message.sender?.fullName || message.senderName || 'Unknown',
+      attachmentId: message.attachmentId || null,
     };
     this.messageInput?.nativeElement.focus();
   }
