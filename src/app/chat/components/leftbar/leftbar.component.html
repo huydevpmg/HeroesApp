@@ -73,46 +73,27 @@
           <!-- Last message -->
           <div class="last-message d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center flex-grow-1 text-truncate">
-              <ng-container
-                *ngIf="item.conversation.lastMessage?.content?.trim() && item.conversation.lastMessage?.senderId && item.conversation.lastMessage?.senderName; else showAttachmentName">
-                <ng-container *ngIf="item.conversation.labels?.length! > 0">
-                  <span ngbTooltip="{{ item.conversation.labels?.[0]?.name }}" placement="top">
-                    <svg width="16" height="12" viewBox="0 0 80 60"
-                      style="vertical-align: middle; margin-right: 6px; flex-shrink: 0;">
-                      <g transform="translate(8, 4) scale(1.25)">
-                        <path [attr.fill]="item.conversation.labels?.[0]?.color" d="M0 0H32L48 20L32 40H0V0Z" />
-                      </g>
-                    </svg>
+              <ng-container *ngIf="item.conversation.lastMessage">
+                <ng-container *ngIf="item.conversation.lastMessage.isDeleteGlobal; else showMessageContent">
+                  <span class="text-muted fst-italic text-truncate" style="max-width: 180px; display: inline-block;">
+                    {{ item.conversation.lastMessage.senderId === currentUserId ? 'You' : item.conversation.lastMessage.senderName }}: Message was deleted
                   </span>
                 </ng-container>
-                <span *ngIf="!item.conversation.lastMessage?.isDeleteGlobal && item.conversation.lastMessage?.type !== 'SYSTEM'"
-                  class="text-truncate fw-bold" style="font-size: 15px;">
-                  {{ item.conversation.lastMessage?.senderId === currentUserId ? 'You' : item.conversation.lastMessage?.senderName }}: {{ item.conversation.lastMessage?.content }}
-                </span>
-                <span *ngIf="!item.conversation.lastMessage?.isDeleteGlobal && item.conversation.lastMessage?.type === 'SYSTEM'"
-                  class="text-truncate fw-bold" style="font-size: 15px;">
-                  {{ item.conversation.lastMessage?.content }}
-                </span>
-                <span> · </span>
-                <small class="text-truncate" [appTimeAgo]="item.conversation.updatedAt ?? ''" style="font-size: 15px; margin-left: 10px;"> </small>
-                <ng-template #showDeletedMessage>
-                  <span class="text-muted fst-italic">Message was deleted</span>
+                <ng-template #showMessageContent>
+                  <ng-container *ngIf="item.conversation.lastMessage.type !== 'SYSTEM'; else showSystemMessage">
+                    <span class="text-truncate fw-bold" style="font-size: 15px;">
+                      {{ item.conversation.lastMessage.senderId === currentUserId ? 'You' : item.conversation.lastMessage.senderName }}: {{ item.conversation.lastMessage.content }}
+                    </span>
+                  </ng-container>
+                  <ng-template #showSystemMessage>
+                    <span class="text-truncate fw-bold" style="font-size: 15px;">
+                      {{ item.conversation.lastMessage.content }}
+                    </span>
+                  </ng-template>
                 </ng-template>
               </ng-container>
-              <ng-template #showAttachmentName>
-                <ng-container *ngIf="item.conversation.labels?.length! > 0">
-                  <svg width="16" height="12" viewBox="0 0 80 60"
-                    style="vertical-align: middle; margin-right: 6px; flex-shrink: 0;"
-                    ngbTooltip="{{ item.conversation.labels?.[0]?.name }}" placement="top">
-                    <g transform="translate(8, 4) scale(1.25)">
-                      <path [attr.fill]="item.conversation.labels?.[0]?.color" d="M0 0H32L48 20L32 40H0V0Z" />
-                    </g>
-                  </svg>
-                </ng-container>
-                <span *ngIf="item.conversation.lastAttachmentName" style="font-size: 15px">{{
-                  item.conversation.lastAttachmentName }}</span>
-                <span *ngIf="!item.conversation.lastAttachmentName" style="font-size: 15px;">No messages yet</span>
-              </ng-template>
+              <span class="ms-1"> · </span>
+              <small class="text-truncate" [appTimeAgo]="item.conversation.updatedAt ?? ''" style="font-size: 15px; margin-left: 10px;"> </small>
             </div>
             <span *ngIf="item.conversation.unreadCount"
               class="badge rounded-pill d-flex align-items-center justify-content-center"

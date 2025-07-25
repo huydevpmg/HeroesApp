@@ -34,6 +34,7 @@ import {
   selectMessagesTotalPages,
 } from '../../store/message/message.selectors';
 import { Attachment } from '../../../shared/enums/models/attachment.model';
+import * as ConversationActions from '../../store/conversation/conversation.actions';
 
 @Component({
   selector: 'app-main-content',
@@ -224,8 +225,18 @@ export class MainContentComponent
 
   ngAfterViewInit() {
     this.messagesSub = this.messages$.subscribe((messages) => {
+      // CHỈ scroll nếu user đang ở gần cuối
+      const container = this.messagesContainer?.nativeElement;
+      if (container) {
+        const threshold = 150; // khoảng cách px tính là "gần cuối"
+        const isNearBottom =
+          container.scrollTop + container.clientHeight >=
+          container.scrollHeight - threshold;
+
+        this.shouldScrollToBottom = isNearBottom;
+      }
+
       this.markLastMessageAsReadIfNeeded(messages);
-      this.shouldScrollToBottom = true;
     });
   }
 
@@ -263,11 +274,11 @@ export class MainContentComponent
       if (unreadIds.length > 0) {
         this.messageReadReceiptService
           .markMultipleMessagesAsRead(this.selectedConversationId, unreadIds)
-          // .subscribe(() => {
-          //   this.store.dispatch(
-          //     ConversationActions.loadConversations({ page: 1, limit: 20 })
-          //   );
-          // });
+          .subscribe(() => {
+            this.store.dispatch(
+              ConversationActions.loadConversations({ page: 1, limit: 20 })
+            );
+          });
       }
     }
   }
@@ -544,6 +555,7 @@ export class MainContentComponent
       if (this.replyMode) {
         this.cancelReply();
       }
+      this.shouldScrollToBottom = true;
     }
   }
 
@@ -564,12 +576,10 @@ export class MainContentComponent
   }
 
   onReplyMessage(message: any) {
-    console.log('Replying to message:', message);
     this.replyMode = true;
     this.replyingToMessage = {
       ...message,
       senderName: message.sender?.fullName || message.senderName || 'Unknown',
-      attachmentId: message.attachmentId || null,
     };
     this.messageInput?.nativeElement.focus();
   }

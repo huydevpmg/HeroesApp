@@ -341,6 +341,7 @@
   flex-direction: row;
   gap: 6px;
 }
+.message-actions:focus-within,
 .message:hover .message-actions,
 .message-actions.emoji-open {
   opacity: 1;
@@ -373,12 +374,6 @@
   color: #495057;
   padding: 0;
   flex-shrink: 0;
-}
-.action-btn:hover {
-  background: #f1f3f5;
-  color: #636363;
-  transform: scale(1.1);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
 }
 
 .dropdown { position: relative; display: inline-block; }

@@ -7,15 +7,24 @@ export const messageReducer = createReducer(
   initialMessageState,
   on(MessageActions.loadMessages, state => ({ ...state, loading: true, error: null })),
   on(MessageActions.loadMessagesSuccess, (state, { messages, total, page, totalPages }) => {
+    const orderedMessages = [...messages].reverse();
+    let newState;
     if (page === 1) {
-      return messageAdapter.setAll(messages, { ...state, loading: false, total, page, totalPages });
+      newState = messageAdapter.setAll(orderedMessages, { ...state, loading: false, total, page, totalPages });
     } else {
       const ids = state.ids as string[];
-      return messageAdapter.addMany(
-        messages.filter(m => !!m._id && !ids.includes(m._id as string)),
+      newState = messageAdapter.addMany(
+        orderedMessages.filter(m => !!m._id && !ids.includes(m._id as string)),
         { ...state, loading: false, total, page, totalPages }
       );
     }
+    const all = messageAdapter.getSelectors().selectAll(newState);
+    const sorted = [...all].sort((a, b) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return aTime - bTime;
+    });
+    return messageAdapter.setAll(sorted, newState);
   }),
   on(MessageActions.loadMessagesFailure, (state, { error }) => ({ ...state, loading: false, error })),
 

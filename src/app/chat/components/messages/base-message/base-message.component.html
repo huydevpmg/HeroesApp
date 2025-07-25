@@ -120,16 +120,11 @@
         <button class="action-btn" (click)="onReply()" title="Reply">
           <i class="bi bi-reply"></i>
         </button>
-        <div class="dropdown position-relative">
-          <button class="action-btn" (click)="toggleMoreDropdown()" title="More">
+        <div ngbDropdown class="dropdown position-relative">
+          <button class="action-btn dropdown-toggle" ngbDropdownToggle title="More">
             <i class="bi bi-three-dots"></i>
           </button>
-          <ul class="dropdown-menu" [class.show]="isMoreOpen">
-            <li>
-              <a class="dropdown-item" href="#" (click)="onReply(); $event.preventDefault()">
-                <i class="bi bi-reply me-2"></i>Reply
-              </a>
-            </li>
+          <ul ngbDropdownMenu class="dropdown-menu" container="body">
             <li>
               <a class="dropdown-item" href="#" (click)="onEdit(); $event.preventDefault()">
                 <i class="bi bi-pencil me-2"></i>Edit

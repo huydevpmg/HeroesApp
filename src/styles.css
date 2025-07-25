@@ -111,3 +111,7 @@ select {
 .toast-close-button:hover {
   opacity: 1 !important;
 }
+
+.dropdown-toggle::after {
+  display: none !important;
+}
