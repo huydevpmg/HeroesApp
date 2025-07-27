@@ -11,7 +11,6 @@ export interface Conversation {
   unreadCount?: number;
   createdAt?: string;
   updatedAt?: string;
-  lastAttachmentName?: string;
   isDeleted?: boolean;
   isArchived?: boolean;
   labels?: Label[];

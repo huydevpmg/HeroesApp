@@ -4,6 +4,7 @@ import { of, from } from 'rxjs';
 import { map, mergeMap, catchError, tap } from 'rxjs/operators';
 import * as MessageActions from './message.actions';
 import * as ConversationActions from '../conversation/conversation.actions';
+import * as AttachmentActions from '../attachment/attachment.actions';
 import { SocketService } from '../../services/socket/socket.service';
 import { MessageApiService } from '../../services/message/message-api.service';
 import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
@@ -16,7 +17,18 @@ export class MessageEffects {
       ofType(MessageActions.loadMessages),
       mergeMap(({ conversationId, page = 1, limit = 20 }) =>
         this.messageApiService.getMessages(conversationId, page, limit).pipe(
-          map(result => MessageActions.loadMessagesSuccess({ messages: result.messages, total: result.total, page: result.page, totalPages: result.totalPages })),
+          map(result => {
+            const messages = result.messages.map((msg: any) => {
+              if (msg.attachments && Array.isArray(msg.attachments)) {
+                return {
+                  ...msg,
+                  attachments: msg.attachments
+                };
+              }
+              return msg;
+            });
+            return MessageActions.loadMessagesSuccess({ messages, total: result.total, page: result.page, totalPages: result.totalPages });
+          }),
           catchError(error => of(MessageActions.loadMessagesFailure({ error: error.message })))
         )
       )
@@ -26,16 +38,17 @@ export class MessageEffects {
   sendMessage$ = createEffect(() =>
     this.actions$.pipe(
       ofType(MessageActions.sendMessage),
-      mergeMap(({ conversationId, content, attachmentId, parentMessageId }) =>
-        this.messageApiService.sendMessage(conversationId, content, attachmentId, parentMessageId).pipe(
-          map(message => [
+      mergeMap(({ conversationId, content, attachments, parentMessageId }) =>
+        this.messageApiService.sendMessage(conversationId, content, attachments, parentMessageId).pipe(
+          mergeMap(message => [
             MessageActions.sendMessageSuccess({ message }),
-            ...(message && message._id ? [ConversationActions.updateConversationLastMessage({ conversationId, message })] : [])
+            ...(message.attachments?.length
+              ? [AttachmentActions.uploadMultipleAttachmentsSuccess({ attachments: message.attachments })]
+              : [])
           ]),
-          catchError(error => of([MessageActions.sendMessageFailure({ error: error.message })]))
+          catchError(error => of(MessageActions.sendMessageFailure({ error: error.message })))
         )
-      ),
-      mergeMap(actions => from(actions))
+      )
     )
   );
 
@@ -55,7 +68,6 @@ export class MessageEffects {
       )
     )
   );
-
 
   editMessage$ = createEffect(() => (
     this.actions$.pipe(

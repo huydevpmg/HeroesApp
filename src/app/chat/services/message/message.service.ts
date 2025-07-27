@@ -3,7 +3,7 @@ import { Store, select } from '@ngrx/store';
 import * as MessageActions from '../../store/message/message.actions';
 import * as MessageSelectors from '../../store/message/message.selectors';
 import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
-
+import { Attachment } from '../../../shared/enums/models/attachment.model';
 @Injectable({
   providedIn: 'root',
 })
@@ -14,8 +14,8 @@ export class MessageService {
 
   constructor(private store: Store) { }
 
-  sendMessage(conversationId: string, content: string, attachmentId?: string, fileName?: string) {
-    this.store.dispatch(MessageActions.sendMessage({ conversationId, content, attachmentId, fileName }));
+  sendMessage(conversationId: string, content: string, attachments?: Attachment[], fileName?: string) {
+    this.store.dispatch(MessageActions.sendMessage({ conversationId, content, attachments, fileName }));
   }
 
   loadMessages(conversationId: string) {

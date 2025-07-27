@@ -105,7 +105,7 @@
           <i class="bi bi-pencil-square edit-icon" style="font-size: 0.8rem !important;"></i>
           <span class="edit-label">Editing message:</span>
             <div class="edit-message-preview">
-            {{ editingMessage.attachmentId ? 'attachment' : editingMessage.content }}
+            {{ editingMessage.attachments? 'attachment' : editingMessage.content }}
             </div>
           <button class="edit-cancel-btn" (click)="cancelEdit()">
             <i class="bi bi-x-lg"></i>
@@ -127,7 +127,7 @@
                 }}
               </span>
             </span>
-            <div class="reply-message-preview">{{ replyingToMessage.attachmentId ? "Attachment" : replyingToMessage.content }}</div>
+            <div class="reply-message-preview">{{ replyingToMessage.attachments ? "Attachment" : replyingToMessage.content }}</div>
           </div>
           <button class="reply-cancel-btn" (click)="cancelReply()">
             <i class="bi bi-x-lg"></i>
@@ -159,9 +159,14 @@
               </ng-template>
 
               <!-- File Info -->
-              <div class="file-info">
+              <div class="file-info" [class.file-uploading]="uploading">
                 <div class="file-name" [title]="file.name">{{ truncateFileName(file.name, 25) }}</div>
                 <div class="file-size">{{ formatFileSize(file.size) }}</div>
+                <div class="file-meta" *ngIf="attachments$ | async as attachments">
+                </div>
+                <div class="file-loading-overlay" *ngIf="uploading">
+                  <div class="loading-spinner-sm"></div>
+                </div>
               </div>
 
               <!-- Remove Button -->

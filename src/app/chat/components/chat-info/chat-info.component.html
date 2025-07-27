@@ -83,7 +83,7 @@
               <small class="text-muted">{{ getSharedImages(attachments).length }} files</small>
             </div>
             <div class="shared-images-grid">
-              <div class="image-grid-item" *ngFor="let image of getSharedImages(attachments); let i = index"
+              <div class="image-grid-item" *ngFor="let image of getSharedImages(attachments); let i = index; trackBy: trackByAttachmentId"
                 [class.show-more]="i === 8 && getSharedImages(attachments).length > 9"
                 (click)="i === 8 && getSharedImages(attachments).length > 9 ? viewAllImages() : viewImage(image)">
                 <img [src]="image.url" [alt]="image.name" class="grid-image" />
@@ -110,7 +110,7 @@
             </div>
             <div class="shared-files">
               <div class="file-item d-flex align-items-center p-2 mb-1 rounded"
-                *ngFor="let file of getSharedFiles(attachments)"
+                *ngFor="let file of getSharedFiles(attachments); trackBy: trackByAttachmentId"
                 (click)="file.type && file.type.startsWith('image/') ? viewImage(file) : viewFile(file)"
                 style="cursor: pointer;">
                 <div class="file-icon me-3">

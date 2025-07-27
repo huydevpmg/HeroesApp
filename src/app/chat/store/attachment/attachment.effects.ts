@@ -1,79 +1,97 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { of } from 'rxjs';
-import { catchError, map, mergeMap } from 'rxjs/operators';
 import * as AttachmentActions from './attachment.actions';
-import * as MessageActions from '../message/message.actions';
-import * as ConversationActions from '../conversation/conversation.actions';
+import { catchError, map, mergeMap, of } from 'rxjs';
 import { AttachmentApiService } from '../../services/attachments/attachment-api.service';
-import { Attachment } from '../../../shared/enums/models/attachment.model';
 
 @Injectable()
 export class AttachmentEffects {
-  uploadAttachment$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(AttachmentActions.uploadAttachment),
-      mergeMap(({ file, content, conversationId, uploadedBy, fileName }) =>
-        this.attachmentService.uploadAttachment(file, content, conversationId, uploadedBy, fileName).pipe(
-          map((attachment: Attachment) => AttachmentActions.uploadAttachmentSuccess({ attachment, content, fileName })),
-          catchError(error => {
-            return of(AttachmentActions.uploadAttachmentFailure({ error: error.message || 'Upload failed' }));
-          })
-        )
-      )
-    )
-  );
+  constructor(
+    private actions$: Actions,
+    private attachmentApiService: AttachmentApiService
+  ) { }
 
+
+  /** Load attachment by ID */
   loadAttachment$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AttachmentActions.loadAttachment),
       mergeMap(({ attachmentId }) =>
-        this.attachmentService.getAttachmentById(attachmentId).pipe(
-          map((attachment: Attachment) => AttachmentActions.loadAttachmentSuccess({ attachment })),
-          catchError(error => of(AttachmentActions.loadAttachmentFailure({ error: error.message || 'Load failed' })))
+        this.attachmentApiService.getAttachmentById(attachmentId).pipe(
+          map((attachment) => AttachmentActions.loadAttachmentSuccess({ attachment })),
+          catchError((error) =>
+            of(AttachmentActions.loadAttachmentFailure({ error: error.message }))
+          )
         )
       )
     )
   );
 
-  uploadAttachmentSuccess$ = createEffect(() =>
+  /** Load attachments by conversation */
+  loadAttachmentsByConversation$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AttachmentActions.uploadAttachmentSuccess),
-      mergeMap(({ attachment, content, fileName }) => {
-        if (content && content.trim()) {
-          return [MessageActions.sendMessage({
-            conversationId: attachment.conversationId,
-            content: content,
-            attachmentId: attachment._id
-          })];
-        }
-
-        if (fileName && !content?.trim()) {
-          return [
-            MessageActions.sendMessage({
-              conversationId: attachment.conversationId,
-              content: '',
-              attachmentId: attachment._id,
-              fileName: fileName
-            }),
-            ConversationActions.updateLastAttachmentName({
-              conversationId: attachment.conversationId,
-              lastAttachmentName: fileName
-            })
-          ];
-        }
-
-        return [MessageActions.sendMessage({
-          conversationId: attachment.conversationId,
-          content: '',
-          attachmentId: attachment._id
-        })];
-      })
+      ofType(AttachmentActions.loadAttachmentsByConversation),
+      mergeMap(({ conversationId }) =>
+        this.attachmentApiService.getAttachments(conversationId).pipe(
+          map((attachments) =>
+            AttachmentActions.loadAttachmentsByConversationSuccess({ attachments })
+          ),
+          catchError((error) =>
+            of(AttachmentActions.loadAttachmentsByConversationFailure({ error: error.message }))
+          )
+        )
+      )
     )
   );
 
-  constructor(
-    private actions$: Actions,
-    private attachmentService: AttachmentApiService,
-  ) { }
+  /** Load attachments by user */
+  loadAttachmentsByUser$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AttachmentActions.loadAttachmentsByUser),
+      mergeMap(({ userId }) =>
+        this.attachmentApiService.getAttachmentsByUser(userId).pipe(
+          map((attachments) =>
+            AttachmentActions.loadAttachmentsByUserSuccess({ attachments })
+          ),
+          catchError((error) =>
+            of(AttachmentActions.loadAttachmentsByUserFailure({ error: error.message }))
+          )
+        )
+      )
+    )
+  );
+
+  /** Load attachments by type */
+  loadAttachmentsByType$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AttachmentActions.loadAttachmentsByType),
+      mergeMap(({ conversationId, attachmentType }) =>
+        this.attachmentApiService.getAttachmentsByType(conversationId, attachmentType).pipe(
+          map((attachments) =>
+            AttachmentActions.loadAttachmentsByTypeSuccess({ attachments })
+          ),
+          catchError((error) =>
+            of(AttachmentActions.loadAttachmentsByTypeFailure({ error: error.message }))
+          )
+        )
+      )
+    )
+  );
+
+  /** Delete attachment */
+  deleteAttachment$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AttachmentActions.deleteAttachment),
+      mergeMap(({ attachmentId }) =>
+        this.attachmentApiService.deleteAttachment(attachmentId).pipe(
+          map(() =>
+            AttachmentActions.deleteAttachmentSuccess({ attachmentId })
+          ),
+          catchError((error) =>
+            of(AttachmentActions.deleteAttachmentFailure({ error: error.message }))
+          )
+        )
+      )
+    )
+  );
 }

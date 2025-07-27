@@ -6,6 +6,7 @@ import { environment } from '../../../../environments/environment';
 import { Message } from '../../../shared/enums/models/message.model';
 import { AuthService } from '../../../auth/services/auth.service';
 import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
+import { Attachment } from '../../../shared/enums/models/attachment.model';
 
 @Injectable({
   providedIn: 'root',
@@ -42,17 +43,18 @@ export class MessageApiService {
     return this.http.patch<void>(`${this.apiUrl}/${messageId}/delete`, body);
   }
 
-  sendMessage(conversationId: string, content: string, attachmentId?: string, parentMessageId?: string): Observable<Message> {
+  sendMessage(conversationId: string, content: string, attachments?: Attachment[], parentMessageId?: string): Observable<Message> {
     const senderId = this.authService.getCurrentUserId() || '';
     const message: Partial<Message> = {
       conversationId,
       content,
-      attachmentId,
+      attachments,
       parentMessage: parentMessageId,
       senderId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
+
     return this.http.post<Message>(`${this.apiUrl}`, message).pipe(
       catchError((error) => {
         console.error('HTTP API error:', error);

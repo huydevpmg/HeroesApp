@@ -287,4 +287,8 @@ export class ChatInfoComponent implements OnInit {
 
     return isOwner;
   }
+
+  trackByAttachmentId(index: number, att: Attachment) {
+    return att._id || att.url || att.name;
+  }
 }

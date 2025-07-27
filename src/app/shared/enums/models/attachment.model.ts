@@ -8,5 +8,4 @@ export interface Attachment {
   conversationId: string;
   createdAt: string;
   updatedAt: string;
-  __v?: number;
 }

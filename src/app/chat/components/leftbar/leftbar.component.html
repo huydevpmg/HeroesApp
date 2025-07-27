@@ -109,9 +109,10 @@
                     </g>
                   </svg>
                 </ng-container>
-                <span *ngIf="item.conversation.lastAttachmentName" style="font-size: 15px">{{
-                  item.conversation.lastAttachmentName }}</span>
-                <span *ngIf="!item.conversation.lastAttachmentName" style="font-size: 15px;">No messages yet</span>
+                <span *ngIf="item.conversation.lastMessage?.attachments?.length! > 0" style="font-size: 15px">
+                  {{ item.conversation.lastMessage?.senderId === currentUserId ? 'You' : item.conversation.lastMessage?.senderName }} sent {{ item.conversation.lastMessage?.attachments?.length }} attachment{{ item.conversation.lastMessage?.attachments?.length! > 1 ? 's' : '' }}
+                </span>
+                <span *ngIf="!item.conversation.lastMessage?.attachments?.length" style="font-size: 15px;">No messages yet</span>
               </ng-template>
             </div>
             <span *ngIf="item.conversation.unreadCount"
