@@ -305,6 +305,12 @@ export const conversationReducer = createReducer(
     loading: false,
     error,
   })),
+  on(ConversationActions.toggleArchiveConversationSuccess, (state, { conversationId }) => {
+    return conversationAdapter.updateOne(
+      { id: conversationId, changes: { isArchived: false } },
+      state
+    );
+  }),
 
   // Unread count actions for conversation
   on(ConversationActions.incrementUnreadCount, (state, { conversationId }) => {

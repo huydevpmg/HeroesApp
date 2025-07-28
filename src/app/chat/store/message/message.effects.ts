@@ -44,7 +44,8 @@ export class MessageEffects {
             MessageActions.sendMessageSuccess({ message }),
             ...(message.attachments?.length
               ? [AttachmentActions.uploadMultipleAttachmentsSuccess({ attachments: message.attachments })]
-              : [])
+              : []),
+            ConversationActions.toggleArchiveConversationSuccess({ conversationId })
           ]),
           catchError(error => of(MessageActions.sendMessageFailure({ error: error.message })))
         )
