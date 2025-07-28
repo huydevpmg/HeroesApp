@@ -41,9 +41,8 @@
           <div *ngIf="item.conversation.isGroup" class="group-avatar">
             <i class="bi bi-people-fill" style="font-size: 30px;"></i>
           </div>
-          <img *ngIf="!item.conversation.isGroup"
-            [src]="item.conversation.avatar"
-            [alt]="item.conversation.name" class="rounded-circle convo-avatar" />
+          <img *ngIf="!item.conversation.isGroup" [src]="item.conversation.avatar" [alt]="item.conversation.name"
+            class="rounded-circle convo-avatar" />
           <ng-container *ngIf="onlineUsers$ | async as onlineUsers">
             <span class="status-badge" *ngIf="!item.conversation.isGroup"
               [class.online]="item.otherUserId && onlineUsers.includes(item.otherUserId)"
@@ -63,8 +62,9 @@
               <app-dropdown-label [userConversationId]="item.conversation.userConversationId || ''"
                 [conversationId]="item.conversation._id || ''" [labels]="labels"
                 [selectedLabelId]="item.conversation.labels?.[0]?._id!" [isArchived]="!!item.conversation.isArchived"
-                (selectLabel)="onSelectLabel($event)" (manageLabels)="onManageLabels()" (markRead)="onMarkRead(item.conversation)"
-                (archive)="onArchive(item.conversation)" (clear)="onClearConversation(item.conversation)"
+                (selectLabel)="onSelectLabel($event)" (manageLabels)="onManageLabels()"
+                (markRead)="onMarkRead(item.conversation)" (archive)="onArchive(item.conversation)"
+                (clear)="onClearConversation(item.conversation)"
                 (openStateChange)="onDropdownOpenStateChange($event, item.conversation._id!)">
               </app-dropdown-label>
             </div>
@@ -73,23 +73,34 @@
           <!-- Last message -->
           <div class="last-message d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center flex-grow-1 text-truncate">
-              <ng-container *ngIf="item.conversation.lastMessage">
-                <ng-container *ngIf="item.conversation.lastMessage.isDeleteGlobal; else showMessageContent">
-                  <span class="text-muted fst-italic text-truncate" style="max-width: 180px; display: inline-block;">
-                    {{ item.conversation.lastMessage.senderId === currentUserId ? 'You' : item.conversation.lastMessage.senderName }}: Message was deleted
+              <ng-container
+                *ngIf="item.conversation.lastMessage?.content?.trim() && item.conversation.lastMessage?.senderId && item.conversation.lastMessage?.senderName; else showAttachmentName">
+                <ng-container *ngIf="item.conversation.labels?.length! > 0">
+                  <span ngbTooltip="{{ item.conversation.labels?.[0]?.name }}" placement="top">
+                    <svg width="16" height="12" viewBox="0 0 80 60"
+                      style="vertical-align: middle; margin-right: 6px; flex-shrink: 0;">
+                      <g transform="translate(8, 4) scale(1.25)">
+                        <path [attr.fill]="item.conversation.labels?.[0]?.color" d="M0 0H32L48 20L32 40H0V0Z" />
+                      </g>
+                    </svg>
                   </span>
                 </ng-container>
-                <ng-template #showMessageContent>
-                  <ng-container *ngIf="item.conversation.lastMessage.type !== 'SYSTEM'; else showSystemMessage">
-                    <span class="text-truncate fw-bold" style="font-size: 15px;">
-                      {{ item.conversation.lastMessage.senderId === currentUserId ? 'You' : item.conversation.lastMessage.senderName }}: {{ item.conversation.lastMessage.content }}
-                    </span>
-                  </ng-container>
-                  <ng-template #showSystemMessage>
-                    <span class="text-truncate fw-bold" style="font-size: 15px;">
-                      {{ item.conversation.lastMessage.content }}
-                    </span>
-                  </ng-template>
+                <span
+                  *ngIf="!item.conversation.lastMessage?.isDeleteGlobal && item.conversation.lastMessage?.type !== 'SYSTEM'"
+                  class="text-truncate fw-bold" style="font-size: 15px;">
+                  {{ item.conversation.lastMessage?.senderId === currentUserId ? 'You' :
+                  item.conversation.lastMessage?.senderName }}: {{ item.conversation.lastMessage?.content }}
+                </span>
+                <span
+                  *ngIf="!item.conversation.lastMessage?.isDeleteGlobal && item.conversation.lastMessage?.type === 'SYSTEM'"
+                  class="text-truncate fw-bold" style="font-size: 15px;">
+                  {{ item.conversation.lastMessage?.content }}
+                </span>
+                <span> · </span>
+                <small class="text-truncate" [appTimeAgo]="item.conversation.updatedAt ?? ''"
+                  style="font-size: 15px; margin-left: 10px;"> </small>
+                <ng-template #showDeletedMessage>
+                  <span class="text-muted fst-italic">Message was deleted</span>
                 </ng-template>
               </ng-container>
               <ng-template #showAttachmentName>
@@ -103,9 +114,13 @@
                   </svg>
                 </ng-container>
                 <span *ngIf="item.conversation.lastMessage?.attachments?.length! > 0" style="font-size: 15px">
-                  {{ item.conversation.lastMessage?.senderId === currentUserId ? 'You' : item.conversation.lastMessage?.senderName }} sent {{ item.conversation.lastMessage?.attachments?.length }} attachment{{ item.conversation.lastMessage?.attachments?.length! > 1 ? 's' : '' }}
+                  {{ item.conversation.lastMessage?.senderId === currentUserId ? 'You' :
+                  item.conversation.lastMessage?.senderName }} sent {{
+                  item.conversation.lastMessage?.attachments?.length }} attachment{{
+                  item.conversation.lastMessage?.attachments?.length! > 1 ? 's' : '' }}
                 </span>
-                <span *ngIf="!item.conversation.lastMessage?.attachments?.length" style="font-size: 15px;">No messages yet</span>
+                <span *ngIf="!item.conversation.lastMessage?.attachments?.length" style="font-size: 15px;">No messages
+                  yet</span>
               </ng-template>
             </div>
             <span *ngIf="item.conversation.unreadCount"
