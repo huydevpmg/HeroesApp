@@ -1,6 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 import { Message } from '../../../shared/enums/models/message.model';
 import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
+import { Attachment } from '../../../shared/enums/models/attachment.model';
 
 // Load messages
 export const loadMessages = createAction(
@@ -22,7 +23,7 @@ export const sendMessage = createAction(
   props<{
     conversationId: string;
     content: string;
-    attachmentId?: string;
+    attachments?: Attachment[];
     fileName?: string;
     parentMessageId?: string;
   }>()

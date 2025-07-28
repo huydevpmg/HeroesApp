@@ -4,12 +4,10 @@ import { SocketCoreService } from './socket-core.service';
 import { MessageSocketService } from './message-socket.service';
 import { ConversationSocketService } from './conversation-socket.service';
 import { PresenceSocketService } from './status-socket.service';
-import { AttachmentSocketService } from './attachment-socket.service';
 import { Message } from '../../../shared/enums/models/message.model';
 import { Conversation } from '../../../shared/enums/models/conversation.model';
 import { DeleteType } from '../../../shared/enums/models/delete-type.enum';
 import { SOCKET_EVENTS } from './socket-events.constants';
-import { Attachment } from '../../../shared/enums/models/attachment.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -19,7 +17,6 @@ export class SocketService {
   private messageSocket = inject(MessageSocketService);
   private conversationSocket = inject(ConversationSocketService);
   private presenceSocket = inject(PresenceSocketService);
-  private attachmentSocket = inject(AttachmentSocketService);
 
   // === CONNECTION METHODS ===
   get connected(): boolean {
@@ -77,15 +74,6 @@ export class SocketService {
 
   areUsersOnline(userIds: string[]): { [userId: string]: boolean } {
     return this.presenceSocket.areUsersOnline(userIds);
-  }
-
-  // === ATTACHMENT METHODS ===
-  emitAttachmentCreated(attachment: Attachment, conversationId: string): void {
-    this.attachmentSocket.emitAttachmentCreated(attachment, conversationId);
-  }
-
-  emitAttachmentDeleted(attachmentId: string, conversationId: string): void {
-    this.attachmentSocket.emitAttachmentDeleted(attachmentId, conversationId);
   }
 
   emitMessageDeletedGlobal(messageId: string) {
@@ -151,23 +139,5 @@ export class SocketService {
 
   getCurrentOnlineUsers(): Observable<Set<string>> {
     return this.presenceSocket.getCurrentOnlineUsers();
-  }
-
-  // Attachment observables
-  onAttachmentCreated(): Observable<{ attachment: Attachment; conversationId: string }> {
-    return this.attachmentSocket.onAttachmentCreated();
-  }
-
-  onAttachmentDeleted(): Observable<{ attachmentId: string; conversationId: string }> {
-    return this.attachmentSocket.onAttachmentDeleted();
-  }
-
-  onAttachmentChange(): Observable<{
-    attachment?: Attachment;
-    attachmentId?: string;
-    conversationId: string;
-    action: 'created' | 'deleted'
-  }> {
-    return this.attachmentSocket.onAttachmentChange();
   }
 }

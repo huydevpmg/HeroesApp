@@ -30,10 +30,6 @@ export class ConversationApiService {
     return this.http.patch<Conversation>(`${this.apiUrl}/${id}`, data);
   }
 
-  updateLastAttachmentName(conversationId: string, lastAttachmentName: string): Observable<Conversation> {
-    return this.http.patch<Conversation>(`${this.apiUrl}/${conversationId}/last-attachment`, { lastAttachmentName });
-  }
-
   getAllUsers(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/users`);
   }

@@ -35,59 +35,55 @@
           </div>
         </div>
 
-        <!-- Text Message Only -->
-        <div class="message-bubble text" *ngIf="message.content && !message.attachmentId" data-bs-toggle="tooltip"
-          [attr.data-bs-placement]="isCurrentUser ? 'left' : 'right'" [attr.title]="message.createdAt | date:'medium'">
-          <p>{{ message.content }}</p>
-        </div>
 
-        <!-- Message with Attachment -->
-        <div class="attachment-container" *ngIf="message.attachmentId">
-          <div class="message-bubble text" *ngIf="message.content">
-            <p>{{ message.content }}</p>
-          </div>
 
-          <!-- Attachment Content -->
-          <div class="attachment-bubble">
-            <div class="attachment-loading" *ngIf="!message.attachment">
-              <div class="loading-spinner"></div>
-            </div>
-
-            <!-- Attachment Content -->
-            <ng-container *ngIf="message.attachment">
-              <!-- Image Attachment -->
-              <ng-container *ngIf="message.attachment?.type && message.attachment?.type.startsWith('image/')">
-                <img [src]="message.attachment?.url" [alt]="message.attachment?.name || 'Image attachment'"
-                  class="attachment-image" (click)="onAttachmentClick(message.attachment)">
-              </ng-container>
-
-              <!-- Video Attachment -->
-              <ng-container *ngIf="message.attachment.type && message.attachment.type.startsWith('video/')">
-                <video [src]="message.attachment.url" class="attachment-video" controls
-                  [attr.poster]="message.attachment.thumbnailUrl">
-                </video>
-              </ng-container>
-
-              <!-- File Attachment -->
-              <ng-container
-                *ngIf="message.attachment.type && !message.attachment.type.startsWith('image/') && !message.attachment.type.startsWith('video/')">
-                <div class="attachment-file" (click)="onAttachmentClick(message.attachment)">
-                  <div class="file-icon">
-                    {{ getFileIconByExt(getFileExtension(message.attachment.name)) }}
-                  </div>
-                  <div class="file-info">
-                    <div class="file-name text-dark" [title]="message.attachment.name">
-                      {{ message.attachment.name }}
-                    </div>
-                    <div class="file-size text-dark">
-                      {{ formatFileSize(message.attachment.size) }}
-                    </div>
-                  </div>
+        <!-- Message with Attachments (multiple, mỗi cái 1 container) -->
+        <ng-container *ngIf="message.attachments && message.attachments.length">
+          <ng-container *ngFor="let att of message.attachments">
+            <div class="attachment-container">
+              <div class="attachment-bubble">
+                <div class="attachment-loading" *ngIf="!att">
+                  <div class="loading-spinner"></div>
                 </div>
-              </ng-container>
-            </ng-container>
-          </div>
-        </div>
+                <ng-container *ngIf="att">
+                  <!-- Image Attachment -->
+                  <ng-container *ngIf="att.type && att.type.startsWith('image/')">
+                    <img [src]="att.url" [alt]="att.name || 'Image attachment'"
+                      class="attachment-image" (click)="onAttachmentClick(att)">
+                  </ng-container>
+                  <!-- Video Attachment -->
+                  <ng-container *ngIf="att.type && att.type.startsWith('video/')">
+                    <video [src]="att.url" class="attachment-video" controls
+                      [attr.poster]="att.thumbnailUrl">
+                    </video>
+                  </ng-container>
+                  <!-- File Attachment -->
+                  <ng-container *ngIf="att.type && !att.type.startsWith('image/') && !att.type.startsWith('video/')">
+                    <div class="attachment-file" (click)="onAttachmentClick(att)">
+                      <div class="file-icon">
+                        {{ getFileIconByExt(getFileExtension(att.name)) }}
+                      </div>
+                      <div class="file-info">
+                        <div class="file-name text-dark" [title]="att.name">
+                          {{ att.name }}
+                        </div>
+                        <div class="file-size text-dark">
+                          {{ formatFileSize(att.size) }}
+                        </div>
+                      </div>
+                    </div>
+                  </ng-container>
+                </ng-container>
+              </div>
+            </div>
+          </ng-container>
+        </ng-container>
+
+              <!-- Text Message Only -->
+              <div class="message-bubble text" *ngIf="message.content && !message.attachmentId" data-bs-toggle="tooltip"
+                [attr.data-bs-placement]="isCurrentUser ? 'left' : 'right'" [attr.title]="message.createdAt | date:'medium'">
+                <p>{{ message.content }}</p>
+                </div>
 
         <!-- Message Info -->
         <div class="message-info">

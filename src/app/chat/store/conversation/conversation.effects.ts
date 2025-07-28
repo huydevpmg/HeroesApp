@@ -61,18 +61,6 @@ export class ConversationEffects {
     )
   );
 
-  updateLastAttachmentName$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(ConversationActions.updateLastAttachmentName),
-      mergeMap(({ conversationId, lastAttachmentName }) =>
-        this.conversationApi.updateLastAttachmentName(conversationId, lastAttachmentName).pipe(
-          map((conversation: Conversation) => ConversationActions.updateConversationSuccess({ conversation })),
-          catchError(error => of(ConversationActions.updateConversationFailure({ error: error.message })))
-        )
-      )
-    )
-  );
-
   getAllUsers$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ConversationActions.getAllUsers),

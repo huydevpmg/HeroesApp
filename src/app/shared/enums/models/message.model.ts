@@ -1,3 +1,5 @@
+import { Attachment } from "./attachment.model";
+
 export interface Reaction {
   userId: string;
   emoji: string;
@@ -12,7 +14,7 @@ export interface Message {
   status?: 'SENT' | 'DELIVERED' | 'READ';
   parentMessage?: string;
   heroContext?: string[];
-  attachmentId?: string;
+  attachments?: Attachment[];
   reactions?: Reaction[];
   isDeleteGlobal?: boolean;
   deletedForUserIds?: string[];

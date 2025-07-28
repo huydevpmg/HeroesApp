@@ -43,10 +43,6 @@ export class ConversationService {
     this.store.dispatch(ConversationActions.updateConversation({ id, data }));
   }
 
-  updateLastAttachmentName(conversationId: string, lastAttachmentName: string) {
-    this.store.dispatch(ConversationActions.updateLastAttachmentName({ conversationId, lastAttachmentName }));
-  }
-
   getAllUsers() {
     this.store.dispatch(ConversationActions.getAllUsers());
   }

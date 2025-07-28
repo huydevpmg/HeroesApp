@@ -28,9 +28,9 @@ export const messageReducer = createReducer(
   }),
   on(MessageActions.loadMessagesFailure, (state, { error }) => ({ ...state, loading: false, error })),
 
-  on(MessageActions.sendMessageSuccess, (state, { message }) =>
-    messageAdapter.addOne(message, state)
-  ),
+  on(MessageActions.sendMessageSuccess, (state, { message }) => {
+    return messageAdapter.addOne(message, state);
+  }),
 
   on(MessageActions.receiveMessage, (state, { message }) =>
     messageAdapter.addOne(message, state)

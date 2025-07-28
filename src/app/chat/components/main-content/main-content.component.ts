@@ -16,7 +16,6 @@ import { Message } from '../../../shared/enums/models/message.model';
 import * as ConversationSelectors from '../../store/conversation/conversation.selectors';
 import * as MessageActions from '../../store/message/message.actions';
 import * as MessageSelectors from '../../store/message/message.selectors';
-import * as AttachmentActions from '../../store/attachment/attachment.actions';
 import { selectMessagesWithAttachment } from '../../store/message/message.selectors';
 import { AuthService } from '../../../auth/services/auth.service';
 import { SocketService } from '../../services/socket/socket.service';
@@ -34,7 +33,7 @@ import {
   selectMessagesTotalPages,
 } from '../../store/message/message.selectors';
 import { Attachment } from '../../../shared/enums/models/attachment.model';
-import * as ConversationActions from '../../store/conversation/conversation.actions';
+import { AttachmentService } from '../../services/attachments/attachment.service';
 
 @Component({
   selector: 'app-main-content',
@@ -63,6 +62,8 @@ export class MainContentComponent
   lastMessageReadReceipts: any[] = [];
   private isLoadingReadReceipts = false;
   private shouldScrollToBottom = false;
+  selectedAttachmentIds: string[] = [];
+  selectedPreviewAttachments: any[] = [];
 
   // --- Subscriptions ---
   private messagesSub?: Subscription;
@@ -98,6 +99,7 @@ export class MainContentComponent
     private messageService: MessageService,
     private messageReadReceiptService: MessageReadReceiptService,
     private readReceiptSocket: ReadReceiptSocketService,
+    private attachmentService: AttachmentService,
     private cdr: ChangeDetectorRef
   ) {
     // --- Observable assignments ---
@@ -147,6 +149,7 @@ export class MainContentComponent
           this.conversationReadReceipts = {};
           this.store.dispatch(MessageActions.loadMessages({ conversationId }));
           this.socketService.joinConversation(conversationId);
+          this.attachmentService.loadAttachmentsByConversation(conversationId);
         }
         this.messages$
           .subscribe((messages) => {
@@ -195,16 +198,7 @@ export class MainContentComponent
     this.messagesAndAttachmentsSub = combineLatest([
       this.messages$,
       this.store.select(selectAttachmentEntities),
-    ]).subscribe(([messages, entities]) => {
-      messages.forEach((msg) => {
-        if (msg.attachmentId && !entities[msg.attachmentId]) {
-          this.store.dispatch(
-            AttachmentActions.loadAttachment({
-              attachmentId: msg.attachmentId!,
-            })
-          );
-        }
-      });
+    ]).subscribe(([messages]) => {
       this.loadReadReceiptsForMessages(messages);
     });
 
@@ -274,11 +268,6 @@ export class MainContentComponent
       if (unreadIds.length > 0) {
         this.messageReadReceiptService
           .markMultipleMessagesAsRead(this.selectedConversationId, unreadIds)
-          .subscribe(() => {
-            this.store.dispatch(
-              ConversationActions.loadConversations({ page: 1, limit: 20 })
-            );
-          });
       }
     }
   }
@@ -466,6 +455,20 @@ export class MainContentComponent
       this.previews = this.selectedFiles.map((file) =>
         file.type.startsWith('image/') ? URL.createObjectURL(file) : ''
       );
+      this.uploading = true;
+      this.attachmentService.uploadMultipleAttachments(
+        this.selectedFiles,
+        this.selectedConversationId,
+        this.myId!
+      ).subscribe((attachments) => {
+        this.selectedPreviewAttachments = attachments.map(att => ({
+          url: att.url,
+          name: att.name,
+          type: att.type,
+          size: att.size
+        }));
+        this.uploading = false;
+      });
     }
   }
 
@@ -496,61 +499,29 @@ export class MainContentComponent
     }
     this.uploading = true;
     try {
-      switch (this.selectedFiles.length) {
-        case 0:
-          if (hasContent) {
-            this.store.dispatch(
-              MessageActions.sendMessage({
-                conversationId: this.selectedConversationId,
-                content: trimmedContent,
-                parentMessageId:
-                  this.replyMode && this.replyingToMessage
-                    ? this.replyingToMessage._id
-                    : undefined,
-              })
-            );
-          }
-          break;
-        case 1:
-          const singleFile = this.selectedFiles[0];
-          this.store.dispatch(
-            AttachmentActions.uploadAttachment({
-              file: singleFile,
-              content: trimmedContent,
-              conversationId: this.selectedConversationId,
-              uploadedBy: this.myId!,
-              fileName: singleFile.name,
-            })
-          );
-          break;
-        default:
-          if (hasContent) {
-            this.store.dispatch(
-              MessageActions.sendMessage({
-                conversationId: this.selectedConversationId,
-                content: trimmedContent,
-              })
-            );
-          }
-          this.selectedFiles.forEach((file, index) => {
-            const isLast = index === this.selectedFiles.length - 1;
-            this.store.dispatch(
-              AttachmentActions.uploadAttachment({
-                file: file,
-                content: '',
-                conversationId: this.selectedConversationId,
-                uploadedBy: this.myId!,
-                fileName: isLast ? file.name : undefined,
-              })
-            );
-          });
-          break;
+      let attachments: any[] = [];
+      if (hasFiles) {
+        attachments = this.selectedPreviewAttachments;
+      }
+      if (hasContent || attachments.length > 0) {
+        this.store.dispatch(
+          MessageActions.sendMessage({
+            conversationId: this.selectedConversationId,
+            content: trimmedContent,
+            attachments,
+            parentMessageId:
+              this.replyMode && this.replyingToMessage
+                ? this.replyingToMessage._id
+                : undefined,
+          })
+        );
       }
     } catch (error) {
       console.error('Error sending message or uploading file:', error);
     } finally {
       this.selectedFiles = [];
       this.previews = [];
+      this.selectedAttachmentIds = [];
       this.uploading = false;
       if (this.replyMode) {
         this.cancelReply();
